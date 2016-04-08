@@ -3,7 +3,31 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cpix", "Cpix\Cpix.csproj", "{8706C176-A754-4C23-A9B7-855E6B1BDDB1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Producer", "Producer\Producer.csproj", "{4E00EB8F-AABD-4109-8AB6-65BAE35B1842}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resources", "Resources\Resources.csproj", "{A46001B7-E050-4859-8175-84C730BA3223}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8706C176-A754-4C23-A9B7-855E6B1BDDB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8706C176-A754-4C23-A9B7-855E6B1BDDB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8706C176-A754-4C23-A9B7-855E6B1BDDB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8706C176-A754-4C23-A9B7-855E6B1BDDB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E00EB8F-AABD-4109-8AB6-65BAE35B1842}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E00EB8F-AABD-4109-8AB6-65BAE35B1842}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E00EB8F-AABD-4109-8AB6-65BAE35B1842}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E00EB8F-AABD-4109-8AB6-65BAE35B1842}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A46001B7-E050-4859-8175-84C730BA3223}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A46001B7-E050-4859-8175-84C730BA3223}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A46001B7-E050-4859-8175-84C730BA3223}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A46001B7-E050-4859-8175-84C730BA3223}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
