@@ -1,6 +1,7 @@
 ﻿using Axinom.Cpix;
 using System;
 using System.IO;
+using System.Security;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Consumer
@@ -16,6 +17,9 @@ namespace Consumer
 			using (var file = File.OpenRead("Cpix.xml"))
 			{
 				var cpix = CpixDocument.Load(file, new[] { recipientCertificate1 });
+
+				if (cpix.Signer == null || cpix.Signer.Thumbprint != trustedSignerCertificate.Thumbprint)
+					throw new SecurityException("The CPIX document is not signed by a trusted entity!");
 
 				Console.WriteLine("Loaded CPIX with {0} content keys.", cpix.Keys.Count);
 			}
