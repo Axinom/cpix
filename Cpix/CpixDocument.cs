@@ -1,4 +1,4 @@
-﻿using Cpix.DocumentModel;
+﻿using Axinom.Cpix.DocumentModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +9,7 @@ using System.Security.Cryptography.Xml;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace Cpix
+namespace Axinom.Cpix
 {
 	public sealed class CpixDocument
 	{

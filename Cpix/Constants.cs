@@ -1,4 +1,4 @@
-﻿namespace Cpix
+﻿namespace Axinom.Cpix
 {
 	static class Constants
 	{

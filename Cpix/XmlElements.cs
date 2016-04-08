@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace Cpix.DocumentModel
+namespace Axinom.Cpix.DocumentModel
 {
 	[XmlRoot("CPIX", Namespace = Constants.CpixNamespace)]
 	public sealed class DocumentRootElement
