@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace Axinom.Cpix.DocumentModel
@@ -50,9 +46,8 @@ namespace Axinom.Cpix.DocumentModel
 		[XmlElement]
 		public EncryptedXmlValue EncryptedValue { get; set; }
 
-		// TODO: MAC handling
-		/*[XmlElement]
-		public byte[] ValueMAC { get; set; }*/
+		[XmlElement]
+		public byte[] ValueMAC { get; set; }
 	}
 
 	public sealed class EncryptedXmlValue
@@ -89,6 +84,18 @@ namespace Axinom.Cpix.DocumentModel
 
 		[XmlElement]
 		public DocumentKeyElement DocumentKey { get; set; }
+
+		[XmlElement("MACKey")]
+		public MacKey MacKey { get; set; }
+	}
+
+	public sealed class MacKey
+	{
+		[XmlAttribute]
+		public string Algorithm { get; set; }
+
+		[XmlElement("Key")]
+		public EncryptedXmlValue Key { get; set; }
 	}
 
 	public sealed class DocumentKeyElement

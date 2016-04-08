@@ -10,7 +10,7 @@
 		public const string Aes256CbcAlgorithm = "http://www.w3.org/2001/04/xmlenc#aes256-cbc";
 		public const string ContentKeyAlgorithm = "TODO";
 
-		public const string HmacShas512Algorithm = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha512";
+		public const string HmacSha512Algorithm = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha512";
 		public const string RsaOaepAlgorithm = "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p";
 	}
 }

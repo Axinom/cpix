@@ -46,6 +46,7 @@ namespace Axinom.Cpix
 			// If null, no encryption is used. when serializing content key elements 
 			// If non-null, encryption is used when serializing content key elements.
 			AesManaged aes = null;
+			HMACSHA512 mac = null;
 
 			if (Recipients?.Count != 0)
 			{
@@ -67,10 +68,19 @@ namespace Axinom.Cpix
 					Padding = PaddingMode.None
 				};
 
+				// 512-bit HMAC key is desirable.
+				var macKey = new byte[512 / 8];
+				_random.GetBytes(macKey);
+
+				mac = new HMACSHA512(macKey);
+
 				// Generate delivery data for each recipient.
 				foreach (var recipient in Recipients.Where(r => r != null))
 				{
-					byte[] encryptedDocumentKey = ((RSACryptoServiceProvider)recipient.PublicKey.Key).Encrypt(documentKey, true);
+					var recipientRsa = ((RSACryptoServiceProvider)recipient.PublicKey.Key);
+
+					var encryptedDocumentKey = recipientRsa.Encrypt(documentKey, true);
+					var encryptedMacKey = recipientRsa.Encrypt(macKey, true);
 
 					document.DeliveryData.Add(new DeliveryDataElement
 					{
@@ -99,6 +109,21 @@ namespace Axinom.Cpix
 											CipherValue = encryptedDocumentKey
 										}
 									}
+								}
+							}
+						},
+						MacKey = new MacKey
+						{
+							Algorithm = Constants.HmacSha512Algorithm,
+							Key = new EncryptedXmlValue
+							{
+								EncryptionMethod = new EncryptionMethodDeclaration
+								{
+									Algorithm = Constants.RsaOaepAlgorithm
+								},
+								CipherData = new CipherDataContainer
+								{
+									CipherValue = encryptedMacKey
 								}
 							}
 						}
@@ -137,12 +162,14 @@ namespace Axinom.Cpix
 					{
 						var encryptedValue = encryptor.TransformFinalBlock(key.Value, 0, key.Value.Length);
 
-						// NB! We prepend the IV to the value when saving an encrypted value.
+						// NB! We prepend the IV to the value when saving an encrypted value to the document field.
+						var fieldValue = iv.Concat(encryptedValue).ToArray();
+
 						element.Data.Secret.EncryptedValue = new EncryptedXmlValue
 						{
 							CipherData = new CipherDataContainer
 							{
-								CipherValue = iv.Concat(encryptedValue).ToArray()
+								CipherValue = fieldValue
 							},
 							EncryptionMethod = new EncryptionMethodDeclaration
 							{
@@ -150,7 +177,8 @@ namespace Axinom.Cpix
 							}
 						};
 
-						// TODO: MAC
+						// Never not MAC.
+						element.Data.Secret.ValueMAC = mac.ComputeHash(fieldValue);
 					}
 				}
 
