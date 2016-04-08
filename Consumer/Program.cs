@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Axinom.Cpix;
+using System;
+using System.IO;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Consumer
 {
@@ -10,6 +9,16 @@ namespace Consumer
 	{
 		static void Main(string[] args)
 		{
+			var recipientCertificate1 = new X509Certificate2("Recipient1.pfx", "Recipient1");
+			var recipientCertificate2 = new X509Certificate2("Recipient2.pfx", "Recipient2");
+			var trustedSignerCertificate = new X509Certificate2("Author.cer");
+
+			using (var file = File.OpenRead("Cpix.xml"))
+			{
+				var cpix = CpixDocument.Load(file, new[] { recipientCertificate1 });
+
+				Console.WriteLine("Loaded CPIX with {0} content keys.", cpix.Keys.Count);
+			}
 		}
 	}
 }

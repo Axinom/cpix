@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
@@ -14,7 +15,7 @@ namespace Axinom.Cpix
 	public sealed class CpixDocument
 	{
 		/// <summary>
-		/// Certificates identifying all the recipients of the CPIX document.
+		/// Certificates identifying all the recipients of the CPIX document. This list is not populated on load.
 		/// 
 		/// If this list contains any recipients, the content keys will be encrypted for each recipient on save.
 		/// If this list is empty, content keys will be saved in the clear and are readable by anyone.
@@ -35,10 +36,185 @@ namespace Axinom.Cpix
 		public List<ContentKey> Keys { get; set; } = new List<ContentKey>();
 
 		/// <summary>
+		/// Loads a CPIX document from a stream, decrypting it using the key pairs of the providede certificates, if required.
+		/// </summary>
+		public static CpixDocument Load(Stream stream, ICollection<X509Certificate2> decryptionCertificates = null)
+		{
+			if (stream == null)
+				throw new ArgumentNullException(nameof(stream));
+
+			if (decryptionCertificates != null && decryptionCertificates.Any(c => c?.HasPrivateKey != true))
+				throw new ArgumentException("The private keys associated with all provided decryption certificates must be available.");
+
+			var cpix = new CpixDocument();
+
+			var xmlDocument = new XmlDocument();
+			xmlDocument.Load(stream);
+
+			var xmlNamespaceManager = new XmlNamespaceManager(xmlDocument.NameTable);
+			xmlNamespaceManager.AddNamespace("cpix", Constants.CpixNamespace);
+			xmlNamespaceManager.AddNamespace("pskc", Constants.PskcNamespace);
+			xmlNamespaceManager.AddNamespace("enc", Constants.XmlEncryptionNamespace);
+			xmlNamespaceManager.AddNamespace("ds", Constants.XmlDigitalSignatureNamespace);
+
+			// First check for and validate the signature.
+			var signatureNode = xmlDocument.SelectSingleNode("/cpix:CPIX/ds:Signature", xmlNamespaceManager);
+
+			if (signatureNode != null)
+			{
+				// There is a signature!
+
+				var signedXml = new SignedXml(xmlDocument);
+				signedXml.LoadXml((XmlElement)signatureNode);
+
+				// The signer certificate must be provided or we won't play ball.
+				var signerCertificateNode = signatureNode.SelectSingleNode("ds:KeyInfo/ds:X509Data/ds:X509Certificate", xmlNamespaceManager);
+
+				if (signerCertificateNode == null)
+					throw new NotSupportedException("An XML digital signature was found on the CPIX document but the X.509 certificate of the signer was not included.");
+
+				// We just verify the signature. Whether the caller trusts the signer is another thing entirely.
+				var signerCertificate = new X509Certificate2(Convert.FromBase64String(signerCertificateNode.InnerText));
+				if (!signedXml.CheckSignature(signerCertificate, true))
+					throw new SecurityException("Digital signature verification failed - the CPIX document has been tampered with!");
+
+				cpix.Signer = signerCertificate;
+			}
+
+			// Now look for and acquire the document key so that the encrypted data can be decrypted.
+			// There is no provision in this library for loading encrypted data without decrypting it (pass-through).
+			var deliveryDataNodes = xmlDocument.SelectNodes("cpix:CPIX/cpix:DeliveryData", xmlNamespaceManager);
+
+			// If content keys are encrypted, we fill these and use for later cryptography.
+			AesManaged aes = null;
+			HMACSHA512 mac = null;
+
+			if (deliveryDataNodes.Count != 0)
+			{
+				// The document is encrypted. We need to find delivery data that we can access.
+				foreach (XmlElement deliveryDataNode in deliveryDataNodes)
+				{
+					// The delivery key must contain our X509 certificate or we will consider it a non-match.
+					var deliveryCertificateNode = deliveryDataNode.SelectSingleNode("cpix:DeliveryKey/ds:X509Data/ds:X509Certificate", xmlNamespaceManager);
+
+					if (deliveryCertificateNode == null)
+						continue; // Huh? Okay, whatever. Ignore it.
+
+					var deliveryCertificate = new X509Certificate2(Convert.FromBase64String(deliveryCertificateNode.InnerText));
+
+					var decryptionCertificate = decryptionCertificates.FirstOrDefault(c => c.Thumbprint == deliveryCertificate.Thumbprint);
+
+					if (decryptionCertificate == null)
+						continue; // Nope. Next, please.
+
+					// This delivery data is for us!
+					// Deserialize this DeliveryData into a nice structure for easier processing.
+					var deliveryData = XmlElementToXmlDeserialized<DeliveryDataElement>(deliveryDataNode);
+
+					// Verify that all the values make sense.
+					deliveryData.LoadTimeValidate();
+
+					var rsa = (RSACryptoServiceProvider)decryptionCertificate.PrivateKey;
+					var macKey = rsa.Decrypt(deliveryData.MacKey.Key.CipherData.CipherValue, true);
+					var documentKey = rsa.Decrypt(deliveryData.DocumentKey.Data.Secret.EncryptedValue.CipherData.CipherValue, true);
+
+					aes = new AesManaged
+					{
+						BlockSize = 128,
+						KeySize = 256,
+						Key = documentKey,
+						Mode = CipherMode.CBC,
+						Padding = PaddingMode.None
+					};
+
+					mac = new HMACSHA512(macKey);
+
+					// Found it, no need to keep going.
+					break;
+				}
+
+				if (aes == null)
+					throw new SecurityException("None of the provided certificates references a a key pair capable of derypting the CPIX document.");
+			}
+
+			// Preparations complete. Let's now load the content keys!
+			var contentKeyNodes = xmlDocument.SelectNodes("/cpix:CPIX/cpix:ContentKey", xmlNamespaceManager);
+
+			foreach (XmlElement contentKeyNode in contentKeyNodes)
+			{
+				// Deserialize for easier processing.
+				var contentKey = XmlElementToXmlDeserialized<ContentKeyElement>(contentKeyNode);
+
+				var encryptionIsUsed = aes != null;
+				contentKey.LoadTimeValidate(encryptionIsUsed);
+
+				// Start loading the data.
+				var keyId = Guid.Parse(contentKey.KeyId);
+
+				if (encryptionIsUsed)
+				{
+					var calculatedMac = mac.ComputeHash(contentKey.Data.Secret.EncryptedValue.CipherData.CipherValue);
+
+					if (!calculatedMac.SequenceEqual(contentKey.Data.Secret.ValueMAC))
+						throw new SecurityException("MAC validation failed - the content key value has been tampered with!");
+
+					var iv = contentKey.Data.Secret.EncryptedValue.CipherData.CipherValue.Take(128 / 8).ToArray();
+					var encryptedKey = contentKey.Data.Secret.EncryptedValue.CipherData.CipherValue.Skip(128 / 8).ToArray();
+
+					aes.IV = iv;
+
+					byte[] key;
+
+					using (var decryptor = aes.CreateDecryptor())
+					{
+						key = decryptor.TransformFinalBlock(encryptedKey, 0, encryptedKey.Length);
+					}
+
+					cpix.Keys.Add(new ContentKey
+					{
+						Id = keyId,
+						Value = key
+					});
+				}
+				else
+				{
+					cpix.Keys.Add(new ContentKey
+					{
+						Id = keyId,
+						Value = contentKey.Data.Secret.PlainValue
+					});
+				}
+			}
+
+			if (cpix.Keys.Count == 0)
+				throw new NotSupportedException("There were no content keys in the CPIX document.");
+
+
+			return cpix;
+		}
+
+		private static T XmlElementToXmlDeserialized<T>(XmlElement element)
+		{
+			using (var buffer = new MemoryStream())
+			{
+				using (var writer = XmlWriter.Create(buffer))
+					element.WriteTo(writer);
+
+				buffer.Position = 0;
+
+				var serializer = new XmlSerializer(typeof(T));
+				return (T)serializer.Deserialize(buffer);
+			}
+		}
+
+		/// <summary>
 		/// Saves the CPIX document to a stream.
 		/// </summary>
 		public void Save(Stream stream)
 		{
+			if (stream == null)
+				throw new ArgumentNullException(nameof(stream));
+
 			ValidateState();
 
 			var document = new DocumentRootElement();
