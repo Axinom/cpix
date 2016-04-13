@@ -2,7 +2,7 @@
 {
 	static class Constants
 	{
-		public const string CpixNamespace = "urn:dashif:org:cpix";
+		public const string CpixNamespace = "urn:dashif:org:cpix-PRERELEASE";
 		public const string PskcNamespace = "urn:ietf:params:xml:ns:keyprov:pskc";
 		public const string XmlDigitalSignatureNamespace = "http://www.w3.org/2000/09/xmldsig#";
 		public const string XmlEncryptionNamespace = "http://www.w3.org/2001/04/xmlenc#";
