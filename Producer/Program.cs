@@ -15,7 +15,7 @@ namespace Producer
 
 			// If this is loaded from PFX, must be marked exportable due to funny behavior in .NET Framework.
 			// Ideally, there should be no need to use an exportable key! But good enough for a sample.
-			var signerCertificate = new X509Certificate2("Author.pfx", "Author", X509KeyStorageFlags.Exportable);
+			var signerCertificate = new X509Certificate2("Author1.pfx", "Author1", X509KeyStorageFlags.Exportable);
 
 			var recipientCertificate1 = new X509Certificate2("Recipient1.cer");
 			var recipientCertificate2 = new X509Certificate2("Recipient2.cer");
@@ -23,57 +23,35 @@ namespace Producer
 			Console.WriteLine("Preparing data for sample documents.");
 
 			// Tuples of filename and CpixDocument structure to generate.
-			var samples = new List<Tuple<string, CpixDocument>>
-			{
-				// Just two content keys, that's all. No encryption, no nothing.
-				new Tuple<string, CpixDocument>( "UC1-KeyDelivery.xml", new CpixDocument
-				{
-					Keys =
-					{
-						GenerateNewKey(),
-						GenerateNewKey()
-					}
-				}),
-				// Now with authentication (digital signature).
-				new Tuple<string, CpixDocument>( "UC2-Signed.xml", new CpixDocument
-				{
-					Signer = signerCertificate,
-					Keys =
-					{
-						GenerateNewKey(),
-						GenerateNewKey()
-					}
-				}),
-				// Now with encryption.
-				new Tuple<string, CpixDocument>( "UC3-Encrypted.xml", new CpixDocument
-				{
-					Recipients =
-					{
-						recipientCertificate1,
-						recipientCertificate2
-					},
-					Keys =
-					{
-						GenerateNewKey(),
-						GenerateNewKey()
-					}
-				}),
-				// Now with both!
-				new Tuple<string, CpixDocument>( "UC2+UC3-SignedAndEncrypted.xml", new CpixDocument
-				{
-					Signer = signerCertificate,
-					Recipients =
-					{
-						recipientCertificate1,
-						recipientCertificate2
-					},
-					Keys =
-					{
-						GenerateNewKey(),
-						GenerateNewKey()
-					}
-				}),
-			};
+			var samples = new List<Tuple<string, CpixDocument>>();
+
+			var document = new CpixDocument();
+			document.AddContentKey(GenerateNewKey());
+			document.AddContentKey(GenerateNewKey());
+			samples.Add(new Tuple<string, CpixDocument>("ClearKeys.xml", document));
+
+			document = new CpixDocument();
+			document.AddContentKey(GenerateNewKey());
+			document.AddContentKey(GenerateNewKey());
+			document.AddContentKeySignature(signerCertificate);
+			document.SetDocumentSignature(signerCertificate);
+			samples.Add(new Tuple<string, CpixDocument>("Signed.xml", document));
+
+			document = new CpixDocument();
+			document.AddContentKey(GenerateNewKey());
+			document.AddContentKey(GenerateNewKey());
+			document.AddRecipient(recipientCertificate1);
+			document.AddRecipient(recipientCertificate2);
+			samples.Add(new Tuple<string, CpixDocument>("Encrypted.xml", document));
+
+			document = new CpixDocument();
+			document.AddContentKey(GenerateNewKey());
+			document.AddContentKey(GenerateNewKey());
+			document.AddRecipient(recipientCertificate1);
+			document.AddRecipient(recipientCertificate2);
+			document.AddContentKeySignature(signerCertificate);
+			document.SetDocumentSignature(signerCertificate);
+			samples.Add(new Tuple<string, CpixDocument>("EncryptedAndSigned.xml", document));
 
 			Console.WriteLine("Saving CPIX documents.");
 

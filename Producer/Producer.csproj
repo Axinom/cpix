@@ -52,8 +52,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Resources\Certificates\Author.pfx">
-      <Link>Author.pfx</Link>
+    <None Include="..\Resources\Certificates\Author1.pfx">
+      <Link>Author1.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\Resources\Certificates\Recipient1.cer">
