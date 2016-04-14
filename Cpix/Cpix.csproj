@@ -52,6 +52,8 @@
     <Compile Include="ContentKey.cs" />
     <Compile Include="CpixDocument.cs" />
     <Compile Include="DocumentModel\XmlElements.cs" />
+    <Compile Include="IContentKey.cs" />
+    <Compile Include="LoadedContentKey.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,4 +1,6 @@
-﻿namespace Axinom.Cpix
+﻿using System.Security.Cryptography;
+
+namespace Axinom.Cpix
 {
 	static class Constants
 	{
@@ -12,5 +14,9 @@
 
 		public const string HmacSha512Algorithm = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha512";
 		public const string RsaOaepAlgorithm = "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p";
+
+		public const int MinimumRsaKeySizeInBits = 2048;
+
+		public static readonly string Sha1Oid = CryptoConfig.MapNameToOID("SHA1");
 	}
 }

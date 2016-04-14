@@ -17,6 +17,9 @@ namespace Axinom.Cpix.DocumentModel
 	[XmlRoot("ContentKey", Namespace = Constants.CpixNamespace)]
 	public sealed class ContentKeyElement
 	{
+		[XmlAttribute("id")]
+		public string XmlId { get; set; }
+
 		[XmlAttribute("keyId")]
 		public string KeyId { get; set; }
 
@@ -26,16 +29,20 @@ namespace Axinom.Cpix.DocumentModel
 		[XmlElement]
 		public DataElement Data { get; set; }
 
+		internal bool HasEncryptedValue => Data?.Secret?.EncryptedValue != null;
+		internal bool HasPlainValue => Data?.Secret?.PlainValue != null;
+
 		/// <summary>
 		/// Performs basic sanity check to ensure that all required fields are filled.
+		/// Both encrypted or clear values are acceptable (but not both at the same time).
 		/// </summary>
-		internal void LoadTimeValidate(bool expectEncrpyedValue)
+		internal void LoadTimeValidate()
 		{
-			if (expectEncrpyedValue)
-			{
-				if (Data?.Secret?.EncryptedValue == null)
-					throw new NotSupportedException("Expected ContentKey/Data/Secret/EncryptedValue element does not exist.");
+			if (HasEncryptedValue && HasPlainValue)
+				throw new NotSupportedException("Cannot have both ContentKey/Data/Secret/EncryptedValue and ContentKey/Data/Secret/PlainValue! Is it encrypted or not?");
 
+			if (HasEncryptedValue)
+			{
 				if (Data.Secret.EncryptedValue.EncryptionMethod?.Algorithm != Constants.Aes256CbcAlgorithm)
 					throw new NotSupportedException("Only the following algorithm is supported for encrypting content keys: " + Constants.Aes256CbcAlgorithm);
 
@@ -51,16 +58,17 @@ namespace Axinom.Cpix.DocumentModel
 				if (Data?.Secret?.ValueMAC == null)
 					throw new NotSupportedException("Expected ContentKey/Data/Secret/ValueMAC element does not exist.");
 			}
-			else
+			else if (HasPlainValue)
 			{
-				if (Data?.Secret?.PlainValue == null)
-					throw new NotSupportedException("Expected ContentKey/Data/Secret/PlainValue element does not exist.");
-
 				// 128-bit content key.
 				var expectedLength = 128 / 8;
 
 				if (Data.Secret.PlainValue.Length != expectedLength)
 					throw new NotSupportedException("ContentKey/Data/Secret/PlainValue element does not contain the expected number of bytes (" + expectedLength + ")");
+			}
+			else
+			{
+				throw new NotSupportedException("Must have either ContentKey/Data/Secret/EncryptedValue or ContentKey/Data/Secret/PlainValue.");
 			}
 		}
 	}

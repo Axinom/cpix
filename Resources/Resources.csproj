@@ -43,15 +43,17 @@
     <Compile Include="SolutionAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Certificates\Author.cer" />
-    <None Include="Certificates\Author.pfx" />
+    <None Include="Certificates\Author1.cer" />
+    <None Include="Certificates\Author1.pfx" />
+    <None Include="Certificates\Author2.cer" />
+    <None Include="Certificates\Author2.pfx" />
     <None Include="Certificates\Recipient1.cer" />
     <None Include="Certificates\Recipient1.pfx" />
     <None Include="Certificates\Recipient2.cer" />
     <None Include="Certificates\Recipient2.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Certificates\Passwords.txt" />
+    <None Include="Certificates\Passwords.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
