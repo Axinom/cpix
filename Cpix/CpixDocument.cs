@@ -7,6 +7,7 @@ using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
+using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -22,7 +23,7 @@ namespace Axinom.Cpix
 	/// 
 	/// To keep things managable, there are three basic types of digital signatures supported by this implementation:
 	/// * signatures on all content keys
-	/// * signatures on all key assignment rules
+	/// * signatures on all content key assignment rules
 	/// * signature on the entire document (only one allowed; also covers other signatures in signed data!)
 	/// 
 	/// Any signatures that do not match the above signed data sets are ignored on load.
@@ -46,16 +47,28 @@ namespace Axinom.Cpix
 		public IReadOnlyCollection<X509Certificate2> ContentKeysSignedBy => _contentKeySigners;
 
 		/// <summary>
+		/// Certificates of the identities whose signature is present on all the content key assignment rules.
+		/// To add more signatures use <see cref="AddAssignmentRuleSignature(X509Certificate2)"/>.
+		/// </summary>
+		public IReadOnlyCollection<X509Certificate2> AssignmentRulesSignedBy => _loadedRuleSignatures.Select(tuple => tuple.Item2).Concat(_addedRuleSigners).ToArray();
+
+		/// <summary>
 		/// Certificate of the identity whose signature is present on the entire document.
 		/// To create or re-create this signatur use <see cref="SetDocumentSignature(X509Certificate2)"/>.
 		/// </summary>
-		public X509Certificate2 DocumentSignedBy => _desiredDocumentSigner ?? _loadedDocumentSigner;
+		public X509Certificate2 DocumentSignedBy => _desiredDocumentSigner;
 
 		/// <summary>
 		/// The set of content keys present in the CPIX document.
 		/// To add more content keys, use <see cref="AddContentKey(ContentKey)"/>.
 		/// </summary>
 		public IReadOnlyCollection<IContentKey> ContentKeys => _contentKeys;
+
+		/// <summary>
+		/// The set of content key assignment rules present in the CPIX document.
+		/// To add more content key assignment rules, use <see cref="AddAssignmentRule(AssignmentRule)"/>.
+		/// </summary>
+		public IReadOnlyCollection<IAssignmentRule> AssignmentRules => _loadedRules.Concat(_addedRules).ToArray();
 
 		/// <summary>
 		/// Whether the values of content keys are available.
@@ -102,6 +115,34 @@ namespace Axinom.Cpix
 		}
 
 		/// <summary>
+		/// Adds a content key assignment rule to the document.
+		/// 
+		/// Only available if there are no existing signatures that cover key assignment rules in their scope.
+		/// You must remove any signatures that cover key assignment rules before you can add new items to the document.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">
+		/// Thrown if there are signatures that include content key assignment rules in their scope.
+		/// </exception>
+		public void AddAssignmentRule(AssignmentRule rule)
+		{
+			if (rule == null)
+				throw new ArgumentNullException(nameof(rule));
+
+			// Even though existing signatures may only cover existing rules (and not get invalidated by adding new ones),
+			// we still require them to be removed first because signatures only covering some rules are a crime against nature.
+
+			if (_loadedRuleSignatures.Count != 0)
+				throw new InvalidOperationException("You must remove (and optionally re-apply) any assignment-rule-scope signatures before adding new content key assignment rules.");
+
+			if (_loadedDocumentSigner != null)
+				throw new InvalidOperationException("You must remove (and optionally re-apply) any document-scope signatures before adding new content key assignment rules.");
+
+			rule.Validate(_contentKeys);
+
+			_addedRules.Add(rule);
+		}
+
+		/// <summary>
 		/// Adds a signature over all the content keys in the document.
 		/// Only available if this is a newly created document.
 		/// </summary>
@@ -124,6 +165,47 @@ namespace Axinom.Cpix
 		}
 
 		/// <summary>
+		/// Adds a signature over all the assignment rules in the document.
+		/// You must remove or re-apply any document signature before you can add signatures to assignment rules.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">Thrown if there are no content key assignment rules.</exception>
+		/// <exception cref="InvalidOperationException">Thrown if there is an untouched document signature.</exception>
+		public void AddAssignmentRuleSignature(X509Certificate2 signingCertificate)
+		{
+			if (signingCertificate == null)
+				throw new ArgumentNullException(nameof(signingCertificate));
+
+			if (_loadedDocumentSigner != null)
+				throw new InvalidOperationException("You must remove (and optionally re-apply) any document-scope signatures before adding new content key assignment rule signatures.");
+
+			if (AssignmentRules.Count == 0)
+				throw new InvalidOperationException("You cannot add a signature over content key assignment rules if no assignment rules exist in the CPIX document.");
+
+			ValidateSigningCertificate(signingCertificate);
+
+			_addedRuleSigners.Add(signingCertificate);
+		}
+
+		/// <summary>
+		/// Removes all signatures that are scoped to key assignment rules.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">Thrown if there is an untouched document signature.</exception>
+		public void RemoveAssignmentRuleSignatures()
+		{
+			if (_loadedDocumentSigner != null)
+				throw new InvalidOperationException("You must remove (and optionally re-apply) any document-scope signatures before removing content key assignment rule signatures.");
+
+			foreach (var signature in _loadedRuleSignatures)
+			{
+				// Remove signature from XML document.
+				signature.Item1.ParentNode.RemoveChild(signature.Item1);
+			}
+
+			// And then forget them all.
+			_loadedRuleSignatures.Clear();
+		}
+
+		/// <summary>
 		/// Creates, recreates or removes a signature over the entire document.
 		/// Set to null to remove a document signature or to a certificate to add/replace one.
 		/// </summary>
@@ -135,6 +217,15 @@ namespace Axinom.Cpix
 			if (signingCertificate != null)
 				ValidateSigningCertificate(signingCertificate);
 
+			if (_loadedDocumentSignature != null)
+			{
+				_loadedDocumentSignature.ParentNode.RemoveChild(_loadedDocumentSignature);
+				_loadedDocumentSignature = null;
+
+				// Signals that old signature is no longer meaningful. Whatever is in "desired" counts.
+				_loadedDocumentSigner = null;
+			}
+
 			_desiredDocumentSigner = signingCertificate;
 		}
 
@@ -142,10 +233,8 @@ namespace Axinom.Cpix
 		private XmlDocument _loadedXml = null;
 
 		// For a loaded document, informative only (signatures are preserved as-is in XML on save).
-		// For a loaded document, items will be of type LoadedContentKey.
 		// For a new document, later used to generate content keys in XML.
-		// For a new document, items will be of type ContentKey.
-		private List<IContentKey> _contentKeys = new List<IContentKey>();
+		private List<ContentKey> _contentKeys = new List<ContentKey>();
 
 		// For a loaded document, informative only (delivery data is preserved as-is in XML on save).
 		// For a new document, later used to generate deliery data in XML.
@@ -160,12 +249,29 @@ namespace Axinom.Cpix
 		private X509Certificate2 _desiredDocumentSigner;
 
 		// For a loaded document, informative only (signatures are preserved as-is in XML on save).
+		// Reset to null if re-signing is requested.
 		// For a new document, always null.
 		private X509Certificate2 _loadedDocumentSigner;
 
 		// For a loaded document, this references the document-level signature.
-		// On save, it will be removed if a new document-level signature is to be applied.
+		// It will be removed from the XML document and set to null if a new document-level signature is to be applied.
 		private XmlElement _loadedDocumentSignature;
+
+		// For a loaded document, informative only (rules are preserved as-is in XML on save).
+		// For a new document, empty.
+		private List<IAssignmentRule> _loadedRules = new List<IAssignmentRule>();
+
+		// For a loaded document, empty.
+		// For a new document, used to generate rules in XML.
+		private List<AssignmentRule> _addedRules = new List<AssignmentRule>();
+
+		// For a loaded document, lists existing siantures on rule scope.
+		// If re-signing is requested, elements will be removed from XML document and list cleared.
+		// If no re-signing is performed, informative only - signatures are preserved as-is in XML on save.
+		private List<Tuple<XmlElement, X509Certificate2>> _loadedRuleSignatures = new List<Tuple<XmlElement, X509Certificate2>>();
+
+		// List of new signatures to add, rule-scoped.
+		private List<X509Certificate2> _addedRuleSigners = new List<X509Certificate2>();
 
 		/// <summary>
 		/// Saves the CPIX document to a stream.
@@ -179,15 +285,19 @@ namespace Axinom.Cpix
 			if (_contentKeys.Count == 0)
 				throw new InvalidOperationException("Cannot save a CPIX document without any content keys.");
 
+			foreach (var contentKey in _contentKeys)
+				contentKey.Validate();
+
+			foreach (var rule in _addedRules)
+				rule.Validate(_contentKeys);
+
 			// Saving is a multi-phase process:
-			// 1) If loaded document
-			//		1a) Clone loaded document.
-			//		1b) If re-signing requested, remove existing document-level signatures.
+			// 1) If loaded document, clone loaded document.
 			// 2) If new document.
 			//		2a) Serialize content keys and (if encrypting keys) delivery data.
 			//		2b) Sign content keys (if signing requested).
-			// 3) TODO: Serialize key assignment rules and sign them.
-			// 4) If signing or re-signing document, sign document.
+			// 3) Serialize added key assignment rules and (re-)sign the whole set.
+			// 4) If signing document, (re-)sign document.
 
 			XmlDocument document;
 			XmlNamespaceManager namespaces;
@@ -196,8 +306,6 @@ namespace Axinom.Cpix
 			{
 				document = (XmlDocument)_loadedXml.CloneNode(true);
 				namespaces = CreateNamespaceManager(document);
-
-				// TODO: Remove document signatures once we need to implement that.
 			}
 			else
 			{
@@ -207,9 +315,24 @@ namespace Axinom.Cpix
 				SignContentKeys(document);
 			}
 
+			SerializeAddedAssignmentRules(document);
+
+			SignAssignmentRules(document);
 			SignDocument(document);
 
-			document.Save(stream);
+			using (var writer = XmlWriter.Create(stream, new XmlWriterSettings
+			{
+				// The serialization we do above results in some duplicate namespaces on the assignment rules.
+				// What if the original already has duplicates that are signed?
+				// Hrm, might have to remove this if that is the case. But don't worry about it for now.
+				NamespaceHandling = NamespaceHandling.OmitDuplicates,
+				Indent = true,
+				IndentChars = "\t",
+				Encoding = Encoding.UTF8
+			}))
+			{
+				document.Save(writer);
+			}
 		}
 
 		/// <summary>
@@ -316,7 +439,7 @@ namespace Axinom.Cpix
 				{
 					XmlId = $"ContentKey{contentKeyNumber++}",
 					Algorithm = Constants.ContentKeyAlgorithm,
-					KeyId = key.Id.ToString(),
+					KeyId = key.Id,
 					Data = new DataElement
 					{
 						Secret = new SecretDataElement()
@@ -366,18 +489,151 @@ namespace Axinom.Cpix
 			}
 
 			// Now transform this structure into a brand new XmlDocument.
-			using (var intermediateXmlBuffer = new MemoryStream())
+			return XmlObjectToXmlDocument(root);
+		}
+
+		private void SerializeAddedAssignmentRules(XmlDocument document)
+		{
+			var namespaces = CreateNamespaceManager(document);
+
+			// If there are existing rules, add to the end. Otherwise, add after content keys.
+			var insertAfter = document.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyAssignmentRule[last()]", namespaces);
+
+			if (insertAfter == null)
+				insertAfter = document.SelectSingleNode("/cpix:CPIX/cpix:ContentKey[last()]", namespaces);
+
+			foreach (var rule in _addedRules)
 			{
-				var serializer = new XmlSerializer(typeof(DocumentRootElement));
-				serializer.Serialize(intermediateXmlBuffer, root);
+				// We do not give them XML IDs, as that is handled later during signing.
+				var ruleObject = new AssignmentRuleElement
+				{
+					KeyId = rule.KeyId
+				};
 
-				// Seek back to beginning to load contents into XmlDocument.
-				intermediateXmlBuffer.Position = 0;
+				if (rule.AudioFilter != null)
+				{
+					ruleObject.AudioFilter = new AudioFilterElement
+					{
+						MinChannels = rule.AudioFilter.MinChannels,
+						MaxChannels = rule.AudioFilter.MaxChannels
+					};
+				}
 
-				var xmlDocument = new XmlDocument();
-				xmlDocument.Load(intermediateXmlBuffer);
+				if (rule.BitrateFilter != null)
+				{
+					ruleObject.BitrateFilter = new BitrateFilterElement
+					{
+						MinBitrate = rule.BitrateFilter.MinBitrate,
+						MaxBitrate = rule.BitrateFilter.MaxBitrate
+					};
+				}
 
-				return xmlDocument;
+				if (rule.CryptoPeriodFilter != null)
+				{
+					ruleObject.CryptoPeriodFilter = new CryptoPeriodFilterElement
+					{
+						PeriodIndex = rule.CryptoPeriodFilter.PeriodIndex
+					};
+				}
+
+				if (rule.LabelFilter != null)
+				{
+					ruleObject.LabelFilter = new LabelFilterElement
+					{
+						Label = rule.LabelFilter.Label
+					};
+				}
+
+				if (rule.TimeFilter != null)
+				{
+					ruleObject.TimeFilter = new TimeFilterElement
+					{
+						Start = rule.TimeFilter.Start,
+						End = rule.TimeFilter.End
+					};
+				}
+
+				if (rule.VideoFilter != null)
+				{
+					ruleObject.VideoFilter = new VideoFilterElement
+					{
+						MinPixels = rule.VideoFilter.MinPixels,
+						MaxPixels = rule.VideoFilter.MaxPixels
+					};
+				}
+
+				var xmlElement = XmlObjectToXmlDocument(ruleObject).DocumentElement;
+				var imported = document.ImportNode(xmlElement, true);
+
+				// Insert and move pointer forward for next one.
+				insertAfter = document.DocumentElement.InsertAfter(imported, insertAfter);
+			}
+		}
+
+		private void SignAssignmentRules(XmlDocument document)
+		{
+			if (_addedRuleSigners.Count == 0)
+				return;
+
+			var namespaces = CreateNamespaceManager(document);
+
+			// If we are signing content key assignment rules, we re-number them all and assign unique IDs to each.
+			// This way we can be assured of easy and straightforward identification for purposes of signature references.
+			int ruleNumber = 1;
+
+			foreach (XmlElement ruleElement in document.SelectNodes("/cpix:CPIX/cpix:ContentKeyAssignmentRule", namespaces))
+				ruleElement.SetAttribute("id", $"AssignmentRule{ruleNumber++}");
+
+			var ruleIdUris = TryDetermineAssignmentRuleUniqueIdUris(document);
+
+			foreach (var signer in _addedRuleSigners)
+			{
+				// There is some funny business that happens with certificates loaded from PFX files in .NET 4.6.2 Preview.
+				// You can't use them with the RSA-SHA512 algorithm! It just complains about an invalid algorithm.
+				// To get around it, simply export and re-import the key pair to a new instance of the RSA CSP.
+				using (var signingKey = new RSACryptoServiceProvider())
+				{
+					var exportedSigningKey = ((RSACryptoServiceProvider)signer.PrivateKey).ExportParameters(true);
+					signingKey.ImportParameters(exportedSigningKey);
+
+					var signedXml = new SignedXml(document)
+					{
+						SigningKey = signingKey
+					};
+
+					// Add each content key assignment rule element as a reference to sign.
+					foreach (var uri in ruleIdUris)
+					{
+						var whatToSign = new Reference
+						{
+							Uri = uri,
+
+							// A nice strong algorithm without known weaknesses that are easily exploitable.
+							DigestMethod = SignedXml.XmlDsigSHA512Url
+						};
+
+						// Just some arbitrary transform. It... works.
+						whatToSign.AddTransform(new XmlDsigC14NTransform());
+
+						signedXml.AddReference(whatToSign);
+					}
+
+					// A nice strong algorithm without known weaknesses that are easily exploitable.
+					signedXml.SignedInfo.SignatureMethod = SignedXml.XmlDsigRSASHA512Url;
+
+					// Canonical XML 1.0 (omit comments); I suppose it works fine, no deep thoughts about this.
+					signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigCanonicalizationUrl;
+
+					// Signer certificate must be delivered with the signature.
+					signedXml.KeyInfo.AddClause(new KeyInfoX509Data(signer));
+
+					// Ready to sign! Let's go!
+					signedXml.ComputeSignature();
+
+					// Now stick the Signature element it generated back into the document and we are done.
+					var signature = signedXml.GetXml();
+					document.DocumentElement.AppendChild(document.ImportNode(signature, true));
+				}
 			}
 		}
 
@@ -438,24 +694,6 @@ namespace Axinom.Cpix
 
 		private void SignDocument(XmlDocument document)
 		{
-			if (_desiredDocumentSigner != _loadedDocumentSigner && _loadedDocumentSigner != null)
-			{
-				// The desired document signer has changed. Remove old signature from document.
-				// Err okay but how do we find it? Remember that we operate on a cloned document tree!
-
-				// ...just look for the same signature value. Should work reasonably well.
-				var namespaces = CreateNamespaceManager(document);
-
-				var lookingForSignatureValue = _loadedDocumentSignature.SelectSingleNode("ds:SignatureValue", namespaces).InnerText;
-
-				var documentSignatureNode = (XmlElement)document.SelectNodes("/cpix:CPIX/ds:Signature/ds:SignatureValue", namespaces).Cast<XmlElement>().SingleOrDefault(signatureValueNode => signatureValueNode.InnerText == lookingForSignatureValue)?.ParentNode;
-
-				if (documentSignatureNode == null)
-					throw new Exception("Internal error: we lost track of the document signature node!");
-
-				documentSignatureNode.ParentNode.RemoveChild(documentSignatureNode);
-			}
-
 			if (_desiredDocumentSigner == null)
 				return;
 
@@ -504,18 +742,6 @@ namespace Axinom.Cpix
 			}
 		}
 
-		/* TODO: Make this required before any modifications once we actually support modifications.
-		 * 
-		/// <summary>
-		/// Removes all document signatures present. You must do this before saving the document, since any changes
-		/// will invalidate existing document signatures and the document as a whole must therefore be re-signed on save.
-		/// </summary>
-		public void RemoveDocumentSignatures()
-		{
-			throw new NotImplementedException();
-		}
-		*/
-
 		/// <summary>
 		/// Loads a CPIX document from a stream, decrypting it using the key pairs of the provided certificates, if required.
 		/// 
@@ -547,7 +773,8 @@ namespace Axinom.Cpix
 			// 3) Load content keys, decrypting if needed and if we have the document key.
 			LoadContentKeys(document, cpix, decryptionCertificates ?? new X509Certificate2[0]);
 
-			// 4) TODO: Load key assignment rules.
+			// 4) Load key assignment rules.
+			LoadAssignmentRules(document, cpix);
 
 			// 5) Validate.
 			if (cpix.ContentKeys.Count == 0)
@@ -561,6 +788,7 @@ namespace Axinom.Cpix
 			var namespaces = CreateNamespaceManager(document);
 
 			var contentKeyIdUris = TryDetermineContentKeyUniqueIdUris(document);
+			var ruleIdUris = TryDetermineAssignmentRuleUniqueIdUris(document);
 
 			foreach (XmlElement signature in document.SelectNodes("/cpix:CPIX/ds:Signature", namespaces))
 			{
@@ -593,6 +821,11 @@ namespace Axinom.Cpix
 				{
 					// This is a signature over all content keys.
 					cpix._contentKeySigners.Add(certificate);
+				}
+				else if (ruleIdUris != null && referenceUris.OrderBy(x => x).SequenceEqual(ruleIdUris.OrderBy(x => x)))
+				{
+					// This is a signature over all content key assignment rules.
+					cpix._loadedRuleSignatures.Add(new Tuple<XmlElement, X509Certificate2>(signature, certificate));
 				}
 				else
 				{
@@ -673,8 +906,6 @@ namespace Axinom.Cpix
 				contentKey.LoadTimeValidate();
 
 				// Start loading the data.
-				var keyId = Guid.Parse(contentKey.KeyId);
-
 				byte[] value = null;
 
 				if (isEncrypted && contentKey.HasPlainValue)
@@ -707,7 +938,87 @@ namespace Axinom.Cpix
 					value = contentKey.Data.Secret.PlainValue;
 				}
 
-				cpix._contentKeys.Add(new LoadedContentKey(keyId, value));
+				var loadedContentKey = new ContentKey
+				{
+					Id = contentKey.KeyId,
+					Value = value
+				};
+
+				// If we are not able to decrypt the value, we accept a null value.
+				loadedContentKey.Validate(allowNullValue: value == null);
+
+				cpix._contentKeys.Add(loadedContentKey);
+			}
+		}
+
+		private static void LoadAssignmentRules(XmlDocument document, CpixDocument cpix)
+		{
+			var namespaces = CreateNamespaceManager(document);
+
+			foreach (XmlElement ruleNode in document.SelectNodes("/cpix:CPIX/cpix:ContentKeyAssignmentRule", namespaces))
+			{
+				var element = XmlElementToXmlDeserialized<AssignmentRuleElement>(ruleNode);
+
+				var rule = new AssignmentRule
+				{
+					KeyId = element.KeyId
+				};
+
+				if (element.AudioFilter != null)
+				{
+					rule.AudioFilter = new AudioFilter
+					{
+						MinChannels = element.AudioFilter.MinChannels,
+						MaxChannels = element.AudioFilter.MaxChannels
+					};
+				}
+
+				if (element.BitrateFilter != null)
+				{
+					rule.BitrateFilter = new BitrateFilter
+					{
+						MinBitrate = element.BitrateFilter.MinBitrate,
+						MaxBitrate = element.BitrateFilter.MaxBitrate
+					};
+				}
+
+				if (element.CryptoPeriodFilter != null)
+				{
+					rule.CryptoPeriodFilter = new CryptoPeriodFilter
+					{
+						PeriodIndex = element.CryptoPeriodFilter.PeriodIndex
+					};
+				}
+
+				if (element.LabelFilter != null)
+				{
+					rule.LabelFilter = new LabelFilter
+					{
+						Label = element.LabelFilter.Label
+					};
+				}
+
+				if (element.TimeFilter != null)
+				{
+					rule.TimeFilter = new TimeFilter
+					{
+						Start = element.TimeFilter.Start,
+						End = element.TimeFilter.End
+					};
+				}
+
+				if (element.VideoFilter != null)
+				{
+					rule.VideoFilter = new VideoFilter
+					{
+						MinPixels = element.VideoFilter.MinPixels,
+						MaxPixels = element.VideoFilter.MaxPixels
+					};
+				}
+
+				rule.Validate(cpix.ContentKeys);
+
+				cpix._loadedRules.Add(rule);
 			}
 		}
 
@@ -734,11 +1045,53 @@ namespace Axinom.Cpix
 				result.Add("#" + id);
 			}
 
+			// If there are no items, there is nothing to reference.
+			if (result.Count == 0)
+				return null;
+
 			// We got all the IDs. But are they unique?
 			if (result.Distinct().Count() != result.Count)
 				return null; // Nope!
 
 			// The IDs also need to be unique between the content keys and all other XML elements!
+			// The XML digital signature implementation must verifiy that no such funny business takes
+			// place when verifying the signatures, so no need to worry extra about that.
+
+			return result.ToArray();
+		}
+
+		/// <summary>
+		/// Returns the refrence URIs (in the XML Digital Signature sense) of all content key assignment rule elements
+		/// OR null if the assignment rule elements in the CPIX document cannot be uniquely identified for signing purposes.
+		/// </summary>
+		private static string[] TryDetermineAssignmentRuleUniqueIdUris(XmlDocument document)
+		{
+			var namespaces = CreateNamespaceManager(document);
+
+			var result = new List<string>();
+
+			foreach (XmlElement rule in document.SelectNodes("/cpix:CPIX/cpix:ContentKeyAssignmentRule", namespaces))
+			{
+				var id = rule.GetAttribute("id");
+
+				if (id == "")
+				{
+					// Missing is empty value - it is not possible to uniquely identify this rule.
+					return null;
+				}
+
+				result.Add("#" + id);
+			}
+
+			// If there are no items, there is nothing to reference.
+			if (result.Count == 0)
+				return null;
+
+			// We got all the IDs. But are they unique?
+			if (result.Distinct().Count() != result.Count)
+				return null; // Nope!
+
+			// The IDs also need to be unique between the rules and all other XML elements!
 			// The XML digital signature implementation must verifiy that no such funny business takes
 			// place when verifying the signatures, so no need to worry extra about that.
 
@@ -756,6 +1109,23 @@ namespace Axinom.Cpix
 
 				var serializer = new XmlSerializer(typeof(T));
 				return (T)serializer.Deserialize(buffer);
+			}
+		}
+
+		private static XmlDocument XmlObjectToXmlDocument<T>(T xmlObject)
+		{
+			using (var intermediateXmlBuffer = new MemoryStream())
+			{
+				var serializer = new XmlSerializer(typeof(T));
+				serializer.Serialize(intermediateXmlBuffer, xmlObject);
+
+				// Seek back to beginning to load contents into XmlDocument.
+				intermediateXmlBuffer.Position = 0;
+
+				var xmlDocument = new XmlDocument();
+				xmlDocument.Load(intermediateXmlBuffer);
+
+				return xmlDocument;
 			}
 		}
 

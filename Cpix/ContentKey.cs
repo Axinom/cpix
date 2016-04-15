@@ -17,13 +17,15 @@ namespace Axinom.Cpix
 		/// <summary>
 		/// Validates the data before it is accepted for serialization.
 		/// </summary>
-		internal void Validate()
+		internal void Validate(bool allowNullValue = false)
 		{
 			if (Id == Guid.Empty)
-				throw new NotSupportedException("Content key must have an ID.");
+				throw new InvalidCpixDataException("Content key must have a nonzero ID.");
 
-			if (Value?.Length != 16)
-				throw new NotSupportedException("Content key must have a 16-byte value.");
+			// We allow null values if deserializing data we cannot decrypt.
+			if (allowNullValue == false)
+				if (Value?.Length != 16)
+					throw new InvalidCpixDataException("Content key must have a 16-byte value.");
 		}
 	}
 }

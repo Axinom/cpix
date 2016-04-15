@@ -56,6 +56,10 @@
       <Link>Author1.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\Resources\Certificates\Author2.pfx">
+      <Link>Author2.pfx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\Resources\Certificates\Recipient1.cer">
       <Link>Recipient1.cer</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

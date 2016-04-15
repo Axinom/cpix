@@ -4,15 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8706C176-A754-4C23-A9B7-855E6B1BDDB1}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{0425264E-A198-414D-8A0E-72A402BDB1A2}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Axinom.Cpix</RootNamespace>
-    <AssemblyName>Axinom.Cpix</AssemblyName>
+    <RootNamespace>Labeler</RootNamespace>
+    <AssemblyName>Labeler</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -20,23 +22,19 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Security" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -45,29 +43,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Resources\SolutionAssemblyInfo.cs">
-      <Link>Properties\SolutionAssemblyInfo.cs</Link>
-    </Compile>
-    <Compile Include="AssignmentRule.cs" />
-    <Compile Include="AudioFilter.cs" />
-    <Compile Include="BitrateFilter.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="ContentKey.cs" />
-    <Compile Include="CpixDocument.cs" />
-    <Compile Include="InvalidCpixDataException.cs" />
-    <Compile Include="CryptoPeriodFilter.cs" />
-    <Compile Include="DocumentModel\XmlElements.cs" />
-    <Compile Include="IAssignmentRule.cs" />
-    <Compile Include="IAudioFilter.cs" />
-    <Compile Include="IBitrateFilter.cs" />
-    <Compile Include="IContentKey.cs" />
-    <Compile Include="ICryptoPeriodFilter.cs" />
-    <Compile Include="ILabelFilter.cs" />
-    <Compile Include="ITimeFilter.cs" />
-    <Compile Include="LabelFilter.cs" />
-    <Compile Include="IVideoFilter.cs" />
-    <Compile Include="TimeFilter.cs" />
-    <Compile Include="VideoFilter.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\Certificates\Author2.pfx">
+      <Link>Author2.pfx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Cpix\Cpix.csproj">
+      <Project>{8706c176-a754-4c23-a9b7-855e6b1bddb1}</Project>
+      <Name>Cpix</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

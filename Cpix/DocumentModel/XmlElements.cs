@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Xml.Serialization;
 
 namespace Axinom.Cpix.DocumentModel
 {
+	/// <summary>
+	/// We just use this to serialize content keys - hence it intentionally does not contain any of the other elements.
+	/// </summary>
 	[XmlRoot("CPIX", Namespace = Constants.CpixNamespace)]
 	public sealed class DocumentRootElement
 	{
@@ -14,6 +18,135 @@ namespace Axinom.Cpix.DocumentModel
 		public List<ContentKeyElement> ContentKeys { get; set; } = new List<ContentKeyElement>();
 	}
 
+	[XmlRoot("ContentKeyAssignmentRule", Namespace = Constants.CpixNamespace)]
+	public sealed class AssignmentRuleElement
+	{
+		[XmlAttribute("keyId")]
+		public Guid KeyId { get; set; }
+
+		[XmlElement]
+		public TimeFilterElement TimeFilter { get; set; }
+
+		[XmlElement]
+		public CryptoPeriodFilterElement CryptoPeriodFilter { get; set; }
+
+		[XmlElement]
+		public LabelFilterElement LabelFilter { get; set; }
+
+		[XmlElement]
+		public VideoFilterElement VideoFilter { get; set; }
+
+		[XmlElement]
+		public AudioFilterElement AudioFilter { get; set; }
+
+		[XmlElement]
+		public BitrateFilterElement BitrateFilter { get; set; }
+	}
+
+	public sealed class TimeFilterElement
+	{
+		[XmlIgnore]
+		public DateTimeOffset? Start { get; set; }
+
+		[XmlIgnore]
+		public DateTimeOffset? End { get; set; }
+
+		[XmlAttribute("start")]
+		public string StartAsXmlString
+		{
+			get { return Start?.ToString("o"); }
+			set { Start = value == null ? null : (DateTimeOffset?)DateTimeOffset.ParseExact(value, "o", CultureInfo.InvariantCulture); }
+		}
+
+		[XmlAttribute("end")]
+		public string EndAsXmlString
+		{
+			get { return End?.ToString("o"); }
+			set { End = value == null ? null : (DateTimeOffset?)DateTimeOffset.ParseExact(value, "o", CultureInfo.InvariantCulture); }
+		}
+	}
+
+	public sealed class CryptoPeriodFilterElement
+	{
+		[XmlAttribute("periodIndex")]
+		public long PeriodIndex { get; set; }
+	}
+
+	public sealed class LabelFilterElement
+	{
+		[XmlAttribute("label")]
+		public string Label { get; set; }
+	}
+
+	public sealed class VideoFilterElement
+	{
+		[XmlIgnore]
+		public long? MinPixels { get; set; }
+
+		[XmlIgnore]
+		public long? MaxPixels { get; set; }
+
+		[XmlAttribute("minPixels")]
+		public string MinPixelsAsXmlString
+		{
+			get { return MinPixels?.ToString(); }
+			set { MinPixels = value != null ? (long?)long.Parse(value) : null; }
+		}
+
+		[XmlAttribute("maxPixels")]
+		public string MaxPixelsAsXmlString
+		{
+			get { return MaxPixels?.ToString(); }
+			set { MaxPixels = value != null ? (long?)long.Parse(value) : null; }
+		}
+	}
+
+	public sealed class AudioFilterElement
+	{
+		[XmlIgnore]
+		public int? MinChannels { get; set; }
+
+		[XmlIgnore]
+		public int? MaxChannels { get; set; }
+
+		[XmlAttribute("minChannels")]
+		public string MinChannelsAsXmlString
+		{
+			get { return MinChannels?.ToString(); }
+			set { MinChannels = value != null ? (int?)int.Parse(value) : null; }
+		}
+
+		[XmlAttribute("maxChannels")]
+		public string MaxChannelsAsXmlString
+		{
+			get { return MaxChannels?.ToString(); }
+			set { MaxChannels = value != null ? (int?)int.Parse(value) : null; }
+		}
+	}
+
+	public sealed class BitrateFilterElement
+	{
+		[XmlIgnore]
+		public long? MinBitrate { get; set; }
+
+		[XmlIgnore]
+		public long? MaxBitrate { get; set; }
+
+		[XmlAttribute("minBitrate")]
+		public string MinBitrateAsXmlString
+		{
+			get { return MinBitrate?.ToString(); }
+			set { MinBitrate = value != null ? (long?)long.Parse(value) : null; }
+		}
+
+		[XmlAttribute("maxBitrate")]
+		public string MaxBitrateAsXmlString
+		{
+			get { return MaxBitrate?.ToString(); }
+			set { MaxBitrate = value != null ? (long?)long.Parse(value) : null; }
+		}
+	}
+
 	[XmlRoot("ContentKey", Namespace = Constants.CpixNamespace)]
 	public sealed class ContentKeyElement
 	{
@@ -21,7 +154,7 @@ namespace Axinom.Cpix.DocumentModel
 		public string XmlId { get; set; }
 
 		[XmlAttribute("keyId")]
-		public string KeyId { get; set; }
+		public Guid KeyId { get; set; }
 
 		[XmlAttribute]
 		public string Algorithm { get; set; }
@@ -39,7 +172,7 @@ namespace Axinom.Cpix.DocumentModel
 		internal void LoadTimeValidate()
 		{
 			if (HasEncryptedValue && HasPlainValue)
-				throw new NotSupportedException("Cannot have both ContentKey/Data/Secret/EncryptedValue and ContentKey/Data/Secret/PlainValue! Is it encrypted or not?");
+				throw new InvalidCpixDataException("Cannot have both ContentKey/Data/Secret/EncryptedValue and ContentKey/Data/Secret/PlainValue! Is it encrypted or not?");
 
 			if (HasEncryptedValue)
 			{
@@ -47,13 +180,13 @@ namespace Axinom.Cpix.DocumentModel
 					throw new NotSupportedException("Only the following algorithm is supported for encrypting content keys: " + Constants.Aes256CbcAlgorithm);
 
 				if (Data.Secret.EncryptedValue.CipherData?.CipherValue == null || Data.Secret.EncryptedValue.CipherData?.CipherValue.Length == 0)
-					throw new NotSupportedException("ContentKey/Data/Secret/EncryptedValue/CipherData/CipherValue element is missing.");
+					throw new InvalidCpixDataException("ContentKey/Data/Secret/EncryptedValue/CipherData/CipherValue element is missing.");
 
 				// 128-bit IV + 128-bit encrypted content key.
 				var expectedLength = (128 + 128) / 8;
 
 				if (Data.Secret.EncryptedValue.CipherData?.CipherValue.Length != expectedLength)
-					throw new NotSupportedException("ContentKey/Data/Secret/EncryptedValue/CipherData/CipherValue element does not contain the expected number of bytes (" + expectedLength + ")");
+					throw new InvalidCpixDataException("ContentKey/Data/Secret/EncryptedValue/CipherData/CipherValue element does not contain the expected number of bytes (" + expectedLength + ")");
 
 				if (Data?.Secret?.ValueMAC == null)
 					throw new NotSupportedException("Expected ContentKey/Data/Secret/ValueMAC element does not exist.");
@@ -64,11 +197,11 @@ namespace Axinom.Cpix.DocumentModel
 				var expectedLength = 128 / 8;
 
 				if (Data.Secret.PlainValue.Length != expectedLength)
-					throw new NotSupportedException("ContentKey/Data/Secret/PlainValue element does not contain the expected number of bytes (" + expectedLength + ")");
+					throw new InvalidCpixDataException("ContentKey/Data/Secret/PlainValue element does not contain the expected number of bytes (" + expectedLength + ")");
 			}
 			else
 			{
-				throw new NotSupportedException("Must have either ContentKey/Data/Secret/EncryptedValue or ContentKey/Data/Secret/PlainValue.");
+				throw new InvalidCpixDataException("Must have either ContentKey/Data/Secret/EncryptedValue or ContentKey/Data/Secret/PlainValue.");
 			}
 		}
 	}
@@ -172,13 +305,13 @@ namespace Axinom.Cpix.DocumentModel
 				throw new NotSupportedException("Only the following algorithm is supported for MAC generation: " + Constants.HmacSha512Algorithm);
 
 			if (Key == null)
-				throw new NotSupportedException("DeliveryData/MACKey/Key element is missing.");
+				throw new InvalidCpixDataException("DeliveryData/MACKey/Key element is missing.");
 
 			if (Key.EncryptionMethod?.Algorithm != Constants.RsaOaepAlgorithm)
 				throw new NotSupportedException("Only the following algorithm is supported for encrypting the MAC key: " + Constants.RsaOaepAlgorithm);
 
 			if (Key.CipherData?.CipherValue == null || Key.CipherData?.CipherValue.Length == 0)
-				throw new NotSupportedException("DeliveryData/MACKey/Key/CipherData/CipherValue element is missing.");
+				throw new InvalidCpixDataException("DeliveryData/MACKey/Key/CipherData/CipherValue element is missing.");
 		}
 	}
 
@@ -199,16 +332,16 @@ namespace Axinom.Cpix.DocumentModel
 				throw new NotSupportedException("Only the following algorithm is supported for the document key: " + Constants.Aes256CbcAlgorithm);
 
 			if (Data == null)
-				throw new NotSupportedException("DeliveryData/DocumentKey/Data element is missing.");
+				throw new InvalidCpixDataException("DeliveryData/DocumentKey/Data element is missing.");
 
 			if (Data.Secret?.EncryptedValue == null)
-				throw new NotSupportedException("DeliveryData/DocumentKey/Data/Secret/EncryptedValue element is missing.");
+				throw new InvalidCpixDataException("DeliveryData/DocumentKey/Data/Secret/EncryptedValue element is missing.");
 
 			if (Data.Secret?.EncryptedValue.EncryptionMethod?.Algorithm != Constants.RsaOaepAlgorithm)
 				throw new NotSupportedException("Only the following algorithm is supported for encrypting the document key: " + Constants.RsaOaepAlgorithm);
 
 			if (Data.Secret?.EncryptedValue.CipherData?.CipherValue == null || Data.Secret?.EncryptedValue.CipherData?.CipherValue.Length == 0)
-				throw new NotSupportedException("DeliveryData/DocumentKey/Data/Secret/CipherData/CipherValue element is missing.");
+				throw new InvalidCpixDataException("DeliveryData/DocumentKey/Data/Secret/CipherData/CipherValue element is missing.");
 		}
 	}
 

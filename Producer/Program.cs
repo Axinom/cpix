@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
@@ -15,7 +16,8 @@ namespace Producer
 
 			// If this is loaded from PFX, must be marked exportable due to funny behavior in .NET Framework.
 			// Ideally, there should be no need to use an exportable key! But good enough for a sample.
-			var signerCertificate = new X509Certificate2("Author1.pfx", "Author1", X509KeyStorageFlags.Exportable);
+			var signerCertificate1 = new X509Certificate2("Author1.pfx", "Author1", X509KeyStorageFlags.Exportable);
+			var signerCertificate2 = new X509Certificate2("Author2.pfx", "Author2", X509KeyStorageFlags.Exportable);
 
 			var recipientCertificate1 = new X509Certificate2("Recipient1.cer");
 			var recipientCertificate2 = new X509Certificate2("Recipient2.cer");
@@ -33,8 +35,8 @@ namespace Producer
 			document = new CpixDocument();
 			document.AddContentKey(GenerateNewKey());
 			document.AddContentKey(GenerateNewKey());
-			document.AddContentKeySignature(signerCertificate);
-			document.SetDocumentSignature(signerCertificate);
+			document.AddContentKeySignature(signerCertificate1);
+			document.SetDocumentSignature(signerCertificate1);
 			samples.Add(new Tuple<string, CpixDocument>("Signed.xml", document));
 
 			document = new CpixDocument();
@@ -49,9 +51,45 @@ namespace Producer
 			document.AddContentKey(GenerateNewKey());
 			document.AddRecipient(recipientCertificate1);
 			document.AddRecipient(recipientCertificate2);
-			document.AddContentKeySignature(signerCertificate);
-			document.SetDocumentSignature(signerCertificate);
+			document.AddContentKeySignature(signerCertificate1);
+			document.SetDocumentSignature(signerCertificate1);
 			samples.Add(new Tuple<string, CpixDocument>("EncryptedAndSigned.xml", document));
+
+			document = new CpixDocument();
+			document.AddContentKey(GenerateNewKey());
+			document.AddContentKey(GenerateNewKey());
+			document.AddContentKey(GenerateNewKey());
+			document.AddAssignmentRule(new AssignmentRule
+			{
+				KeyId = document.ContentKeys.First().Id,
+				AudioFilter = new AudioFilter
+				{
+					MinChannels = 1,
+					MaxChannels = 2
+				}
+			});
+			document.AddAssignmentRule(new AssignmentRule
+			{
+				KeyId = document.ContentKeys.Skip(1).First().Id,
+				VideoFilter = new VideoFilter
+				{
+					MaxPixels = 1920 * 1080 - 1
+				}
+			});
+			document.AddAssignmentRule(new AssignmentRule
+			{
+				KeyId = document.ContentKeys.Last().Id,
+				VideoFilter = new VideoFilter
+				{
+					MinPixels = 1920 * 1080
+				}
+			});
+			document.AddRecipient(recipientCertificate1);
+			document.AddRecipient(recipientCertificate2);
+			document.AddContentKeySignature(signerCertificate1);
+			document.AddAssignmentRuleSignature(signerCertificate2);
+			document.SetDocumentSignature(signerCertificate1);
+			samples.Add(new Tuple<string, CpixDocument>("WithRulesAndEncryptedAndSigned.xml", document));
 
 			Console.WriteLine("Saving CPIX documents.");
 

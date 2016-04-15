@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
@@ -36,6 +37,20 @@ namespace Tests
 				Id = keyData.Item1,
 				Value = keyData.Item2
 			};
+		}
+
+		public static AssignmentRule AddAssignmentRule(CpixDocument document)
+		{
+			var contentKey = document.ContentKeys.First();
+
+			var rule = new AssignmentRule
+			{
+				KeyId = contentKey.Id
+			};
+
+			document.AddAssignmentRule(rule);
+
+			return rule;
 		}
 
 		public static readonly RandomNumberGenerator Random = RandomNumberGenerator.Create();
