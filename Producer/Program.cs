@@ -103,8 +103,8 @@ namespace Producer
 
 				TimeFilter = new TimeFilter
 				{
-					Start = period1Start + periodDuration,
-					End = period1Start + periodDuration + periodDuration
+					Start = period2Start,
+					End = period2Start + periodDuration
 				},
 				VideoFilter = new VideoFilter
 				{
@@ -133,8 +133,8 @@ namespace Producer
 
 				TimeFilter = new TimeFilter
 				{
-					Start = period1Start + periodDuration,
-					End = period1Start + periodDuration + periodDuration
+					Start = period2Start,
+					End = period2Start + periodDuration
 				},
 				VideoFilter = new VideoFilter
 				{
