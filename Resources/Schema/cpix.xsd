@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:cpix="urn:dashif:org:cpix" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:pskc="urn:ietf:params:xml:ns:keyprov:pskc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+	targetNamespace="urn:dashif:org:cpix" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+	<xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="xmldsig-core-schema.xsd" />
+	<xs:import namespace="urn:ietf:params:xml:ns:keyprov:pskc" schemaLocation="pskc.xsd" />
+	<xs:complexType name="DeliveryDataType">
+		<xs:sequence>
+			<xs:element name="DeliveryKey" type="ds:KeyInfoType" />
+			<xs:element name="DocumentKey" type="pskc:KeyType" />
+			<xs:element name="MacMethod" type="pskc:MACMethodType" minOccurs="0" />
+			<xs:element name="Description" type="xs:string" minOccurs="0" />
+			<xs:element name="SendingOrganization" type="xs:string" minOccurs="0" />
+			<xs:element name="SenderPointofContact" type="xs:string" minOccurs="0" />
+			<xs:element name="ReceivingOrganization" type="xs:string" minOccurs="0" />
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:ID" use="optional" />
+		<xs:attribute name="name" type="xs:string" use="optional" />
+		<xs:attribute name="updateVersion" type="xs:integer" use="optional" />
+	</xs:complexType>
+	<xs:complexType name="UpdateHistoryItemType">
+		<xs:attribute name="id" type="xs:ID" use="optional" />
+		<xs:attribute name="date" type="xs:dateTime" use="required" />
+		<xs:attribute name="source" type="xs:string" use="required" />
+	</xs:complexType>
+	<xs:complexType name="TimeFilterType">
+		<xs:attribute name="start" type="xs:dateTime" use="optional" />
+		<xs:attribute name="end" type="xs:dateTime" use="optional" />
+	</xs:complexType>
+	<xs:complexType name="CryptoPeriodFilterType">
+		<xs:attribute name="periodIndex" type="xs:integer" use="required" />
+	</xs:complexType>
+	<xs:complexType name="LabelFilterType">
+		<xs:attribute name="label" type="xs:string" use="required" />
+	</xs:complexType>
+	<xs:complexType name="VideoFilterType">
+		<xs:attribute name="minPixels" type="xs:integer" use="optional" />
+		<xs:attribute name="maxPixels" type="xs:integer" use="optional" />
+	</xs:complexType>
+	<xs:complexType name="AudioFilterType">
+		<xs:attribute name="minChannels" type="xs:integer" use="optional" />
+		<xs:attribute name="maxChannels" type="xs:integer" use="optional" />
+	</xs:complexType>
+	<xs:complexType name="BitrateFilterType">
+		<xs:attribute name="minBitrate" type="xs:integer" use="optional" />
+		<xs:attribute name="maxBitrate" type="xs:integer" use="optional" />
+	</xs:complexType>
+	<xs:complexType name="DrmSystemType">
+		<xs:sequence>
+			<xs:element name="PsshSignaling" type="xs:base64Binary" minOccurs="0" />
+			<xs:element name="DashManifestSignaling" type="xs:base64Binary" minOccurs="0" />
+		</xs:sequence>
+		<xs:attribute name="systemId" type="xs:string" use="required" />
+		<xs:attribute name="updateVersion" type="xs:integer" use="optional" />
+	</xs:complexType>
+	<xs:complexType name="ContentKeyAssignmentRuleType">
+		<xs:sequence>
+			<xs:element name="TimeFilter" type="cpix:TimeFilterType" minOccurs="0" />
+			<xs:element name="CryptoPeriodFilter" type="cpix:CryptoPeriodFilterType" minOccurs="0" />
+			<xs:element name="LabelFilter" type="cpix:LabelFilterType" minOccurs="0" />
+			<xs:element name="VideoFilter" type="cpix:VideoFilterType" minOccurs="0" />
+			<xs:element name="AudioFilter" type="cpix:AudioFilterType" minOccurs="0" />
+			<xs:element name="BitrateFilter" type="cpix:BitrateFilterType" minOccurs="0" />
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:ID" use="optional" />
+		<xs:attribute name="keyId" type="xs:string" use="required" />
+		<xs:attribute name="updateVersion" type="xs:integer" use="optional" />
+	</xs:complexType>
+	<!--
+	This is a copy & paste style extension of PKSC KeyType. We cannot derive directly from it because
+	it defines the mandatory "id" element as string. This is a problem as many libraries assume "id" is
+	always of type xs:ID and will refuse to work with values that are not actually valid xs:ID values
+	(e.g. GUIDs	that start with a number), leading to undesired failures in practice. Therefore this
+	type definition	separates the concept of XML element identification ("id") and key identification ("keyId").
+	-->
+	<xs:complexType name="ContentKeyType">
+		<xs:sequence>
+			<xs:element name="Issuer" type="xs:string" minOccurs="0" />
+			<xs:element name="AlgorithmParameters" type="pskc:AlgorithmParametersType" minOccurs="0" />
+			<xs:element name="KeyProfileId" type="xs:string" minOccurs="0" />
+			<xs:element name="KeyReference" type="xs:string" minOccurs="0" />
+			<xs:element name="FriendlyName" type="xs:string" minOccurs="0" />
+			<xs:element name="Data" type="pskc:KeyDataType" minOccurs="0" />
+			<xs:element name="UserId" type="xs:string" minOccurs="0" />
+			<xs:element name="Policy" type="pskc:PolicyType" minOccurs="0" />
+			<xs:element name="Extensions" type="pskc:ExtensionsType" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="DrmSystem" type="cpix:DrmSystemType" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:ID" use="optional" />
+		<xs:attribute name="keyID" type="xs:string" use="required" />
+		<xs:attribute name="updateVersion" type="xs:integer" use="optional" />
+		<xs:attribute name="Algorithm" type="pskc:KeyAlgorithmType" use="optional" />
+	</xs:complexType>
+	<xs:complexType name="CPIX">
+		<xs:sequence>
+			<xs:element name="DeliveryData" type="cpix:DeliveryDataType" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="ContentKey" type="cpix:ContentKeyType" minOccurs="1" maxOccurs="unbounded" />
+			<xs:element name="ContentKeyAssignmentRule" type="cpix:ContentKeyAssignmentRuleType" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="UpdateHistoryItem" type="cpix:UpdateHistoryItemType" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="Signature" type="ds:SignatureType" maxOccurs="unbounded" minOccurs="0" />
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:ID" use="optional" />
+		<xs:attribute name="name" type="xs:string" use="optional" />
+	</xs:complexType>
+</xs:schema>
