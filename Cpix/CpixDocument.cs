@@ -3,12 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Xml;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace Axinom.Cpix
@@ -411,7 +413,7 @@ namespace Axinom.Cpix
 								}
 							}
 						},
-						MacKey = new MacKey
+						MacMethod = new MacMethodElement
 						{
 							Algorithm = Constants.HmacSha512Algorithm,
 							Key = new EncryptedXmlValue
@@ -760,8 +762,17 @@ namespace Axinom.Cpix
 			// We will fill this instance with the loaded data.
 			var cpix = new CpixDocument();
 
+			var settings = new XmlReaderSettings
+			{
+				ValidationType = ValidationType.Schema
+			};
+			settings.Schemas.Add(_schemaSet);
+
 			var document = new XmlDocument();
-			document.Load(stream);
+			document.Load(XmlReader.Create(stream, settings));
+
+			if (document.DocumentElement?.Name != "CPIX" || document.DocumentElement?.NamespaceURI != Constants.CpixNamespace)
+				throw new InvalidCpixDataException("The provided XML file does not appear to be a CPIX document - the name of the root element is incorrect.");
 
 			cpix._loadedXml = document;
 
@@ -876,7 +887,7 @@ namespace Axinom.Cpix
 				deliveryData.LoadTimeValidate();
 
 				var rsa = (RSACryptoServiceProvider)decryptionCertificate.PrivateKey;
-				var macKey = rsa.Decrypt(deliveryData.MacKey.Key.CipherData.CipherValue, true);
+				var macKey = rsa.Decrypt(deliveryData.MacMethod.Key.CipherData.CipherValue, true);
 				var documentKey = rsa.Decrypt(deliveryData.DocumentKey.Data.Secret.EncryptedValue.CipherData.CipherValue, true);
 
 				aes = new AesManaged
@@ -1188,6 +1199,40 @@ namespace Axinom.Cpix
 				throw new ArgumentException($"The RSA key must be at least {Constants.MinimumRsaKeySizeInBits} bits long.");
 		}
 
-		private static RandomNumberGenerator _random = RandomNumberGenerator.Create();
+		static CpixDocument()
+		{
+			// Load the XSD for CPIX and all the referenced schemas.
+			_schemaSet = new XmlSchemaSet();
+
+			var assembly = Assembly.GetExecutingAssembly();
+
+			// At least one of the schemas contains DTDs, so let's say it's okay to process them.
+			var settings = new XmlReaderSettings
+			{
+				DtdProcessing = DtdProcessing.Parse
+			};
+
+			using (var stream = assembly.GetManifestResourceStream("Axinom.Cpix.xenc-schema.xsd"))
+			using (var reader = XmlReader.Create(stream, settings))
+				_schemaSet.Add(null, reader);
+
+			using (var stream = assembly.GetManifestResourceStream("Axinom.Cpix.xmldsig-core-schema.xsd"))
+			using (var reader = XmlReader.Create(stream, settings))
+				_schemaSet.Add(null, reader);
+
+			using (var stream = assembly.GetManifestResourceStream("Axinom.Cpix.pskc.xsd"))
+			using (var reader = XmlReader.Create(stream, settings))
+				_schemaSet.Add(null, reader);
+
+			using (var stream = assembly.GetManifestResourceStream("Axinom.Cpix.cpix.xsd"))
+			using (var reader = XmlReader.Create(stream, settings))
+				_schemaSet.Add(null, reader);
+
+			_schemaSet.Compile();
+		}
+
+		private static readonly XmlSchemaSet _schemaSet;
+
+		private static readonly RandomNumberGenerator _random = RandomNumberGenerator.Create();
 	}
 }

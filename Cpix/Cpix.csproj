@@ -69,6 +69,24 @@
     <Compile Include="TimeFilter.cs" />
     <Compile Include="VideoFilter.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\Resources\Schema\cpix.xsd">
+      <Link>cpix.xsd</Link>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Resources\Schema\pskc.xsd">
+      <Link>pskc.xsd</Link>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Resources\Schema\xenc-schema.xsd">
+      <Link>xenc-schema.xsd</Link>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Resources\Schema\xmldsig-core-schema.xsd">
+      <Link>xmldsig-core-schema.xsd</Link>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

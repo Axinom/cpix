@@ -267,8 +267,8 @@ namespace Axinom.Cpix.DocumentModel
 		[XmlElement]
 		public DocumentKeyElement DocumentKey { get; set; }
 
-		[XmlElement("MACKey")]
-		public MacKey MacKey { get; set; }
+		[XmlElement("MacMethod")]
+		public MacMethodElement MacMethod { get; set; }
 
 		/// <summary>
 		/// Performs basic sanity check to ensure that all required fields are filled.
@@ -280,15 +280,15 @@ namespace Axinom.Cpix.DocumentModel
 			if (DocumentKey == null)
 				throw new NotSupportedException("DeliveryData/DocumentKey element is missing.");
 
-			if (MacKey == null)
-				throw new NotSupportedException("DeliveryData/MACKey element is missing.");
+			if (MacMethod == null)
+				throw new NotSupportedException("DeliveryData/MacMethod element is missing.");
 
 			DocumentKey.LoadTimeValidate();
-			MacKey.LoadTimeValidate();
+			MacMethod.LoadTimeValidate();
 		}
 	}
 
-	public sealed class MacKey
+	public sealed class MacMethodElement
 	{
 		[XmlAttribute]
 		public string Algorithm { get; set; }
@@ -305,13 +305,13 @@ namespace Axinom.Cpix.DocumentModel
 				throw new NotSupportedException("Only the following algorithm is supported for MAC generation: " + Constants.HmacSha512Algorithm);
 
 			if (Key == null)
-				throw new InvalidCpixDataException("DeliveryData/MACKey/Key element is missing.");
+				throw new InvalidCpixDataException("DeliveryData/MacMethod/Key element is missing.");
 
 			if (Key.EncryptionMethod?.Algorithm != Constants.RsaOaepAlgorithm)
 				throw new NotSupportedException("Only the following algorithm is supported for encrypting the MAC key: " + Constants.RsaOaepAlgorithm);
 
 			if (Key.CipherData?.CipherValue == null || Key.CipherData?.CipherValue.Length == 0)
-				throw new InvalidCpixDataException("DeliveryData/MACKey/Key/CipherData/CipherValue element is missing.");
+				throw new InvalidCpixDataException("DeliveryData/MacMethod/Key/CipherData/CipherValue element is missing.");
 		}
 	}
 

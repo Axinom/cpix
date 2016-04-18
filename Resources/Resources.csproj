@@ -51,6 +51,18 @@
     <None Include="Certificates\Recipient1.pfx" />
     <None Include="Certificates\Recipient2.cer" />
     <None Include="Certificates\Recipient2.pfx" />
+    <None Include="Schema\cpix.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Schema\pskc.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Schema\xenc-schema.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Schema\xmldsig-core-schema.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="Certificates\Passwords.txt" />
