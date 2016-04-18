@@ -95,6 +95,9 @@ namespace Axinom.Cpix
 
 			contentKey.Validate();
 
+			if (_contentKeys.Any(key => key.Id == contentKey.Id))
+				throw new ArgumentException("The CPIX document already contains a content key with the same ID.");
+
 			_contentKeys.Add(contentKey);
 		}
 
@@ -789,7 +792,10 @@ namespace Axinom.Cpix
 
 			// 5) Validate.
 			if (cpix.ContentKeys.Count == 0)
-				throw new NotSupportedException("There were no content keys in the CPIX document.");
+				throw new InvalidCpixDataException("There were no content keys in the CPIX document.");
+
+			if (cpix.ContentKeys.Count != cpix.ContentKeys.Select(key => key.Id).Distinct().Count())
+				throw new InvalidCpixDataException("There were duplicate content keys in the CPIX document.");
 
 			return cpix;
 		}
@@ -1149,6 +1155,88 @@ namespace Axinom.Cpix
 			manager.AddNamespace("ds", Constants.XmlDigitalSignatureNamespace);
 
 			return manager;
+		}
+
+		/// <summary>
+		/// Finds a suitable content key to samples that conform to the provided sample description.
+		/// The content key assignment rules are resolved and exactly one match is assumed. No match
+		/// or multiple matches are considered an error condition (ambiguities are not allowed).
+		/// </summary>
+		public IContentKey ResolveContentKey(SampleDescription sampleDescription)
+		{
+			if (sampleDescription == null)
+				throw new ArgumentNullException(nameof(sampleDescription));
+
+			sampleDescription.Validate();
+
+			var results = AssignmentRules
+				.Where(rule => EvaluateAssignmentRule(rule, sampleDescription))
+				.Select(rule => ContentKeys.Single(key => key.Id == rule.KeyId))
+				.ToArray();
+
+			if (results.Length == 0)
+				throw new ContentKeyResolveException("No content keys were assigned to samples matching the provided sample description.");
+
+			if (results.Length > 1)
+				throw new ContentKeyResolveException("Multiple content keys were assigned to samples matching the provided sample description.");
+
+			return results[0];
+		}
+
+		private static bool EvaluateAssignmentRule(IAssignmentRule rule, SampleDescription sampleDescription)
+		{
+			if (rule.TimeFilter != null)
+			{
+				if (rule.TimeFilter.Start != null && !(sampleDescription.Timestamp >= rule.TimeFilter.Start))
+					return false;
+				// Deliberately "<" - there is an exclusive end on the range.
+				if (rule.TimeFilter.End != null && !(sampleDescription.Timestamp < rule.TimeFilter.End))
+					return false;
+			}
+
+			if (rule.CryptoPeriodFilter != null)
+			{
+				if (sampleDescription.CryptoPeriodIndex != rule.CryptoPeriodFilter.PeriodIndex)
+					return false;
+			}
+
+			if (rule.LabelFilter != null)
+			{
+				if (sampleDescription.Labels == null || !sampleDescription.Labels.Any(label => label == rule.LabelFilter.Label))
+					return false;
+			}
+
+			if (rule.VideoFilter != null)
+			{
+				if (sampleDescription.Type != SampleType.Video)
+					return false;
+
+				if (rule.VideoFilter.MinPixels != null && !(sampleDescription.PicturePixelCount >= rule.VideoFilter.MinPixels))
+					return false;
+				if (rule.VideoFilter.MaxPixels != null && !(sampleDescription.PicturePixelCount <= rule.VideoFilter.MaxPixels))
+					return false;
+			}
+
+			if (rule.AudioFilter != null)
+			{
+				if (sampleDescription.Type != SampleType.Audio)
+					return false;
+
+				if (rule.AudioFilter.MinChannels != null && !(sampleDescription.AudioChannelCount >= rule.AudioFilter.MinChannels))
+					return false;
+				if (rule.AudioFilter.MaxChannels != null && !(sampleDescription.AudioChannelCount <= rule.AudioFilter.MaxChannels))
+					return false;
+			}
+
+			if (rule.BitrateFilter != null)
+			{
+				if (rule.BitrateFilter.MinBitrate != null && !(sampleDescription.Bitrate >= rule.BitrateFilter.MinBitrate))
+					return false;
+				if (rule.BitrateFilter.MaxBitrate != null && !(sampleDescription.Bitrate <= rule.BitrateFilter.MaxBitrate))
+					return false;
+			}
+
+			return true;
 		}
 
 		private static void ValidateRecipientCertificate(X509Certificate2 recipient)

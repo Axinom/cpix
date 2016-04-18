@@ -71,5 +71,16 @@ namespace Tests
 
 			Assert.Throws<InvalidCpixDataException>(() => document.Save(new MemoryStream()));
 		}
+
+		[Fact]
+		public void AddContentKey_Twice_Fails()
+		{
+			var contentKey = TestHelpers.GenerateContentKey();
+
+			var document = new CpixDocument();
+			document.AddContentKey(contentKey);
+
+			Assert.Throws<ArgumentException>(() => document.AddContentKey(contentKey));
+		}
 	}
 }

@@ -53,6 +53,7 @@
     <Compile Include="BitrateFilter.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="ContentKey.cs" />
+    <Compile Include="ContentKeyResolveException.cs" />
     <Compile Include="CpixDocument.cs" />
     <Compile Include="InvalidCpixDataException.cs" />
     <Compile Include="CryptoPeriodFilter.cs" />
@@ -66,6 +67,8 @@
     <Compile Include="ITimeFilter.cs" />
     <Compile Include="LabelFilter.cs" />
     <Compile Include="IVideoFilter.cs" />
+    <Compile Include="SampleDescription.cs" />
+    <Compile Include="SampleType.cs" />
     <Compile Include="TimeFilter.cs" />
     <Compile Include="VideoFilter.cs" />
   </ItemGroup>

@@ -26,6 +26,9 @@ namespace Axinom.Cpix
 		{
 			if (Start >= End)
 				throw new InvalidCpixDataException("The time filter start time must be earlier than the end time if both are specified.");
+
+			if (Start == null && End == null)
+				throw new InvalidCpixDataException("The time filter must specify at least one of: start time, end time.");
 		}
 	}
 }

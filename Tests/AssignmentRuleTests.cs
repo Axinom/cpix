@@ -129,6 +129,11 @@ namespace Tests
 					End = new DateTimeOffset(2000, 1, 1, 1, 1, 1, TimeSpan.Zero),
 				}
 			}));
+			Assert.Throws<InvalidCpixDataException>(() => document.AddAssignmentRule(new AssignmentRule
+			{
+				KeyId = contentKey.Id,
+				TimeFilter = new TimeFilter()
+			}));
 		}
 
 		[Fact]
