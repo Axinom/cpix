@@ -27,25 +27,32 @@ namespace Producer
 			// Tuples of filename and CpixDocument structure to generate.
 			var samples = new List<Tuple<string, CpixDocument>>();
 
+			#region Example: ClearKeys.xml
 			var document = new CpixDocument();
 			document.AddContentKey(GenerateNewKey());
 			document.AddContentKey(GenerateNewKey());
 			samples.Add(new Tuple<string, CpixDocument>("ClearKeys.xml", document));
+			#endregion
 
+			#region Example: Signed.xml
 			document = new CpixDocument();
 			document.AddContentKey(GenerateNewKey());
 			document.AddContentKey(GenerateNewKey());
 			document.AddContentKeySignature(signerCertificate1);
 			document.SetDocumentSignature(signerCertificate1);
 			samples.Add(new Tuple<string, CpixDocument>("Signed.xml", document));
+			#endregion
 
+			#region Example: Encrypted.xml
 			document = new CpixDocument();
 			document.AddContentKey(GenerateNewKey());
 			document.AddContentKey(GenerateNewKey());
 			document.AddRecipient(recipientCertificate1);
 			document.AddRecipient(recipientCertificate2);
 			samples.Add(new Tuple<string, CpixDocument>("Encrypted.xml", document));
+			#endregion
 
+			#region Example: EncryptedAndSigned.xml
 			document = new CpixDocument();
 			document.AddContentKey(GenerateNewKey());
 			document.AddContentKey(GenerateNewKey());
@@ -54,42 +61,100 @@ namespace Producer
 			document.AddContentKeySignature(signerCertificate1);
 			document.SetDocumentSignature(signerCertificate1);
 			samples.Add(new Tuple<string, CpixDocument>("EncryptedAndSigned.xml", document));
+			#endregion
 
+			#region WithRulesAndEncryptedAndSigned.xml
 			document = new CpixDocument();
-			document.AddContentKey(GenerateNewKey());
-			document.AddContentKey(GenerateNewKey());
-			document.AddContentKey(GenerateNewKey());
+
+			var lowValueKeyPeriod1 = GenerateNewKey();
+			var highValueKeyPeriod1 = GenerateNewKey();
+			var lowValueKeyPeriod2 = GenerateNewKey();
+			var highValueKeyPeriod2 = GenerateNewKey();
+			var audioKey = GenerateNewKey();
+
+			var periodDuration = TimeSpan.FromHours(1);
+			var period1Start = new DateTimeOffset(2016, 6, 6, 6, 10, 0, TimeSpan.Zero);
+			var period2Start = period1Start + periodDuration;
+
+			document.AddContentKey(lowValueKeyPeriod1);
+			document.AddContentKey(highValueKeyPeriod1);
+			document.AddContentKey(lowValueKeyPeriod2);
+			document.AddContentKey(highValueKeyPeriod2);
+			document.AddContentKey(audioKey);
+
 			document.AddAssignmentRule(new AssignmentRule
 			{
-				KeyId = document.ContentKeys.First().Id,
-				AudioFilter = new AudioFilter
+				KeyId = lowValueKeyPeriod1.Id,
+
+				TimeFilter = new TimeFilter
 				{
-					MinChannels = 1,
-					MaxChannels = 2
-				}
-			});
-			document.AddAssignmentRule(new AssignmentRule
-			{
-				KeyId = document.ContentKeys.Skip(1).First().Id,
+					Start = period1Start,
+					End = period1Start + periodDuration
+				},
 				VideoFilter = new VideoFilter
 				{
-					MaxPixels = 1920 * 1080 - 1
+					MaxPixels = 1280 * 720 - 1
 				}
 			});
+
 			document.AddAssignmentRule(new AssignmentRule
 			{
-				KeyId = document.ContentKeys.Last().Id,
+				KeyId = lowValueKeyPeriod2.Id,
+
+				TimeFilter = new TimeFilter
+				{
+					Start = period1Start + periodDuration,
+					End = period1Start + periodDuration + periodDuration
+				},
 				VideoFilter = new VideoFilter
 				{
-					MinPixels = 1920 * 1080
+					MaxPixels = 1280 * 720 - 1
 				}
 			});
+
+			document.AddAssignmentRule(new AssignmentRule
+			{
+				KeyId = highValueKeyPeriod1.Id,
+
+				TimeFilter = new TimeFilter
+				{
+					Start = period1Start,
+					End = period1Start + periodDuration
+				},
+				VideoFilter = new VideoFilter
+				{
+					MinPixels = 1280 * 720
+				}
+			});
+
+			document.AddAssignmentRule(new AssignmentRule
+			{
+				KeyId = highValueKeyPeriod2.Id,
+
+				TimeFilter = new TimeFilter
+				{
+					Start = period1Start + periodDuration,
+					End = period1Start + periodDuration + periodDuration
+				},
+				VideoFilter = new VideoFilter
+				{
+					MinPixels = 1280 * 720
+				}
+			});
+
+			document.AddAssignmentRule(new AssignmentRule
+			{
+				KeyId = audioKey.Id,
+				AudioFilter = new AudioFilter()
+			});
+
 			document.AddRecipient(recipientCertificate1);
 			document.AddRecipient(recipientCertificate2);
 			document.AddContentKeySignature(signerCertificate1);
 			document.AddAssignmentRuleSignature(signerCertificate2);
-			document.SetDocumentSignature(signerCertificate1);
-			samples.Add(new Tuple<string, CpixDocument>("WithRulesAndEncryptedAndSigned.xml", document));
+			document.SetDocumentSignature(signerCertificate2);
+			samples.Add(new Tuple<string, CpixDocument>("WithRulesAndEncryptedAndSigned.xml", document)); 
+			#endregion
 
 			Console.WriteLine("Saving CPIX documents.");
 
