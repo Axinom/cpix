@@ -290,8 +290,9 @@ namespace Axinom.Cpix
 			if (_contentKeys.Count == 0)
 				throw new InvalidOperationException("Cannot save a CPIX document without any content keys.");
 
+			// If we loaded a file, we do not require a key to be present here as we might not be a recipient.
 			foreach (var contentKey in _contentKeys)
-				contentKey.Validate();
+				contentKey.Validate(allowNullValue: _loadedXml != null);
 
 			foreach (var rule in _addedRules)
 				rule.Validate(_contentKeys);
