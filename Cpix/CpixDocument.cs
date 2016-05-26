@@ -1,4 +1,5 @@
-﻿using Axinom.Cpix.DocumentModel;
+﻿using Axinom.Cpix.Compatibility;
+using Axinom.Cpix.DocumentModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -615,7 +616,7 @@ namespace Axinom.Cpix
 							Uri = uri,
 
 							// A nice strong algorithm without known weaknesses that are easily exploitable.
-							DigestMethod = SignedXml.XmlDsigSHA512Url
+							DigestMethod = Constants.Sha512Algorithm
 						};
 
 						// Just some arbitrary transform. It... works.
@@ -625,7 +626,7 @@ namespace Axinom.Cpix
 					}
 
 					// A nice strong algorithm without known weaknesses that are easily exploitable.
-					signedXml.SignedInfo.SignatureMethod = SignedXml.XmlDsigRSASHA512Url;
+					signedXml.SignedInfo.SignatureMethod = RSAPKCS1SHA512SignatureDescription.Name;
 
 					// Canonical XML 1.0 (omit comments); I suppose it works fine, no deep thoughts about this.
 					signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigCanonicalizationUrl;
@@ -670,7 +671,7 @@ namespace Axinom.Cpix
 							Uri = uri,
 
 							// A nice strong algorithm without known weaknesses that are easily exploitable.
-							DigestMethod = SignedXml.XmlDsigSHA512Url
+							DigestMethod = Constants.Sha512Algorithm
 						};
 
 						// Just some arbitrary transform. It... works.
@@ -680,7 +681,7 @@ namespace Axinom.Cpix
 					}
 
 					// A nice strong algorithm without known weaknesses that are easily exploitable.
-					signedXml.SignedInfo.SignatureMethod = SignedXml.XmlDsigRSASHA512Url;
+					signedXml.SignedInfo.SignatureMethod = RSAPKCS1SHA512SignatureDescription.Name;
 
 					// Canonical XML 1.0 (omit comments); I suppose it works fine, no deep thoughts about this.
 					signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigCanonicalizationUrl;
@@ -722,7 +723,7 @@ namespace Axinom.Cpix
 					Uri = "",
 
 					// A nice strong algorithm without known weaknesses that are easily exploitable.
-					DigestMethod = SignedXml.XmlDsigSHA512Url
+					DigestMethod = Constants.Sha512Algorithm
 				};
 
 				// This signature (and other signatures) are inside the signed data, so exclude them.
@@ -731,7 +732,7 @@ namespace Axinom.Cpix
 				signedXml.AddReference(whatToSign);
 
 				// A nice strong algorithm without known weaknesses that are easily exploitable.
-				signedXml.SignedInfo.SignatureMethod = SignedXml.XmlDsigRSASHA512Url;
+				signedXml.SignedInfo.SignatureMethod = RSAPKCS1SHA512SignatureDescription.Name;
 
 				// Canonical XML 1.0 (omit comments); I suppose it works fine, no deep thoughts about this.
 				signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigCanonicalizationUrl;
@@ -1290,6 +1291,10 @@ namespace Axinom.Cpix
 
 		static CpixDocument()
 		{
+			// For compatibility with .NET Framework < 4.6.2.
+			// Remove once 4.6.2 is published and can be safely targeted.
+			RSAPKCS1SHA512SignatureDescription.Register();
+
 			// Load the XSD for CPIX and all the referenced schemas.
 			_schemaSet = new XmlSchemaSet();
 
