@@ -51,9 +51,9 @@ namespace Axinom.Cpix
 
 		/// <summary>
 		/// Certificates of the identities whose signature is present on all the content key assignment rules.
-		/// To add more signatures use <see cref="AddAssignmentRuleSignature(X509Certificate2)"/>.
+		/// To add more signatures use <see cref="AddUsageRuleSignature(X509Certificate2)"/>.
 		/// </summary>
-		public IReadOnlyCollection<X509Certificate2> AssignmentRulesSignedBy => _loadedRuleSignatures.Select(tuple => tuple.Item2).Concat(_addedRuleSigners).ToArray();
+		public IReadOnlyCollection<X509Certificate2> UsageRulesSignedBy => _loadedRuleSignatures.Select(tuple => tuple.Item2).Concat(_addedRuleSigners).ToArray();
 
 		/// <summary>
 		/// Certificate of the identity whose signature is present on the entire document.
@@ -69,9 +69,9 @@ namespace Axinom.Cpix
 
 		/// <summary>
 		/// The set of content key assignment rules present in the CPIX document.
-		/// To add more content key assignment rules, use <see cref="AddAssignmentRule(AssignmentRule)"/>.
+		/// To add more content key assignment rules, use <see cref="AddUsageRule(UsageRule)"/>.
 		/// </summary>
-		public IReadOnlyCollection<IAssignmentRule> AssignmentRules => _loadedRules.Concat(_addedRules).ToArray();
+		public IReadOnlyCollection<IUsageRule> UsageRules => _loadedRules.Concat(_addedRules).ToArray();
 
 		/// <summary>
 		/// Whether the values of content keys are available.
@@ -129,7 +129,7 @@ namespace Axinom.Cpix
 		/// <exception cref="InvalidOperationException">
 		/// Thrown if there are signatures that include content key assignment rules in their scope.
 		/// </exception>
-		public void AddAssignmentRule(AssignmentRule rule)
+		public void AddUsageRule(UsageRule rule)
 		{
 			if (rule == null)
 				throw new ArgumentNullException(nameof(rule));
@@ -176,7 +176,7 @@ namespace Axinom.Cpix
 		/// </summary>
 		/// <exception cref="InvalidOperationException">Thrown if there are no content key assignment rules.</exception>
 		/// <exception cref="InvalidOperationException">Thrown if there is an untouched document signature.</exception>
-		public void AddAssignmentRuleSignature(X509Certificate2 signingCertificate)
+		public void AddUsageRuleSignature(X509Certificate2 signingCertificate)
 		{
 			if (signingCertificate == null)
 				throw new ArgumentNullException(nameof(signingCertificate));
@@ -184,7 +184,7 @@ namespace Axinom.Cpix
 			if (_loadedDocumentSigner != null)
 				throw new InvalidOperationException("You must remove (and optionally re-apply) any document-scope signatures before adding new content key assignment rule signatures.");
 
-			if (AssignmentRules.Count == 0)
+			if (UsageRules.Count == 0)
 				throw new InvalidOperationException("You cannot add a signature over content key assignment rules if no assignment rules exist in the CPIX document.");
 
 			ValidateSigningCertificate(signingCertificate);
@@ -196,7 +196,7 @@ namespace Axinom.Cpix
 		/// Removes all signatures that are scoped to key assignment rules.
 		/// </summary>
 		/// <exception cref="InvalidOperationException">Thrown if there is an untouched document signature.</exception>
-		public void RemoveAssignmentRuleSignatures()
+		public void RemoveUsageRuleSignatures()
 		{
 			if (_loadedDocumentSigner != null)
 				throw new InvalidOperationException("You must remove (and optionally re-apply) any document-scope signatures before removing content key assignment rule signatures.");
@@ -265,11 +265,11 @@ namespace Axinom.Cpix
 
 		// For a loaded document, informative only (rules are preserved as-is in XML on save).
 		// For a new document, empty.
-		private List<IAssignmentRule> _loadedRules = new List<IAssignmentRule>();
+		private List<IUsageRule> _loadedRules = new List<IUsageRule>();
 
 		// For a loaded document, empty.
 		// For a new document, used to generate rules in XML.
-		private List<AssignmentRule> _addedRules = new List<AssignmentRule>();
+		private List<UsageRule> _addedRules = new List<UsageRule>();
 
 		// For a loaded document, lists existing siantures on rule scope.
 		// If re-signing is requested, elements will be removed from XML document and list cleared.
@@ -322,9 +322,9 @@ namespace Axinom.Cpix
 				SignContentKeys(document);
 			}
 
-			SerializeAddedAssignmentRules(document);
+			SerializeAddedUsageRules(document);
 
-			SignAssignmentRules(document);
+			SignUsageRules(document);
 			SignDocument(document);
 
 			using (var writer = XmlWriter.Create(stream, new XmlWriterSettings
@@ -499,12 +499,12 @@ namespace Axinom.Cpix
 			return XmlObjectToXmlDocument(root);
 		}
 
-		private void SerializeAddedAssignmentRules(XmlDocument document)
+		private void SerializeAddedUsageRules(XmlDocument document)
 		{
 			var namespaces = CreateNamespaceManager(document);
 
 			// If there are existing rules, add to the end. Otherwise, add after content keys.
-			var insertAfter = document.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyAssignmentRule[last()]", namespaces);
+			var insertAfter = document.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyUsageRule[last()]", namespaces);
 
 			if (insertAfter == null)
 				insertAfter = document.SelectSingleNode("/cpix:CPIX/cpix:ContentKey[last()]", namespaces);
@@ -512,7 +512,7 @@ namespace Axinom.Cpix
 			foreach (var rule in _addedRules)
 			{
 				// We do not give them XML IDs, as that is handled later during signing.
-				var ruleObject = new AssignmentRuleElement
+				var ruleObject = new UsageRuleElement
 				{
 					KeyId = rule.KeyId
 				};
@@ -535,28 +535,11 @@ namespace Axinom.Cpix
 					};
 				}
 
-				if (rule.CryptoPeriodFilter != null)
-				{
-					ruleObject.CryptoPeriodFilter = new CryptoPeriodFilterElement
-					{
-						PeriodIndex = rule.CryptoPeriodFilter.PeriodIndex
-					};
-				}
-
 				if (rule.LabelFilter != null)
 				{
 					ruleObject.LabelFilter = new LabelFilterElement
 					{
 						Label = rule.LabelFilter.Label
-					};
-				}
-
-				if (rule.TimeFilter != null)
-				{
-					ruleObject.TimeFilter = new TimeFilterElement
-					{
-						Start = rule.TimeFilter.Start,
-						End = rule.TimeFilter.End
 					};
 				}
 
@@ -577,7 +560,7 @@ namespace Axinom.Cpix
 			}
 		}
 
-		private void SignAssignmentRules(XmlDocument document)
+		private void SignUsageRules(XmlDocument document)
 		{
 			if (_addedRuleSigners.Count == 0)
 				return;
@@ -588,10 +571,10 @@ namespace Axinom.Cpix
 			// This way we can be assured of easy and straightforward identification for purposes of signature references.
 			int ruleNumber = 1;
 
-			foreach (XmlElement ruleElement in document.SelectNodes("/cpix:CPIX/cpix:ContentKeyAssignmentRule", namespaces))
-				ruleElement.SetAttribute("id", $"AssignmentRule{ruleNumber++}");
+			foreach (XmlElement ruleElement in document.SelectNodes("/cpix:CPIX/cpix:ContentKeyUsageRule", namespaces))
+				ruleElement.SetAttribute("id", $"UsageRule{ruleNumber++}");
 
-			var ruleIdUris = TryDetermineAssignmentRuleUniqueIdUris(document);
+			var ruleIdUris = TryDetermineUsageRuleUniqueIdUris(document);
 
 			foreach (var signer in _addedRuleSigners)
 			{
@@ -790,7 +773,7 @@ namespace Axinom.Cpix
 			LoadContentKeys(document, cpix, decryptionCertificates ?? new X509Certificate2[0]);
 
 			// 4) Load key assignment rules.
-			LoadAssignmentRules(document, cpix);
+			LoadUsageRules(document, cpix);
 
 			// 5) Validate.
 			if (cpix.ContentKeys.Count == 0)
@@ -807,7 +790,7 @@ namespace Axinom.Cpix
 			var namespaces = CreateNamespaceManager(document);
 
 			var contentKeyIdUris = TryDetermineContentKeyUniqueIdUris(document);
-			var ruleIdUris = TryDetermineAssignmentRuleUniqueIdUris(document);
+			var ruleIdUris = TryDetermineUsageRuleUniqueIdUris(document);
 
 			foreach (XmlElement signature in document.SelectNodes("/cpix:CPIX/ds:Signature", namespaces))
 			{
@@ -970,15 +953,15 @@ namespace Axinom.Cpix
 			}
 		}
 
-		private static void LoadAssignmentRules(XmlDocument document, CpixDocument cpix)
+		private static void LoadUsageRules(XmlDocument document, CpixDocument cpix)
 		{
 			var namespaces = CreateNamespaceManager(document);
 
-			foreach (XmlElement ruleNode in document.SelectNodes("/cpix:CPIX/cpix:ContentKeyAssignmentRule", namespaces))
+			foreach (XmlElement ruleNode in document.SelectNodes("/cpix:CPIX/cpix:ContentKeyUsageRule", namespaces))
 			{
-				var element = XmlElementToXmlDeserialized<AssignmentRuleElement>(ruleNode);
+				var element = XmlElementToXmlDeserialized<UsageRuleElement>(ruleNode);
 
-				var rule = new AssignmentRule
+				var rule = new UsageRule
 				{
 					KeyId = element.KeyId
 				};
@@ -1000,29 +983,12 @@ namespace Axinom.Cpix
 						MaxBitrate = element.BitrateFilter.MaxBitrate
 					};
 				}
-
-				if (element.CryptoPeriodFilter != null)
-				{
-					rule.CryptoPeriodFilter = new CryptoPeriodFilter
-					{
-						PeriodIndex = element.CryptoPeriodFilter.PeriodIndex
-					};
-				}
-
+				
 				if (element.LabelFilter != null)
 				{
 					rule.LabelFilter = new LabelFilter
 					{
 						Label = element.LabelFilter.Label
-					};
-				}
-
-				if (element.TimeFilter != null)
-				{
-					rule.TimeFilter = new TimeFilter
-					{
-						Start = element.TimeFilter.Start,
-						End = element.TimeFilter.End
 					};
 				}
 
@@ -1083,13 +1049,13 @@ namespace Axinom.Cpix
 		/// Returns the refrence URIs (in the XML Digital Signature sense) of all content key assignment rule elements
 		/// OR null if the assignment rule elements in the CPIX document cannot be uniquely identified for signing purposes.
 		/// </summary>
-		private static string[] TryDetermineAssignmentRuleUniqueIdUris(XmlDocument document)
+		private static string[] TryDetermineUsageRuleUniqueIdUris(XmlDocument document)
 		{
 			var namespaces = CreateNamespaceManager(document);
 
 			var result = new List<string>();
 
-			foreach (XmlElement rule in document.SelectNodes("/cpix:CPIX/cpix:ContentKeyAssignmentRule", namespaces))
+			foreach (XmlElement rule in document.SelectNodes("/cpix:CPIX/cpix:ContentKeyUsageRule", namespaces))
 			{
 				var id = rule.GetAttribute("id");
 
@@ -1171,8 +1137,8 @@ namespace Axinom.Cpix
 
 			sampleDescription.Validate();
 
-			var results = AssignmentRules
-				.Where(rule => EvaluateAssignmentRule(rule, sampleDescription))
+			var results = UsageRules
+				.Where(rule => EvaluateUsageRule(rule, sampleDescription))
 				.Select(rule => ContentKeys.Single(key => key.Id == rule.KeyId))
 				.ToArray();
 
@@ -1185,23 +1151,8 @@ namespace Axinom.Cpix
 			return results[0];
 		}
 
-		private static bool EvaluateAssignmentRule(IAssignmentRule rule, SampleDescription sampleDescription)
+		private static bool EvaluateUsageRule(IUsageRule rule, SampleDescription sampleDescription)
 		{
-			if (rule.TimeFilter != null)
-			{
-				if (rule.TimeFilter.Start != null && !(sampleDescription.Timestamp >= rule.TimeFilter.Start))
-					return false;
-				// Deliberately "<" - there is an exclusive end on the range.
-				if (rule.TimeFilter.End != null && !(sampleDescription.Timestamp < rule.TimeFilter.End))
-					return false;
-			}
-
-			if (rule.CryptoPeriodFilter != null)
-			{
-				if (sampleDescription.CryptoPeriodIndex != rule.CryptoPeriodFilter.PeriodIndex)
-					return false;
-			}
-
 			if (rule.LabelFilter != null)
 			{
 				if (sampleDescription.Labels == null || !sampleDescription.Labels.Any(label => label == rule.LabelFilter.Label))

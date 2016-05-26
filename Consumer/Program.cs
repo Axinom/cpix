@@ -33,12 +33,12 @@ namespace Consumer
 					//throw new SecurityException("The content keys in this CPIX document are not signed by a trusted entity!");
 				}
 
-				if (cpix.AssignmentRules.Count != 0 && !cpix.AssignmentRulesSignedBy.Any(c => c.Thumbprint == trustedRulesSignerCertificate.Thumbprint))
+				if (cpix.UsageRules.Count != 0 && !cpix.UsageRulesSignedBy.Any(c => c.Thumbprint == trustedRulesSignerCertificate.Thumbprint))
 				{
 					throw new SecurityException("The content key assignment rules in this CPIX document are not signed by a trusted entity!");
 				}
 
-				Console.WriteLine("Loaded CPIX with {0} content keys and {1} assignment rules.", cpix.ContentKeys.Count, cpix.AssignmentRules.Count);
+				Console.WriteLine("Loaded CPIX with {0} content keys and {1} assignment rules.", cpix.ContentKeys.Count, cpix.UsageRules.Count);
 
 				foreach (var key in cpix.ContentKeys)
 				{
@@ -50,7 +50,7 @@ namespace Consumer
 						Console.WriteLine(": " + Convert.ToBase64String(key.Value));
 				}
 
-				foreach (var rule in cpix.AssignmentRules)
+				foreach (var rule in cpix.UsageRules)
 					Console.WriteLine("A rule for " + rule.KeyId);
 			}
 		}

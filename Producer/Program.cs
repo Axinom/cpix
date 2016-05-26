@@ -68,8 +68,6 @@ namespace Producer
 
 			var lowValueKeyPeriod1 = GenerateNewKey();
 			var highValueKeyPeriod1 = GenerateNewKey();
-			var lowValueKeyPeriod2 = GenerateNewKey();
-			var highValueKeyPeriod2 = GenerateNewKey();
 			var audioKey = GenerateNewKey();
 
 			var periodDuration = TimeSpan.FromHours(1);
@@ -78,71 +76,29 @@ namespace Producer
 
 			document.AddContentKey(lowValueKeyPeriod1);
 			document.AddContentKey(highValueKeyPeriod1);
-			document.AddContentKey(lowValueKeyPeriod2);
-			document.AddContentKey(highValueKeyPeriod2);
 			document.AddContentKey(audioKey);
 
-			document.AddAssignmentRule(new AssignmentRule
+			document.AddUsageRule(new UsageRule
 			{
 				KeyId = lowValueKeyPeriod1.Id,
 
-				TimeFilter = new TimeFilter
-				{
-					Start = period1Start,
-					End = period1Start + periodDuration
-				},
 				VideoFilter = new VideoFilter
 				{
 					MaxPixels = 1280 * 720 - 1
 				}
 			});
 
-			document.AddAssignmentRule(new AssignmentRule
-			{
-				KeyId = lowValueKeyPeriod2.Id,
-
-				TimeFilter = new TimeFilter
-				{
-					Start = period2Start,
-					End = period2Start + periodDuration
-				},
-				VideoFilter = new VideoFilter
-				{
-					MaxPixels = 1280 * 720 - 1
-				}
-			});
-
-			document.AddAssignmentRule(new AssignmentRule
+			document.AddUsageRule(new UsageRule
 			{
 				KeyId = highValueKeyPeriod1.Id,
 
-				TimeFilter = new TimeFilter
-				{
-					Start = period1Start,
-					End = period1Start + periodDuration
-				},
 				VideoFilter = new VideoFilter
 				{
 					MinPixels = 1280 * 720
 				}
 			});
-
-			document.AddAssignmentRule(new AssignmentRule
-			{
-				KeyId = highValueKeyPeriod2.Id,
-
-				TimeFilter = new TimeFilter
-				{
-					Start = period2Start,
-					End = period2Start + periodDuration
-				},
-				VideoFilter = new VideoFilter
-				{
-					MinPixels = 1280 * 720
-				}
-			});
-
-			document.AddAssignmentRule(new AssignmentRule
+			
+			document.AddUsageRule(new UsageRule
 			{
 				KeyId = audioKey.Id,
 				AudioFilter = new AudioFilter()
@@ -151,7 +107,7 @@ namespace Producer
 			document.AddRecipient(recipientCertificate1);
 			document.AddRecipient(recipientCertificate2);
 			document.AddContentKeySignature(signerCertificate1);
-			document.AddAssignmentRuleSignature(signerCertificate2);
+			document.AddUsageRuleSignature(signerCertificate2);
 			document.SetDocumentSignature(signerCertificate2);
 			samples.Add(new Tuple<string, CpixDocument>("WithRulesAndEncryptedAndSigned.xml", document)); 
 			#endregion

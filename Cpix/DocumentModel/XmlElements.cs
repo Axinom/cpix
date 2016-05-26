@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Xml.Serialization;
 
 namespace Axinom.Cpix.DocumentModel
@@ -18,18 +17,12 @@ namespace Axinom.Cpix.DocumentModel
 		public List<ContentKeyElement> ContentKeys { get; set; } = new List<ContentKeyElement>();
 	}
 
-	[XmlRoot("ContentKeyAssignmentRule", Namespace = Constants.CpixNamespace)]
-	public sealed class AssignmentRuleElement
+	[XmlRoot("ContentKeyUsageRule", Namespace = Constants.CpixNamespace)]
+	public sealed class UsageRuleElement
 	{
 		[XmlAttribute("keyId")]
 		public Guid KeyId { get; set; }
-
-		[XmlElement]
-		public TimeFilterElement TimeFilter { get; set; }
-
-		[XmlElement]
-		public CryptoPeriodFilterElement CryptoPeriodFilter { get; set; }
-
+		
 		[XmlElement]
 		public LabelFilterElement LabelFilter { get; set; }
 
@@ -42,36 +35,7 @@ namespace Axinom.Cpix.DocumentModel
 		[XmlElement]
 		public BitrateFilterElement BitrateFilter { get; set; }
 	}
-
-	public sealed class TimeFilterElement
-	{
-		[XmlIgnore]
-		public DateTimeOffset? Start { get; set; }
-
-		[XmlIgnore]
-		public DateTimeOffset? End { get; set; }
-
-		[XmlAttribute("start")]
-		public string StartAsXmlString
-		{
-			get { return Start?.ToString("o"); }
-			set { Start = value == null ? null : (DateTimeOffset?)DateTimeOffset.ParseExact(value, "o", CultureInfo.InvariantCulture); }
-		}
-
-		[XmlAttribute("end")]
-		public string EndAsXmlString
-		{
-			get { return End?.ToString("o"); }
-			set { End = value == null ? null : (DateTimeOffset?)DateTimeOffset.ParseExact(value, "o", CultureInfo.InvariantCulture); }
-		}
-	}
-
-	public sealed class CryptoPeriodFilterElement
-	{
-		[XmlAttribute("periodIndex")]
-		public long PeriodIndex { get; set; }
-	}
-
+	
 	public sealed class LabelFilterElement
 	{
 		[XmlAttribute("label")]

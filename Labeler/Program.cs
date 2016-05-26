@@ -18,7 +18,7 @@ namespace Labeler
 			using (var file = File.OpenRead("Cpix.xml"))
 				document = CpixDocument.Load(file);
 
-			if (document.AssignmentRules.Count != 0)
+			if (document.UsageRules.Count != 0)
 				throw new Exception("This CPIX document already has assignment rules. Will not touch it for fear of conflicts.");
 
 			// We will sign document as a whole ourselves, overwriting any existing signature.
@@ -26,7 +26,7 @@ namespace Labeler
 			document.SetDocumentSignature(myCertificate);
 
 			// Remove any signatures that cover the rules, as we are about to modify things.
-			document.RemoveAssignmentRuleSignatures();
+			document.RemoveUsageRuleSignatures();
 
 			var labels = new[]
 			{
@@ -43,7 +43,7 @@ namespace Labeler
 
 			foreach (var label in labels)
 			{
-				document.AddAssignmentRule(new AssignmentRule
+				document.AddUsageRule(new UsageRule
 				{
 					// Just pick a random content key for each label, for sample purposes.
 					KeyId = document.ContentKeys.Skip(random.Next(document.ContentKeys.Count)).First().Id,
@@ -55,7 +55,7 @@ namespace Labeler
 			}
 
 			// We will then sign the created rules ourselves.
-			document.AddAssignmentRuleSignature(myCertificate);
+			document.AddUsageRuleSignature(myCertificate);
 
 			using (var file = File.Create("out.xml"))
 				document.Save(file);

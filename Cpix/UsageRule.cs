@@ -10,24 +10,12 @@ namespace Axinom.Cpix
 	/// <remarks>
 	/// When the rule is used to map a sample to a content key filters are combined using "AND" logic.
 	/// </remarks>
-	public sealed class AssignmentRule : IAssignmentRule
+	public sealed class UsageRule : IUsageRule
 	{
 		/// <summary>
 		/// The content key referenced by this assignment rule.
 		/// </summary>
 		public Guid KeyId { get; set; }
-
-		/// <summary>
-		/// Time filter to apply when mapping samples.
-		/// If null, all samples are a match for this filter.
-		/// </summary>
-		public TimeFilter TimeFilter { get; set; }
-
-		/// <summary>
-		/// Crypto period filter to apply when mapping samples.
-		/// If null, all samples are a match for this filter.
-		/// </summary>
-		public CryptoPeriodFilter CryptoPeriodFilter { get; set; }
 
 		/// <summary>
 		/// Label filter to apply when mapping samples.
@@ -55,12 +43,10 @@ namespace Axinom.Cpix
 		/// </summary>
 		public BitrateFilter BitrateFilter { get; set; }
 
-		ITimeFilter IAssignmentRule.TimeFilter => TimeFilter;
-		ICryptoPeriodFilter IAssignmentRule.CryptoPeriodFilter => CryptoPeriodFilter;
-		ILabelFilter IAssignmentRule.LabelFilter => LabelFilter;
-		IVideoFilter IAssignmentRule.VideoFilter => VideoFilter;
-		IAudioFilter IAssignmentRule.AudioFilter => AudioFilter;
-		IBitrateFilter IAssignmentRule.BitrateFilter => BitrateFilter;
+		ILabelFilter IUsageRule.LabelFilter => LabelFilter;
+		IVideoFilter IUsageRule.VideoFilter => VideoFilter;
+		IAudioFilter IUsageRule.AudioFilter => AudioFilter;
+		IBitrateFilter IUsageRule.BitrateFilter => BitrateFilter;
 
 		/// <summary>
 		/// Validates the data in the object before it is accepted for use by this library.
@@ -73,8 +59,6 @@ namespace Axinom.Cpix
 			if (VideoFilter != null && AudioFilter != null)
 				throw new InvalidCpixDataException("Content key assignment rule contains both a video filter and an audio filter - this is an invalid combination.");
 
-			TimeFilter?.Validate();
-			CryptoPeriodFilter?.Validate();
 			LabelFilter?.Validate();
 			VideoFilter?.Validate();
 			AudioFilter?.Validate();

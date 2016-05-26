@@ -90,7 +90,7 @@ namespace Tests
 			document.SetDocumentSignature(TestHelpers.PrivateAuthor1);
 
 			// We modify some data to verify that the above actually "did" something.
-			document.AddAssignmentRule(new AssignmentRule
+			document.AddUsageRule(new UsageRule
 			{
 				KeyId = document.ContentKeys.Single().Id
 			});
@@ -140,17 +140,17 @@ namespace Tests
 		{
 			var document = new CpixDocument();
 			document.AddContentKey(TestHelpers.GenerateContentKey());
-			TestHelpers.AddAssignmentRule(document);
+			TestHelpers.AddUsageRule(document);
 			document.SetDocumentSignature(TestHelpers.PrivateAuthor1);
 			document.AddContentKeySignature(TestHelpers.PrivateAuthor1);
-			document.AddAssignmentRuleSignature(TestHelpers.PrivateAuthor1);
+			document.AddUsageRuleSignature(TestHelpers.PrivateAuthor1);
 
 			document = TestHelpers.Reload(document);
 
 			Assert.Equal(1, document.ContentKeysSignedBy.Count);
 			Assert.NotNull(document.DocumentSignedBy);
 
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.AssignmentRulesSignedBy.Single().Thumbprint);
+			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.UsageRulesSignedBy.Single().Thumbprint);
 			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.ContentKeysSignedBy.Single().Thumbprint);
 			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.DocumentSignedBy.Thumbprint);
 		}
@@ -160,88 +160,88 @@ namespace Tests
 		{
 			var document = new CpixDocument();
 			document.AddContentKey(TestHelpers.GenerateContentKey());
-			TestHelpers.AddAssignmentRule(document);
+			TestHelpers.AddUsageRule(document);
 
 			Assert.ThrowsAny<ArgumentException>(() => document.AddContentKeySignature(TestHelpers.PublicAuthor1));
 			Assert.ThrowsAny<ArgumentException>(() => document.SetDocumentSignature(TestHelpers.PublicAuthor1));
-			Assert.ThrowsAny<ArgumentException>(() => document.AddAssignmentRuleSignature(TestHelpers.PublicAuthor1));
+			Assert.ThrowsAny<ArgumentException>(() => document.AddUsageRuleSignature(TestHelpers.PublicAuthor1));
 		}
 
 		[Fact]
-		public void AddAssignmentRuleSignature_WithNoAssignmentRules_Fails()
+		public void AddUsageRuleSignature_WithNoUsageRules_Fails()
 		{
 			var document = new CpixDocument();
-			Assert.Throws<InvalidOperationException>(() => document.AddAssignmentRuleSignature(TestHelpers.PrivateAuthor1));
+			Assert.Throws<InvalidOperationException>(() => document.AddUsageRuleSignature(TestHelpers.PrivateAuthor1));
 		}
 
 		[Fact]
-		public void AddAssignmentRuleSignature_WithSignedDocument_Fails()
+		public void AddUsageRuleSignature_WithSignedDocument_Fails()
 		{
 			var document = new CpixDocument();
 			document.AddContentKey(TestHelpers.GenerateContentKey());
-			TestHelpers.AddAssignmentRule(document);
+			TestHelpers.AddUsageRule(document);
 			document.SetDocumentSignature(TestHelpers.PrivateAuthor1);
 
 			document = TestHelpers.Reload(document);
 
-			Assert.Throws<InvalidOperationException>(() => TestHelpers.AddAssignmentRule(document));
+			Assert.Throws<InvalidOperationException>(() => TestHelpers.AddUsageRule(document));
 		}
 
 		[Fact]
-		public void AddAssignmentRuleSignature_WithExistingAssignmentRuleSignatures_Succeeds()
+		public void AddUsageRuleSignature_WithExistingUsageRuleSignatures_Succeeds()
 		{
 			var document = new CpixDocument();
 			document.AddContentKey(TestHelpers.GenerateContentKey());
-			TestHelpers.AddAssignmentRule(document);
-			document.AddAssignmentRuleSignature(TestHelpers.PrivateAuthor1);
+			TestHelpers.AddUsageRule(document);
+			document.AddUsageRuleSignature(TestHelpers.PrivateAuthor1);
 
 			document = TestHelpers.Reload(document);
 
-			document.AddAssignmentRuleSignature(TestHelpers.PrivateAuthor2);
+			document.AddUsageRuleSignature(TestHelpers.PrivateAuthor2);
 
 			document = TestHelpers.Reload(document);
 
-			Assert.Equal(2, document.AssignmentRulesSignedBy.Count);
-			Assert.Equal(1, document.AssignmentRulesSignedBy.Count(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
-			Assert.Equal(1, document.AssignmentRulesSignedBy.Count(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
+			Assert.Equal(2, document.UsageRulesSignedBy.Count);
+			Assert.Equal(1, document.UsageRulesSignedBy.Count(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
+			Assert.Equal(1, document.UsageRulesSignedBy.Count(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
 		}
 
 		[Fact]
-		public void ResignAssignmentRules_WithSameIdentity_Succeeds()
+		public void ResignUsageRules_WithSameIdentity_Succeeds()
 		{
 			var document = new CpixDocument();
 			document.AddContentKey(TestHelpers.GenerateContentKey());
-			TestHelpers.AddAssignmentRule(document);
-			document.AddAssignmentRuleSignature(TestHelpers.PrivateAuthor1);
+			TestHelpers.AddUsageRule(document);
+			document.AddUsageRuleSignature(TestHelpers.PrivateAuthor1);
 
 			document = TestHelpers.Reload(document);
 
-			document.RemoveAssignmentRuleSignatures();
-			document.AddAssignmentRuleSignature(TestHelpers.PrivateAuthor1);
+			document.RemoveUsageRuleSignatures();
+			document.AddUsageRuleSignature(TestHelpers.PrivateAuthor1);
 
 			document = TestHelpers.Reload(document);
 
-			Assert.Equal(1, document.AssignmentRulesSignedBy.Count);
-			Assert.Equal(1, document.AssignmentRulesSignedBy.Count(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
+			Assert.Equal(1, document.UsageRulesSignedBy.Count);
+			Assert.Equal(1, document.UsageRulesSignedBy.Count(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
 		}
 
 		[Fact]
-		public void ResignAssignmentRules_WithDifferentIdentity_Succeeds()
+		public void ResignUsageRules_WithDifferentIdentity_Succeeds()
 		{
 			var document = new CpixDocument();
 			document.AddContentKey(TestHelpers.GenerateContentKey());
-			TestHelpers.AddAssignmentRule(document);
-			document.AddAssignmentRuleSignature(TestHelpers.PrivateAuthor1);
+			TestHelpers.AddUsageRule(document);
+			document.AddUsageRuleSignature(TestHelpers.PrivateAuthor1);
 
 			document = TestHelpers.Reload(document);
 
-			document.RemoveAssignmentRuleSignatures();
-			document.AddAssignmentRuleSignature(TestHelpers.PrivateAuthor2);
+			document.RemoveUsageRuleSignatures();
+			document.AddUsageRuleSignature(TestHelpers.PrivateAuthor2);
 
 			document = TestHelpers.Reload(document);
 
-			Assert.Equal(1, document.AssignmentRulesSignedBy.Count);
-			Assert.Equal(1, document.AssignmentRulesSignedBy.Count(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
+			Assert.Equal(1, document.UsageRulesSignedBy.Count);
+			Assert.Equal(1, document.UsageRulesSignedBy.Count(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
 		}
 	}
 }

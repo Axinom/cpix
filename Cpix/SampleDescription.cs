@@ -9,12 +9,6 @@ namespace Axinom.Cpix
 	public sealed class SampleDescription
 	{
 		/// <summary>
-		/// Timestamp of the sample.
-		/// If null, sample will not match any time filters.
-		/// </summary>
-		public DateTimeOffset? Timestamp { get; set; }
-
-		/// <summary>
 		/// Type of the sample.
 		/// If null, sample will not match any filters that require a specific type of sample.
 		/// </summary>
@@ -37,13 +31,7 @@ namespace Axinom.Cpix
 		/// If null, sample will not match any filters that require a specific picture pixel count.
 		/// </summary>
 		public long? PicturePixelCount { get; set; }
-
-		/// <summary>
-		/// Crypto period index of the sample.
-		/// If null, sample will not match any filters that require a specific crypto period index.
-		/// </summary>
-		public long? CryptoPeriodIndex { get; set; }
-
+		
 		/// <summary>
 		/// Labels that exist on the sample.
 		/// If null, sample will not match any filters that require a specific label on the sample.

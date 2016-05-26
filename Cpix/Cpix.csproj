@@ -49,7 +49,7 @@
     <Compile Include="..\Resources\SolutionAssemblyInfo.cs">
       <Link>Properties\SolutionAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="AssignmentRule.cs" />
+    <Compile Include="UsageRule.cs" />
     <Compile Include="AudioFilter.cs" />
     <Compile Include="BitrateFilter.cs" />
     <Compile Include="Compatibility\RSAPKCS1SHA512SignatureDescription.cs" />
@@ -58,20 +58,16 @@
     <Compile Include="ContentKeyResolveException.cs" />
     <Compile Include="CpixDocument.cs" />
     <Compile Include="InvalidCpixDataException.cs" />
-    <Compile Include="CryptoPeriodFilter.cs" />
     <Compile Include="DocumentModel\XmlElements.cs" />
-    <Compile Include="IAssignmentRule.cs" />
+    <Compile Include="IUsageRule.cs" />
     <Compile Include="IAudioFilter.cs" />
     <Compile Include="IBitrateFilter.cs" />
     <Compile Include="IContentKey.cs" />
-    <Compile Include="ICryptoPeriodFilter.cs" />
     <Compile Include="ILabelFilter.cs" />
-    <Compile Include="ITimeFilter.cs" />
     <Compile Include="LabelFilter.cs" />
     <Compile Include="IVideoFilter.cs" />
     <Compile Include="SampleDescription.cs" />
     <Compile Include="SampleType.cs" />
-    <Compile Include="TimeFilter.cs" />
     <Compile Include="VideoFilter.cs" />
   </ItemGroup>
   <ItemGroup>

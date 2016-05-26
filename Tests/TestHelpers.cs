@@ -39,16 +39,16 @@ namespace Tests
 			};
 		}
 
-		public static AssignmentRule AddAssignmentRule(CpixDocument document)
+		public static UsageRule AddUsageRule(CpixDocument document)
 		{
 			var contentKey = document.ContentKeys.First();
 
-			var rule = new AssignmentRule
+			var rule = new UsageRule
 			{
 				KeyId = contentKey.Id
 			};
 
-			document.AddAssignmentRule(rule);
+			document.AddUsageRule(rule);
 
 			return rule;
 		}

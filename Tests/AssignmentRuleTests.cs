@@ -6,44 +6,26 @@ using Xunit;
 
 namespace Tests
 {
-	public sealed class AssignmentRuleTests
+	public sealed class UsageRuleTests
 	{
 		[Fact]
-		public void AddAssignmentRule_WithNewDocument_AddsAssignmentRule()
+		public void AddUsageRule_WithNewDocument_AddsUsageRule()
 		{
 			var contentKey = TestHelpers.GenerateContentKey();
 
 			var document = new CpixDocument();
 			document.AddContentKey(contentKey);
 
-			TestHelpers.AddAssignmentRule(document);
+			TestHelpers.AddUsageRule(document);
 
 			document = TestHelpers.Reload(document);
 
-			Assert.Equal(1, document.AssignmentRules.Count);
-			Assert.Equal(contentKey.Id, document.AssignmentRules.Single().KeyId);
+			Assert.Equal(1, document.UsageRules.Count);
+			Assert.Equal(contentKey.Id, document.UsageRules.Single().KeyId);
 		}
 
 		[Fact]
-		public void AddAssignmentRule_WithLoadedDocumentWithNoExistingRules_AddsAssignmentRule()
-		{
-			var contentKey = TestHelpers.GenerateContentKey();
-
-			var document = new CpixDocument();
-			document.AddContentKey(contentKey);
-
-			document = TestHelpers.Reload(document);
-
-			TestHelpers.AddAssignmentRule(document);
-
-			document = TestHelpers.Reload(document);
-
-			Assert.Equal(1, document.AssignmentRules.Count);
-			Assert.Equal(contentKey.Id, document.AssignmentRules.Single().KeyId);
-		}
-
-		[Fact]
-		public void AddAssignmentRule_WithLoadedDocumentWithExistingRules_AddsAssignmentRule()
+		public void AddUsageRule_WithLoadedDocumentWithNoExistingRules_AddsUsageRule()
 		{
 			var contentKey = TestHelpers.GenerateContentKey();
 
@@ -52,26 +34,44 @@ namespace Tests
 
 			document = TestHelpers.Reload(document);
 
-			TestHelpers.AddAssignmentRule(document);
+			TestHelpers.AddUsageRule(document);
 
 			document = TestHelpers.Reload(document);
 
-			TestHelpers.AddAssignmentRule(document);
-
-			document = TestHelpers.Reload(document);
-
-			Assert.Equal(2, document.AssignmentRules.Count);
-			Assert.Equal(contentKey.Id, document.AssignmentRules.First().KeyId);
-			Assert.Equal(contentKey.Id, document.AssignmentRules.Last().KeyId);
+			Assert.Equal(1, document.UsageRules.Count);
+			Assert.Equal(contentKey.Id, document.UsageRules.Single().KeyId);
 		}
 
 		[Fact]
-		public void AddAssignmentRule_WithVariousInvalidRules_Fails()
+		public void AddUsageRule_WithLoadedDocumentWithExistingRules_AddsUsageRule()
+		{
+			var contentKey = TestHelpers.GenerateContentKey();
+
+			var document = new CpixDocument();
+			document.AddContentKey(contentKey);
+
+			document = TestHelpers.Reload(document);
+
+			TestHelpers.AddUsageRule(document);
+
+			document = TestHelpers.Reload(document);
+
+			TestHelpers.AddUsageRule(document);
+
+			document = TestHelpers.Reload(document);
+
+			Assert.Equal(2, document.UsageRules.Count);
+			Assert.Equal(contentKey.Id, document.UsageRules.First().KeyId);
+			Assert.Equal(contentKey.Id, document.UsageRules.Last().KeyId);
+		}
+
+		[Fact]
+		public void AddUsageRule_WithVariousInvalidRules_Fails()
 		{
 			var document = new CpixDocument();
 
-			Assert.Throws<InvalidCpixDataException>(() => document.AddAssignmentRule(new AssignmentRule()));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddAssignmentRule(new AssignmentRule
+			Assert.Throws<InvalidCpixDataException>(() => document.AddUsageRule(new UsageRule()));
+			Assert.Throws<InvalidCpixDataException>(() => document.AddUsageRule(new UsageRule
 			{
 				KeyId = Guid.NewGuid()
 			}));
@@ -79,7 +79,7 @@ namespace Tests
 			var contentKey = TestHelpers.GenerateContentKey();
 			document.AddContentKey(contentKey);
 
-			Assert.Throws<InvalidCpixDataException>(() => document.AddAssignmentRule(new AssignmentRule
+			Assert.Throws<InvalidCpixDataException>(() => document.AddUsageRule(new UsageRule
 			{
 				KeyId = contentKey.Id,
 				AudioFilter = new AudioFilter
@@ -88,13 +88,13 @@ namespace Tests
 					MinChannels = 6
 				}
 			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddAssignmentRule(new AssignmentRule
+			Assert.Throws<InvalidCpixDataException>(() => document.AddUsageRule(new UsageRule
 			{
 				KeyId = contentKey.Id,
 				AudioFilter = new AudioFilter(),
 				VideoFilter = new VideoFilter()
 			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddAssignmentRule(new AssignmentRule
+			Assert.Throws<InvalidCpixDataException>(() => document.AddUsageRule(new UsageRule
 			{
 				KeyId = contentKey.Id,
 				VideoFilter = new VideoFilter
@@ -103,7 +103,7 @@ namespace Tests
 					MinPixels = 11
 				}
 			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddAssignmentRule(new AssignmentRule
+			Assert.Throws<InvalidCpixDataException>(() => document.AddUsageRule(new UsageRule
 			{
 				KeyId = contentKey.Id,
 				BitrateFilter = new BitrateFilter
@@ -112,7 +112,7 @@ namespace Tests
 					MinBitrate = 515145151516
 				}
 			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddAssignmentRule(new AssignmentRule
+			Assert.Throws<InvalidCpixDataException>(() => document.AddUsageRule(new UsageRule
 			{
 				KeyId = contentKey.Id,
 				LabelFilter = new LabelFilter
@@ -120,28 +120,14 @@ namespace Tests
 					Label = null
 				}
 			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddAssignmentRule(new AssignmentRule
-			{
-				KeyId = contentKey.Id,
-				TimeFilter = new TimeFilter
-				{
-					Start = new DateTimeOffset(2000, 1, 1, 1, 1, 1, TimeSpan.Zero),
-					End = new DateTimeOffset(2000, 1, 1, 1, 1, 1, TimeSpan.Zero),
-				}
-			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddAssignmentRule(new AssignmentRule
-			{
-				KeyId = contentKey.Id,
-				TimeFilter = new TimeFilter()
-			}));
 		}
 
 		[Fact]
-		public void Save_WithSneakilyCorruptedAssignmentRule_Fails()
+		public void Save_WithSneakilyCorruptedUsageRule_Fails()
 		{
 			var document = new CpixDocument();
 			document.AddContentKey(TestHelpers.GenerateContentKey());
-			var rule = TestHelpers.AddAssignmentRule(document);
+			var rule = TestHelpers.AddUsageRule(document);
 
 			// It was validated by Add but now we corrupt it again!
 			rule.KeyId = Guid.NewGuid();
@@ -150,30 +136,30 @@ namespace Tests
 		}
 
 		[Fact]
-		public void AddAssignmentRule_WithExistingSignature_Fails()
+		public void AddUsageRule_WithExistingSignature_Fails()
 		{
 			var document = new CpixDocument();
 			document.AddContentKey(TestHelpers.GenerateContentKey());
-			TestHelpers.AddAssignmentRule(document);
-			document.AddAssignmentRuleSignature(TestHelpers.PrivateAuthor1);
+			TestHelpers.AddUsageRule(document);
+			document.AddUsageRuleSignature(TestHelpers.PrivateAuthor1);
 
 			document = TestHelpers.Reload(document);
 
-			Assert.Throws<InvalidOperationException>(() => TestHelpers.AddAssignmentRule(document));
+			Assert.Throws<InvalidOperationException>(() => TestHelpers.AddUsageRule(document));
 		}
 
 		[Fact]
-		public void AddAssignmentRule_AfterRemovingExistingSignature_Succeeds()
+		public void AddUsageRule_AfterRemovingExistingSignature_Succeeds()
 		{
 			var document = new CpixDocument();
 			document.AddContentKey(TestHelpers.GenerateContentKey());
-			TestHelpers.AddAssignmentRule(document);
-			document.AddAssignmentRuleSignature(TestHelpers.PrivateAuthor1);
+			TestHelpers.AddUsageRule(document);
+			document.AddUsageRuleSignature(TestHelpers.PrivateAuthor1);
 
 			document = TestHelpers.Reload(document);
 
-			document.RemoveAssignmentRuleSignatures();
-			TestHelpers.AddAssignmentRule(document);
+			document.RemoveUsageRuleSignatures();
+			TestHelpers.AddUsageRule(document);
 		}
 	}
 }
