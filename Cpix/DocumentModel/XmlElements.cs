@@ -146,8 +146,8 @@ namespace Axinom.Cpix.DocumentModel
 				if (Data.Secret.EncryptedValue.CipherData?.CipherValue == null || Data.Secret.EncryptedValue.CipherData?.CipherValue.Length == 0)
 					throw new InvalidCpixDataException("ContentKey/Data/Secret/EncryptedValue/CipherData/CipherValue element is missing.");
 
-				// 128-bit IV + 128-bit encrypted content key.
-				var expectedLength = (128 + 128) / 8;
+				// 128-bit IV + 128-bit encrypted content key + 128-bit PKCS#7 padding block.
+				var expectedLength = (128 + 128 + 128) / 8;
 
 				if (Data.Secret.EncryptedValue.CipherData?.CipherValue.Length != expectedLength)
 					throw new InvalidCpixDataException("ContentKey/Data/Secret/EncryptedValue/CipherData/CipherValue element does not contain the expected number of bytes (" + expectedLength + ")");

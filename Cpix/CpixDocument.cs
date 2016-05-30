@@ -371,7 +371,7 @@ namespace Axinom.Cpix
 					KeySize = 256,
 					Key = documentKey,
 					Mode = CipherMode.CBC,
-					Padding = PaddingMode.None
+					Padding = PaddingMode.PKCS7
 				};
 
 				// 512-bit HMAC key is desirable.
@@ -869,7 +869,7 @@ namespace Axinom.Cpix
 					KeySize = 256,
 					Key = documentKey,
 					Mode = CipherMode.CBC,
-					Padding = PaddingMode.None
+					Padding = PaddingMode.PKCS7
 				};
 
 				mac = new HMACSHA512(macKey);
