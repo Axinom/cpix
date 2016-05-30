@@ -49,6 +49,7 @@
     <Compile Include="..\Resources\SolutionAssemblyInfo.cs">
       <Link>Properties\SolutionAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Compatibility\CngSha512RSAPKCS1SignatureFormatter.cs" />
     <Compile Include="UsageRule.cs" />
     <Compile Include="AudioFilter.cs" />
     <Compile Include="BitrateFilter.cs" />

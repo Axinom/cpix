@@ -14,10 +14,8 @@ namespace Producer
 		{
 			Console.WriteLine("Loading certificates.");
 
-			// If this is loaded from PFX, must be marked exportable due to funny behavior in .NET Framework.
-			// Ideally, there should be no need to use an exportable key! But good enough for a sample.
-			var signerCertificate1 = new X509Certificate2("Author1.pfx", "Author1", X509KeyStorageFlags.Exportable);
-			var signerCertificate2 = new X509Certificate2("Author2.pfx", "Author2", X509KeyStorageFlags.Exportable);
+			var signerCertificate1 = new X509Certificate2("Author1.pfx", "Author1");
+			var signerCertificate2 = new X509Certificate2("Author2.pfx", "Author2");
 
 			var recipientCertificate1 = new X509Certificate2("Recipient1.cer");
 			var recipientCertificate2 = new X509Certificate2("Recipient2.cer");

@@ -578,14 +578,8 @@ namespace Axinom.Cpix
 
 			foreach (var signer in _addedRuleSigners)
 			{
-				// There is some funny business that happens with certificates loaded from PFX files in .NET 4.6.2 Preview.
-				// You can't use them with the RSA-SHA512 algorithm! It just complains about an invalid algorithm.
-				// To get around it, simply export and re-import the key pair to a new instance of the RSA CSP.
-				using (var signingKey = new RSACryptoServiceProvider())
+				using (var signingKey = signer.GetRSAPrivateKey())
 				{
-					var exportedSigningKey = ((RSACryptoServiceProvider)signer.PrivateKey).ExportParameters(true);
-					signingKey.ImportParameters(exportedSigningKey);
-
 					var signedXml = new SignedXml(document)
 					{
 						SigningKey = signingKey
@@ -633,14 +627,8 @@ namespace Axinom.Cpix
 
 			foreach (var signer in _contentKeySigners)
 			{
-				// There is some funny business that happens with certificates loaded from PFX files in .NET 4.6.2 Preview.
-				// You can't use them with the RSA-SHA512 algorithm! It just complains about an invalid algorithm.
-				// To get around it, simply export and re-import the key pair to a new instance of the RSA CSP.
-				using (var signingKey = new RSACryptoServiceProvider())
+				using (var signingKey = signer.GetRSAPrivateKey())
 				{
-					var exportedSigningKey = ((RSACryptoServiceProvider)signer.PrivateKey).ExportParameters(true);
-					signingKey.ImportParameters(exportedSigningKey);
-
 					var signedXml = new SignedXml(document)
 					{
 						SigningKey = signingKey
@@ -687,14 +675,8 @@ namespace Axinom.Cpix
 			if (_desiredDocumentSigner == null)
 				return;
 
-			// There is some funny business that happens with certificates loaded from PFX files in .NET 4.6.2 Preview.
-			// You can't use them with the RSA-SHA512 algorithm! It just complains about an invalid algorithm.
-			// To get around it, simply export and re-import the key pair to a new instance of the RSA CSP.
-			using (var signingKey = new RSACryptoServiceProvider())
+			using (var signingKey = _desiredDocumentSigner.GetRSAPrivateKey())
 			{
-				var exportedSigningKey = ((RSACryptoServiceProvider)_desiredDocumentSigner.PrivateKey).ExportParameters(true);
-				signingKey.ImportParameters(exportedSigningKey);
-
 				var signedXml = new SignedXml(document)
 				{
 					SigningKey = signingKey

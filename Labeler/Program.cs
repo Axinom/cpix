@@ -10,9 +10,7 @@ namespace Labeler
 	{
 		static void Main(string[] args)
 		{
-			// If this is loaded from PFX, must be marked exportable due to funny behavior in .NET Framework.
-			// Ideally, there should be no need to use an exportable key! But good enough for a sample.
-			var myCertificate = new X509Certificate2("Author2.pfx", "Author2", X509KeyStorageFlags.Exportable);
+			var myCertificate = new X509Certificate2("Author2.pfx", "Author2");
 
 			CpixDocument document;
 			using (var file = File.OpenRead("Cpix.xml"))

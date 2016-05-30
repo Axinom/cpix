@@ -3,7 +3,7 @@
 namespace Axinom.Cpix.Compatibility
 {
 	/// <summary>
-	/// SignatureDescription impl for http://www.w3.org/2001/04/xmldsig-more#rsa-sha512
+	/// Hack for compatibility with .NET 4.6.1 and older. Remove once 4.6.2 is published and older versions can be dropped.
 	/// </summary>
 	public sealed class RSAPKCS1SHA512SignatureDescription : SignatureDescription
 	{
@@ -16,23 +16,21 @@ namespace Axinom.Cpix.Compatibility
 		/// </summary>
 		public static void Register()
 		{
-			CryptoConfig.AddAlgorithm(typeof(RSAPKCS1SHA512SignatureDescription), Name);
+			if (CryptoConfig.CreateFromName(Name) == null)
+				CryptoConfig.AddAlgorithm(typeof(RSAPKCS1SHA512SignatureDescription), Name);
 		}
 
-		/// <summary>
-		/// .NET calls this parameterless ctor
-		/// </summary>
 		public RSAPKCS1SHA512SignatureDescription()
 		{
-			KeyAlgorithm = "System.Security.Cryptography.RSACryptoServiceProvider";
-			DigestAlgorithm = "System.Security.Cryptography.SHA512Managed";
-			FormatterAlgorithm = "System.Security.Cryptography.RSAPKCS1SignatureFormatter";
-			DeformatterAlgorithm = "System.Security.Cryptography.RSAPKCS1SignatureDeformatter";
+			KeyAlgorithm = typeof(RSA).FullName;
+			DigestAlgorithm = typeof(SHA512Managed).FullName;
+			FormatterAlgorithm = typeof(CngSha512RSAPKCS1SignatureFormatter).FullName;
+			DeformatterAlgorithm = typeof(RSAPKCS1SignatureDeformatter).FullName;
 		}
 
 		public override AsymmetricSignatureDeformatter CreateDeformatter(AsymmetricAlgorithm key)
 		{
-			var asymmetricSignatureDeformatter = (AsymmetricSignatureDeformatter)CryptoConfig.CreateFromName(DeformatterAlgorithm);
+			var asymmetricSignatureDeformatter = new RSAPKCS1SignatureDeformatter();
 			asymmetricSignatureDeformatter.SetKey(key);
 			asymmetricSignatureDeformatter.SetHashAlgorithm("SHA512");
 			return asymmetricSignatureDeformatter;
@@ -40,7 +38,7 @@ namespace Axinom.Cpix.Compatibility
 
 		public override AsymmetricSignatureFormatter CreateFormatter(AsymmetricAlgorithm key)
 		{
-			var asymmetricSignatureFormatter = (AsymmetricSignatureFormatter)CryptoConfig.CreateFromName(FormatterAlgorithm);
+			var asymmetricSignatureFormatter = new CngSha512RSAPKCS1SignatureFormatter();
 			asymmetricSignatureFormatter.SetKey(key);
 			asymmetricSignatureFormatter.SetHashAlgorithm("SHA512");
 			return asymmetricSignatureFormatter;

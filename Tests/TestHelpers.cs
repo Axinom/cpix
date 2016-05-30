@@ -60,11 +60,9 @@ namespace Tests
 		public static readonly X509Certificate2 PublicRecipient1 = new X509Certificate2("Recipient1.cer");
 		public static readonly X509Certificate2 PublicRecipient2 = new X509Certificate2("Recipient2.cer");
 
-		// They must be exportable because for whatever reason, signing does not work without re-import.
-		// TODO: investigate and get rid of this limitation. Maybe it only affects PFX loading? Hope so!
-		public static readonly X509Certificate2 PrivateAuthor1 = new X509Certificate2("Author1.pfx", "Author1", X509KeyStorageFlags.Exportable);
-		public static readonly X509Certificate2 PrivateAuthor2 = new X509Certificate2("Author2.pfx", "Author2", X509KeyStorageFlags.Exportable);
-		public static readonly X509Certificate2 PrivateRecipient1 = new X509Certificate2("Recipient1.pfx", "Recipient1", X509KeyStorageFlags.Exportable);
-		public static readonly X509Certificate2 PrivateRecipient2 = new X509Certificate2("Recipient2.pfx", "Recipient2", X509KeyStorageFlags.Exportable);
+		public static readonly X509Certificate2 PrivateAuthor1 = new X509Certificate2("Author1.pfx", "Author1");
+		public static readonly X509Certificate2 PrivateAuthor2 = new X509Certificate2("Author2.pfx", "Author2");
+		public static readonly X509Certificate2 PrivateRecipient1 = new X509Certificate2("Recipient1.pfx", "Recipient1");
+		public static readonly X509Certificate2 PrivateRecipient2 = new X509Certificate2("Recipient2.pfx", "Recipient2");
 	}
 }
