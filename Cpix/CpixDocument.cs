@@ -22,15 +22,18 @@ namespace Axinom.Cpix
 	/// <remarks>
 	/// All content keys are automatically encrypted on save and delivery data generated based on provided certificates.
 	/// Content keys can only be added/defined on initial document creation. You can modify other parts of the document
-	/// (e.g. key assignment rules) and save it again later, though, even if you have no access to the decryption keys.
+	/// (e.g. usage rules) and save it again later, though, even if you have no access to the decryption keys.
 	/// 
-	/// To keep things managable, there are three basic types of digital signatures supported by this implementation:
-	/// * signatures on all content keys
-	/// * signatures on all content key assignment rules
-	/// * signature on the entire document (only one allowed; also covers other signatures in signed data!)
+	/// To keep the API managable, there are three basic types of digital signatures supported by this implementation:
+	/// * signatures on all content keys.
+	/// * signatures on all key usage rules.
+	/// * signature on the entire document (only one allowed; also covers other signatures in signed data!).
 	/// 
-	/// Any signatures that do not match the above signed data sets are ignored on load.
-	/// You must have the private keys to re-sign any of these parts that you modify.
+	/// Any signatures that do not match the above signed data sets are ignored on load, though validated on save
+	/// to ensure that files that fail verification are not created.
+	/// 
+	/// You must have the private keys to re-sign any of these parts that you modify,
+	/// removing any existing signature before performing your modifications.
 	/// </remarks>
 	public sealed class CpixDocument
 	{
@@ -50,14 +53,14 @@ namespace Axinom.Cpix
 		public IReadOnlyCollection<X509Certificate2> ContentKeysSignedBy => _contentKeySigners;
 
 		/// <summary>
-		/// Certificates of the identities whose signature is present on all the content key assignment rules.
+		/// Certificates of the identities whose signature is present on all the content key usage rules.
 		/// To add more signatures use <see cref="AddUsageRuleSignature(X509Certificate2)"/>.
 		/// </summary>
 		public IReadOnlyCollection<X509Certificate2> UsageRulesSignedBy => _loadedRuleSignatures.Select(tuple => tuple.Item2).Concat(_addedRuleSigners).ToArray();
 
 		/// <summary>
 		/// Certificate of the identity whose signature is present on the entire document.
-		/// To create or re-create this signatur use <see cref="SetDocumentSignature(X509Certificate2)"/>.
+		/// To remove, create or re-create this signature use <see cref="SetDocumentSignature(X509Certificate2)"/>.
 		/// </summary>
 		public X509Certificate2 DocumentSignedBy => _desiredDocumentSigner;
 
@@ -68,8 +71,8 @@ namespace Axinom.Cpix
 		public IReadOnlyCollection<IContentKey> ContentKeys => _contentKeys;
 
 		/// <summary>
-		/// The set of content key assignment rules present in the CPIX document.
-		/// To add more content key assignment rules, use <see cref="AddUsageRule(UsageRule)"/>.
+		/// The set of content key usage rules present in the CPIX document.
+		/// To add more content key usage rules, use <see cref="AddUsageRule(UsageRule)"/>.
 		/// </summary>
 		public IReadOnlyCollection<IUsageRule> UsageRules => _loadedRules.Concat(_addedRules).ToArray();
 
@@ -77,7 +80,7 @@ namespace Axinom.Cpix
 		/// Whether the values of content keys are available.
 		/// 
 		/// This is always true for new documents. This may be false for loaded documents if the content keys
-		/// were encrypted and none of our decryption certificates were among the listed recipients.
+		/// were encrypted and we do not possess any of the delivery keys.
 		/// </summary>
 		public bool ContentKeysAvailable { get; private set; } = true;
 
