@@ -20,6 +20,11 @@ namespace Axinom.Cpix
 			}
 		}
 
+		internal static XmlElement InsertXmlObject<T>(T xmlObject, XmlDocument document, XmlElement parent)
+		{
+			return (XmlElement)parent.AppendChild(document.ImportNode(XmlObjectToXmlDocument(xmlObject).DocumentElement, true));
+		}
+
 		internal static XmlDocument XmlObjectToXmlDocument<T>(T xmlObject)
 		{
 			using (var intermediateXmlBuffer = new MemoryStream())

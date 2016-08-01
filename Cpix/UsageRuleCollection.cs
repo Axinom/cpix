@@ -19,15 +19,5 @@ namespace Axinom.Cpix
 		{
 			throw new NotImplementedException();
 		}
-
-		protected override void ValidateEntityBeforeAdd(UsageRule entity)
-		{
-			throw new NotImplementedException();
-		}
-
-		internal override void ValidateForSave()
-		{
-			throw new NotImplementedException();
-		}
 	}
 }

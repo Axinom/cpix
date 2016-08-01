@@ -56,6 +56,7 @@
     <Compile Include="ContentKeyCollection.cs" />
     <Compile Include="CpixDocument.cs" />
     <Compile Include="CryptographyHelpers.cs" />
+    <Compile Include="Entity.cs" />
     <Compile Include="EntityCollection.cs" />
     <Compile Include="Compatibility\RSAPKCS1SHA512SignatureDescription.cs" />
     <Compile Include="Constants.cs" />

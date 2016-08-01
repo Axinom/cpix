@@ -6,7 +6,7 @@ namespace Axinom.Cpix
 	/// <summary>
 	/// An identity that is authorized to access the content keys of a CPIX document.
 	/// </summary>
-	public sealed class Recipient : IRecipient
+	public sealed class Recipient : Entity, IRecipient
 	{
 		/// <summary>
 		/// A certificate identifying the recipient and the asymmetric key used to secure communications.
@@ -19,8 +19,11 @@ namespace Axinom.Cpix
 				throw new ArgumentNullException(nameof(certificate));
 
 			Certificate = certificate;
+		}
 
-			// TODO: Any difference for load scenarios? Probably not?
+		internal override void ValidateNewEntity()
+		{
+			CryptographyHelpers.ValidateRecipientCertificateAndPublicKey(Certificate);
 		}
 	}
 }

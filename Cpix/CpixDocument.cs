@@ -129,9 +129,9 @@ namespace Axinom.Cpix
 				throw new ArgumentNullException(nameof(stream));
 
 			// Validate all the entity collections.
-			Recipients.ValidateForSave();
-			ContentKeys.ValidateForSave();
-			UsageRules.ValidateForSave();
+			Recipients.ValidateCollectionStateBeforeSave();
+			ContentKeys.ValidateCollectionStateBeforeSave();
+			UsageRules.ValidateCollectionStateBeforeSave();
 
 			// Saving is a multi - phase process:
 			// 1) Create a new XML document, if needed. If we are working with a loaded document, we just use the existing one.
@@ -241,6 +241,28 @@ namespace Axinom.Cpix
 		private X509Certificate2 _desiredSignedBy;
 
 		/// <summary>
+		/// Gets the document key or null if no document key has been loaded/generated
+		/// </summary>
+		internal byte[] DocumentKey { get; private set; }
+
+		/// <summary>
+		/// Gets the MAC key or null if no MAC key has been loaded/generated.
+		/// </summary>
+		internal byte[] MacKey { get; private set; }
+
+		/// <summary>
+		/// Generates a new document and MAC key.
+		/// </summary>
+		internal void GenerateKeys()
+		{
+			DocumentKey = new byte[Constants.DocumentKeyLengthInBytes];
+			Random.GetBytes(DocumentKey);
+
+			MacKey = new byte[Constants.MacKeyLengthInBytes];
+			Random.GetBytes(MacKey);
+		}
+
+		/// <summary>
 		/// Throws an exception if the document is read-only.
 		/// </summary>
 		internal void VerifyIsNotReadOnly()
@@ -308,7 +330,7 @@ namespace Axinom.Cpix
 		// Contains all the XML Schema information required to validate a CPIX document.
 		private static readonly XmlSchemaSet _schemaSet;
 
-		private static readonly RandomNumberGenerator _random = RandomNumberGenerator.Create();
+		internal readonly RandomNumberGenerator Random = RandomNumberGenerator.Create();
 		#endregion
 	}
 }

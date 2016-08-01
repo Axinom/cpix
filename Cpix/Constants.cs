@@ -10,7 +10,6 @@ namespace Axinom.Cpix
 		public const string XmlEncryptionNamespace = "http://www.w3.org/2001/04/xmlenc#";
 
 		public const string Aes256CbcAlgorithm = "http://www.w3.org/2001/04/xmlenc#aes256-cbc";
-		public const string ContentKeyAlgorithm = "TODO";
 
 		public const string HmacSha512Algorithm = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha512";
 		public const string RsaOaepAlgorithm = "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p";
@@ -22,5 +21,15 @@ namespace Axinom.Cpix
 		public const string Sha512Algorithm = "http://www.w3.org/2001/04/xmlenc#sha512";
 
 		public const int ContentKeyLengthInBytes = 16;
+
+		/// <summary>
+		/// AES-256, so 256-bit key.
+		/// </summary>
+		public const int DocumentKeyLengthInBytes = 256 / 8;
+
+		/// <summary>
+		/// HMAC-SHA512, so 512-bit key.
+		/// </summary>
+		public const int MacKeyLengthInBytes = 512 / 8;
 	}
 }

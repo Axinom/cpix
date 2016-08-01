@@ -2,7 +2,7 @@
 
 namespace Axinom.Cpix
 {
-	public sealed class ContentKey : IContentKey
+	public sealed class ContentKey : Entity, IContentKey
 	{
 		/// <summary>
 		/// Unique ID of the content key.
@@ -15,9 +15,11 @@ namespace Axinom.Cpix
 		public byte[] Value { get; set; }
 
 		/// <summary>
-		/// Vertfies that the class represents a valid newly created content key.
+		/// Gets whether the content key is an existing encrypted content key.
 		/// </summary>
-		internal void ValidateNewContentKey()
+		internal bool IsExistingEncryptedKey { get; }
+
+		internal override void ValidateNewEntity()
 		{
 			if (Id == Guid.Empty)
 				throw new InvalidCpixDataException("A unique key ID must be provided for each content key.");

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Axinom.Cpix
 {
-	public sealed class UsageRule : IUsageRule
+	public sealed class UsageRule : Entity, IUsageRule
 	{
 		/// <summary>
 		/// The ID of the content key that this usage rule applies to.
@@ -19,5 +19,10 @@ namespace Axinom.Cpix
 		IReadOnlyCollection<IAudioFilter> IUsageRule.AudioFilters => (IReadOnlyCollection<IAudioFilter>)AudioFilters;
 		IReadOnlyCollection<ILabelFilter> IUsageRule.LabelFilters => (IReadOnlyCollection<ILabelFilter>)LabelFilters;
 		IReadOnlyCollection<IBitrateFilter> IUsageRule.BitrateFilters => (IReadOnlyCollection<IBitrateFilter>)BitrateFilters;
+
+		internal override void ValidateNewEntity()
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

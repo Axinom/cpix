@@ -23,7 +23,7 @@ namespace Axinom.Cpix
 	/// This may not always be enforced by the API for technical/convenience reasons but is always the principle
 	/// to follow. Violations may lead to undefined behavior.
 	/// </remarks>
-	public abstract class EntityCollection<TEntityInterface, TEntityImplementation> : ICollection<TEntityInterface> where TEntityImplementation : class, TEntityInterface
+	public abstract class EntityCollection<TEntityInterface, TEntityImplementation> : ICollection<TEntityInterface> where TEntityImplementation : Entity, TEntityInterface
 	{
 		/// <summary>
 		/// Adds a new item to the collection.
@@ -44,7 +44,9 @@ namespace Axinom.Cpix
 			if (Contains(item))
 				throw new InvalidOperationException("The item is already in this collection.");
 
-			ValidateEntityBeforeAdd(item);
+			item.ValidateNewEntity();
+
+			ValidateCollectionStateBeforeAdd(item);
 
 			_newItems.Add(item);
 		}
@@ -157,12 +159,12 @@ namespace Axinom.Cpix
 
 		protected readonly CpixDocument _document;
 
-		private readonly List<TEntityImplementation> _newItems = new List<TEntityImplementation>();
+		protected readonly List<TEntityImplementation> _newItems = new List<TEntityImplementation>();
 		private readonly List<Tuple<TEntityImplementation, XmlElement>> _existingItemsData = new List<Tuple<TEntityImplementation, XmlElement>>();
 
-		private IEnumerable<TEntityInterface> ExistingItems => _existingItemsData.Select(data => data.Item1);
+		internal IEnumerable<TEntityImplementation> ExistingItems => _existingItemsData.Select(data => data.Item1);
 
-		private IEnumerable<TEntityInterface> AllItems => ExistingItems.Concat(_newItems);
+		internal IEnumerable<TEntityImplementation> AllItems => ExistingItems.Concat(_newItems);
 
 		private readonly List<X509Certificate2> _newSigners = new List<X509Certificate2>();
 		private readonly List<Tuple<XmlElement, X509Certificate2>> _existingSignatures = new List<Tuple<XmlElement, X509Certificate2>>();
@@ -182,14 +184,32 @@ namespace Axinom.Cpix
 		}
 
 		/// <summary>
-		/// Performs entity validation before it is added to the collection.
+		/// Performs collection-scope validation before an entity is added to the collection.
+		/// The entity has already passed individual validation, so this just concerns "global" state validation.
 		/// </summary>
-		protected abstract void ValidateEntityBeforeAdd(TEntityImplementation entity);
+		protected virtual void ValidateCollectionStateBeforeAdd(TEntityImplementation entity)
+		{
+		}
 
 		/// <summary>
-		/// Performs validation of the entire collection and its contents before it is saved.
+		/// Performs validation of the collection and its contents before it is saved.
 		/// </summary>
-		internal abstract void ValidateForSave();
+		internal virtual void ValidateCollectionStateBeforeSave()
+		{
+			ValidateEntitiesBeforeSave();
+		}
+
+		/// <summary>
+		/// Performs validation of the collection's contents before it is saved.
+		/// </summary>
+		internal void ValidateEntitiesBeforeSave()
+		{
+			// Just individually validate each new item.
+			foreach (var item in _newItems)
+				item.ValidateNewEntity();
+
+			// No need to validate any existing items, as we won't save them even if modified.
+		}
 
 		/// <summary>
 		/// Saves any changes in this entity set to the supplied document.

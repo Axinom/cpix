@@ -30,7 +30,7 @@ namespace Axinom.Cpix.DocumentModel
 	//{
 	//	[XmlAttribute("keyId")]
 	//	public Guid KeyId { get; set; }
-		
+
 	//	[XmlElement]
 	//	public LabelFilterElement LabelFilter { get; set; }
 
@@ -43,7 +43,7 @@ namespace Axinom.Cpix.DocumentModel
 	//	[XmlElement]
 	//	public BitrateFilterElement BitrateFilter { get; set; }
 	//}
-	
+
 	//public sealed class LabelFilterElement
 	//{
 	//	[XmlAttribute("label")]
@@ -119,207 +119,201 @@ namespace Axinom.Cpix.DocumentModel
 	//	}
 	//}
 
-	//[XmlRoot("ContentKey", Namespace = Constants.CpixNamespace)]
-	//public sealed class ContentKeyElement
-	//{
-	//	[XmlAttribute("id")]
-	//	public string XmlId { get; set; }
+	[XmlRoot("ContentKey", Namespace = Constants.CpixNamespace)]
+	public sealed class ContentKeyElement
+	{
+		[XmlAttribute("kid")]
+		public Guid KeyId { get; set; }
 
-	//	[XmlAttribute("keyId")]
-	//	public Guid KeyId { get; set; }
+		[XmlElement]
+		public DataElement Data { get; set; }
 
-	//	[XmlAttribute]
-	//	public string Algorithm { get; set; }
+		internal bool HasEncryptedValue => Data?.Secret?.EncryptedValue != null;
+		internal bool HasPlainValue => Data?.Secret?.PlainValue != null;
 
-	//	[XmlElement]
-	//	public DataElement Data { get; set; }
+		/// <summary>
+		/// Performs basic sanity check to ensure that all required fields are filled.
+		/// Both encrypted or clear values are acceptable (but not both at the same time).
+		/// </summary>
+		internal void LoadTimeValidate()
+		{
+			if (HasEncryptedValue && HasPlainValue)
+				throw new InvalidCpixDataException("Cannot have both ContentKey/Data/Secret/EncryptedValue and ContentKey/Data/Secret/PlainValue! Is it encrypted or not?");
 
-	//	internal bool HasEncryptedValue => Data?.Secret?.EncryptedValue != null;
-	//	internal bool HasPlainValue => Data?.Secret?.PlainValue != null;
+			if (HasEncryptedValue)
+			{
+				if (Data.Secret.EncryptedValue.EncryptionMethod?.Algorithm != Constants.Aes256CbcAlgorithm)
+					throw new NotSupportedException("Only the following algorithm is supported for encrypting content keys: " + Constants.Aes256CbcAlgorithm);
 
-	//	/// <summary>
-	//	/// Performs basic sanity check to ensure that all required fields are filled.
-	//	/// Both encrypted or clear values are acceptable (but not both at the same time).
-	//	/// </summary>
-	//	internal void LoadTimeValidate()
-	//	{
-	//		if (HasEncryptedValue && HasPlainValue)
-	//			throw new InvalidCpixDataException("Cannot have both ContentKey/Data/Secret/EncryptedValue and ContentKey/Data/Secret/PlainValue! Is it encrypted or not?");
+				if (Data.Secret.EncryptedValue.CipherData?.CipherValue == null || Data.Secret.EncryptedValue.CipherData?.CipherValue.Length == 0)
+					throw new InvalidCpixDataException("ContentKey/Data/Secret/EncryptedValue/CipherData/CipherValue element is missing.");
 
-	//		if (HasEncryptedValue)
-	//		{
-	//			if (Data.Secret.EncryptedValue.EncryptionMethod?.Algorithm != Constants.Aes256CbcAlgorithm)
-	//				throw new NotSupportedException("Only the following algorithm is supported for encrypting content keys: " + Constants.Aes256CbcAlgorithm);
+				// 128-bit IV + 128-bit encrypted content key + 128-bit PKCS#7 padding block.
+				var expectedLength = (128 + 128 + 128) / 8;
 
-	//			if (Data.Secret.EncryptedValue.CipherData?.CipherValue == null || Data.Secret.EncryptedValue.CipherData?.CipherValue.Length == 0)
-	//				throw new InvalidCpixDataException("ContentKey/Data/Secret/EncryptedValue/CipherData/CipherValue element is missing.");
+				if (Data.Secret.EncryptedValue.CipherData?.CipherValue.Length != expectedLength)
+					throw new InvalidCpixDataException("ContentKey/Data/Secret/EncryptedValue/CipherData/CipherValue element does not contain the expected number of bytes (" + expectedLength + ")");
 
-	//			// 128-bit IV + 128-bit encrypted content key + 128-bit PKCS#7 padding block.
-	//			var expectedLength = (128 + 128 + 128) / 8;
+				if (Data?.Secret?.ValueMAC == null)
+					throw new NotSupportedException("Expected ContentKey/Data/Secret/ValueMAC element does not exist.");
+			}
+			else if (HasPlainValue)
+			{
+				// 128-bit content key.
+				var expectedLength = 128 / 8;
 
-	//			if (Data.Secret.EncryptedValue.CipherData?.CipherValue.Length != expectedLength)
-	//				throw new InvalidCpixDataException("ContentKey/Data/Secret/EncryptedValue/CipherData/CipherValue element does not contain the expected number of bytes (" + expectedLength + ")");
+				if (Data.Secret.PlainValue.Length != expectedLength)
+					throw new InvalidCpixDataException("ContentKey/Data/Secret/PlainValue element does not contain the expected number of bytes (" + expectedLength + ")");
+			}
+			else
+			{
+				throw new InvalidCpixDataException("Must have either ContentKey/Data/Secret/EncryptedValue or ContentKey/Data/Secret/PlainValue.");
+			}
+		}
+	}
 
-	//			if (Data?.Secret?.ValueMAC == null)
-	//				throw new NotSupportedException("Expected ContentKey/Data/Secret/ValueMAC element does not exist.");
-	//		}
-	//		else if (HasPlainValue)
-	//		{
-	//			// 128-bit content key.
-	//			var expectedLength = 128 / 8;
+	public sealed class DataElement
+	{
+		/// <summary>
+		/// For our purposes, this is just a meaningless layer of nesting.
+		/// The content key is in this regardless of whether it is encrypted or not.
+		/// </summary>
+		[XmlElement]
+		public SecretDataElement Secret { get; set; }
+	}
 
-	//			if (Data.Secret.PlainValue.Length != expectedLength)
-	//				throw new InvalidCpixDataException("ContentKey/Data/Secret/PlainValue element does not contain the expected number of bytes (" + expectedLength + ")");
-	//		}
-	//		else
-	//		{
-	//			throw new InvalidCpixDataException("Must have either ContentKey/Data/Secret/EncryptedValue or ContentKey/Data/Secret/PlainValue.");
-	//		}
-	//	}
-	//}
+	public sealed class SecretDataElement
+	{
+		/// <summary>
+		/// Indicates that the data is a plain (nonencrypted) value.
+		/// </summary>
+		[XmlElement]
+		public byte[] PlainValue { get; set; }
 
-	//public sealed class DataElement
-	//{
-	//	/// <summary>
-	//	/// For our purposes, this is just a meaningless layer of nesting.
-	//	/// The content key is in this regardless of whether it is encrypted or not.
-	//	/// </summary>
-	//	[XmlElement]
-	//	public SecretDataElement Secret { get; set; }
-	//}
+		[XmlElement]
+		public EncryptedXmlValue EncryptedValue { get; set; }
 
-	//public sealed class SecretDataElement
-	//{
-	//	/// <summary>
-	//	/// Indicates that the data is a plain (nonencrypted) value.
-	//	/// </summary>
-	//	[XmlElement]
-	//	public byte[] PlainValue { get; set; }
+		[XmlElement]
+		public byte[] ValueMAC { get; set; }
+	}
 
-	//	[XmlElement]
-	//	public EncryptedXmlValue EncryptedValue { get; set; }
+	public sealed class EncryptedXmlValue
+	{
+		[XmlElement("EncryptionMethod", Namespace = Constants.XmlEncryptionNamespace)]
+		public EncryptionMethodDeclaration EncryptionMethod { get; set; }
 
-	//	[XmlElement]
-	//	public byte[] ValueMAC { get; set; }
-	//}
+		[XmlElement(Namespace = Constants.XmlEncryptionNamespace)]
+		public CipherDataContainer CipherData { get; set; }
+	}
 
-	//public sealed class EncryptedXmlValue
-	//{
-	//	[XmlElement("EncryptionMethod", Namespace = Constants.XmlEncryptionNamespace)]
-	//	public EncryptionMethodDeclaration EncryptionMethod { get; set; }
+	public sealed class CipherDataContainer
+	{
+		[XmlElement(Namespace = Constants.XmlEncryptionNamespace)]
+		public byte[] CipherValue { get; set; }
+	}
 
-	//	[XmlElement(Namespace = Constants.XmlEncryptionNamespace)]
-	//	public CipherDataContainer CipherData { get; set; }
-	//}
+	public sealed class EncryptionMethodDeclaration
+	{
+		[XmlAttribute]
+		public string Algorithm { get; set; }
+	}
 
-	//public sealed class CipherDataContainer
-	//{
-	//	[XmlElement(Namespace = Constants.XmlEncryptionNamespace)]
-	//	public byte[] CipherValue { get; set; }
-	//}
+	public sealed class X509Data
+	{
+		[XmlElement("X509Certificate")]
+		public byte[] Certificate { get; set; }
+	}
 
-	//public sealed class EncryptionMethodDeclaration
-	//{
-	//	[XmlAttribute]
-	//	public string Algorithm { get; set; }
-	//}
+	[XmlRoot("DeliveryData", Namespace = Constants.CpixNamespace)]
+	public sealed class DeliveryDataElement
+	{
+		[XmlElement]
+		public DeliveryKeyElement DeliveryKey { get; set; }
 
-	//public sealed class X509Data
-	//{
-	//	[XmlElement("X509Certificate")]
-	//	public byte[] Certificate { get; set; }
-	//}
+		[XmlElement]
+		public DocumentKeyElement DocumentKey { get; set; }
 
-	//[XmlRoot("DeliveryData", Namespace = Constants.CpixNamespace)]
-	//public sealed class DeliveryDataElement
-	//{
-	//	[XmlElement]
-	//	public DeliveryKeyElement DeliveryKey { get; set; }
+		[XmlElement("MACMethod")]
+		public MacMethodElement MacMethod { get; set; }
 
-	//	[XmlElement]
-	//	public DocumentKeyElement DocumentKey { get; set; }
+		/// <summary>
+		/// Performs basic sanity check to ensure that all required fields are filled.
+		/// </summary>
+		internal void LoadTimeValidate()
+		{
+			// DeliveryKey was already checked by CpixDocument we would not have gotten here.
 
-	//	[XmlElement("MacMethod")]
-	//	public MacMethodElement MacMethod { get; set; }
+			if (DocumentKey == null)
+				throw new NotSupportedException("DeliveryData/DocumentKey element is missing.");
 
-	//	/// <summary>
-	//	/// Performs basic sanity check to ensure that all required fields are filled.
-	//	/// </summary>
-	//	internal void LoadTimeValidate()
-	//	{
-	//		// DeliveryKey was already checked by CpixDocument we would not have gotten here.
+			if (MacMethod == null)
+				throw new NotSupportedException("DeliveryData/MacMethod element is missing.");
 
-	//		if (DocumentKey == null)
-	//			throw new NotSupportedException("DeliveryData/DocumentKey element is missing.");
+			DocumentKey.LoadTimeValidate();
+			MacMethod.LoadTimeValidate();
+		}
+	}
 
-	//		if (MacMethod == null)
-	//			throw new NotSupportedException("DeliveryData/MacMethod element is missing.");
+	public sealed class MacMethodElement
+	{
+		[XmlAttribute]
+		public string Algorithm { get; set; }
 
-	//		DocumentKey.LoadTimeValidate();
-	//		MacMethod.LoadTimeValidate();
-	//	}
-	//}
+		[XmlElement("Key")]
+		public EncryptedXmlValue Key { get; set; }
 
-	//public sealed class MacMethodElement
-	//{
-	//	[XmlAttribute]
-	//	public string Algorithm { get; set; }
+		/// <summary>
+		/// Performs basic sanity check to ensure that all required fields are filled.
+		/// </summary>
+		internal void LoadTimeValidate()
+		{
+			if (Algorithm != Constants.HmacSha512Algorithm)
+				throw new NotSupportedException("Only the following algorithm is supported for MAC generation: " + Constants.HmacSha512Algorithm);
 
-	//	[XmlElement("Key")]
-	//	public EncryptedXmlValue Key { get; set; }
+			if (Key == null)
+				throw new InvalidCpixDataException("DeliveryData/MacMethod/Key element is missing.");
 
-	//	/// <summary>
-	//	/// Performs basic sanity check to ensure that all required fields are filled.
-	//	/// </summary>
-	//	internal void LoadTimeValidate()
-	//	{
-	//		if (Algorithm != Constants.HmacSha512Algorithm)
-	//			throw new NotSupportedException("Only the following algorithm is supported for MAC generation: " + Constants.HmacSha512Algorithm);
+			if (Key.EncryptionMethod?.Algorithm != Constants.RsaOaepAlgorithm)
+				throw new NotSupportedException("Only the following algorithm is supported for encrypting the MAC key: " + Constants.RsaOaepAlgorithm);
 
-	//		if (Key == null)
-	//			throw new InvalidCpixDataException("DeliveryData/MacMethod/Key element is missing.");
+			if (Key.CipherData?.CipherValue == null || Key.CipherData?.CipherValue.Length == 0)
+				throw new InvalidCpixDataException("DeliveryData/MacMethod/Key/CipherData/CipherValue element is missing.");
+		}
+	}
 
-	//		if (Key.EncryptionMethod?.Algorithm != Constants.RsaOaepAlgorithm)
-	//			throw new NotSupportedException("Only the following algorithm is supported for encrypting the MAC key: " + Constants.RsaOaepAlgorithm);
+	public sealed class DocumentKeyElement
+	{
+		[XmlAttribute]
+		public string Algorithm { get; set; }
 
-	//		if (Key.CipherData?.CipherValue == null || Key.CipherData?.CipherValue.Length == 0)
-	//			throw new InvalidCpixDataException("DeliveryData/MacMethod/Key/CipherData/CipherValue element is missing.");
-	//	}
-	//}
+		[XmlElement]
+		public DataElement Data { get; set; }
 
-	//public sealed class DocumentKeyElement
-	//{
-	//	[XmlAttribute]
-	//	public string Algorithm { get; set; }
+		/// <summary>
+		/// Performs basic sanity check to ensure that all required fields are filled.
+		/// </summary>
+		internal void LoadTimeValidate()
+		{
+			if (Algorithm != Constants.Aes256CbcAlgorithm)
+				throw new NotSupportedException("Only the following algorithm is supported for the document key: " + Constants.Aes256CbcAlgorithm);
 
-	//	[XmlElement]
-	//	public DataElement Data { get; set; }
+			if (Data == null)
+				throw new InvalidCpixDataException("DeliveryData/DocumentKey/Data element is missing.");
 
-	//	/// <summary>
-	//	/// Performs basic sanity check to ensure that all required fields are filled.
-	//	/// </summary>
-	//	internal void LoadTimeValidate()
-	//	{
-	//		if (Algorithm != Constants.Aes256CbcAlgorithm)
-	//			throw new NotSupportedException("Only the following algorithm is supported for the document key: " + Constants.Aes256CbcAlgorithm);
+			if (Data.Secret?.EncryptedValue == null)
+				throw new InvalidCpixDataException("DeliveryData/DocumentKey/Data/Secret/EncryptedValue element is missing.");
 
-	//		if (Data == null)
-	//			throw new InvalidCpixDataException("DeliveryData/DocumentKey/Data element is missing.");
+			if (Data.Secret?.EncryptedValue.EncryptionMethod?.Algorithm != Constants.RsaOaepAlgorithm)
+				throw new NotSupportedException("Only the following algorithm is supported for encrypting the document key: " + Constants.RsaOaepAlgorithm);
 
-	//		if (Data.Secret?.EncryptedValue == null)
-	//			throw new InvalidCpixDataException("DeliveryData/DocumentKey/Data/Secret/EncryptedValue element is missing.");
+			if (Data.Secret?.EncryptedValue.CipherData?.CipherValue == null || Data.Secret?.EncryptedValue.CipherData?.CipherValue.Length == 0)
+				throw new InvalidCpixDataException("DeliveryData/DocumentKey/Data/Secret/CipherData/CipherValue element is missing.");
+		}
+	}
 
-	//		if (Data.Secret?.EncryptedValue.EncryptionMethod?.Algorithm != Constants.RsaOaepAlgorithm)
-	//			throw new NotSupportedException("Only the following algorithm is supported for encrypting the document key: " + Constants.RsaOaepAlgorithm);
-
-	//		if (Data.Secret?.EncryptedValue.CipherData?.CipherValue == null || Data.Secret?.EncryptedValue.CipherData?.CipherValue.Length == 0)
-	//			throw new InvalidCpixDataException("DeliveryData/DocumentKey/Data/Secret/CipherData/CipherValue element is missing.");
-	//	}
-	//}
-
-	//public sealed class DeliveryKeyElement
-	//{
-	//	[XmlElement(Namespace = Constants.XmlDigitalSignatureNamespace)]
-	//	public X509Data X509Data { get; set; }
-	//}
+	public sealed class DeliveryKeyElement
+	{
+		[XmlElement(Namespace = Constants.XmlDigitalSignatureNamespace)]
+		public X509Data X509Data { get; set; }
+	}
 }
