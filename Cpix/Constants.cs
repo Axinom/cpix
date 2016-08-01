@@ -20,5 +20,7 @@ namespace Axinom.Cpix
 		public static readonly string Sha1Oid = "1.3.14.3.2.29";
 
 		public const string Sha512Algorithm = "http://www.w3.org/2001/04/xmlenc#sha512";
+
+		public const int ContentKeyLengthInBytes = 16;
 	}
 }

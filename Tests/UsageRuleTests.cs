@@ -14,7 +14,7 @@ namespace Tests
 			var contentKey = TestHelpers.GenerateContentKey();
 
 			var document = new CpixDocument();
-			document.AddContentKey(contentKey);
+			document.ContentKeys.Add(contentKey);
 
 			TestHelpers.AddUsageRule(document);
 
@@ -30,7 +30,7 @@ namespace Tests
 			var contentKey = TestHelpers.GenerateContentKey();
 
 			var document = new CpixDocument();
-			document.AddContentKey(contentKey);
+			document.ContentKeys.Add(contentKey);
 
 			document = TestHelpers.Reload(document);
 
@@ -48,7 +48,7 @@ namespace Tests
 			var contentKey = TestHelpers.GenerateContentKey();
 
 			var document = new CpixDocument();
-			document.AddContentKey(contentKey);
+			document.ContentKeys.Add(contentKey);
 
 			document = TestHelpers.Reload(document);
 
@@ -70,54 +70,72 @@ namespace Tests
 		{
 			var document = new CpixDocument();
 
-			Assert.Throws<InvalidCpixDataException>(() => document.AddUsageRule(new UsageRule()));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddUsageRule(new UsageRule
+			Assert.Throws<InvalidCpixDataException>(() => document.UsageRules.Add(new UsageRule()));
+			Assert.Throws<InvalidCpixDataException>(() => document.UsageRules.Add(new UsageRule
 			{
 				KeyId = Guid.NewGuid()
 			}));
 
 			var contentKey = TestHelpers.GenerateContentKey();
-			document.AddContentKey(contentKey);
+			document.ContentKeys.Add(contentKey);
 
-			Assert.Throws<InvalidCpixDataException>(() => document.AddUsageRule(new UsageRule
+			Assert.Throws<InvalidCpixDataException>(() => document.UsageRules.Add(new UsageRule
 			{
 				KeyId = contentKey.Id,
-				AudioFilter = new AudioFilter
+				AudioFilters = new[]
 				{
-					MaxChannels = 5,
-					MinChannels = 6
+					new AudioFilter
+					{
+						MaxChannels = 5,
+						MinChannels = 6
+					}
 				}
 			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddUsageRule(new UsageRule
+			Assert.Throws<InvalidCpixDataException>(() => document.UsageRules.Add(new UsageRule
 			{
 				KeyId = contentKey.Id,
-				AudioFilter = new AudioFilter(),
-				VideoFilter = new VideoFilter()
-			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddUsageRule(new UsageRule
-			{
-				KeyId = contentKey.Id,
-				VideoFilter = new VideoFilter
+				AudioFilters = new[]
 				{
-					MaxPixels = 10,
-					MinPixels = 11
+					new AudioFilter(),
+				},
+				VideoFilters = new[]
+				{
+					new VideoFilter()
 				}
 			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddUsageRule(new UsageRule
+			Assert.Throws<InvalidCpixDataException>(() => document.UsageRules.Add(new UsageRule
 			{
 				KeyId = contentKey.Id,
-				BitrateFilter = new BitrateFilter
+				VideoFilters = new[]
 				{
-					MaxBitrate = 515145151515,
-					MinBitrate = 515145151516
+					new VideoFilter
+					{
+						MaxPixels = 10,
+						MinPixels = 11
+					}
 				}
 			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddUsageRule(new UsageRule
+			Assert.Throws<InvalidCpixDataException>(() => document.UsageRules.Add(new UsageRule
 			{
 				KeyId = contentKey.Id,
-				LabelFilter = new LabelFilter
+				BitrateFilters = new[]
 				{
-					Label = null
+					new BitrateFilter
+					{
+						MaxBitrate = 515145151515,
+						MinBitrate = 515145151516
+					}
+				}
+			}));
+			Assert.Throws<InvalidCpixDataException>(() => document.UsageRules.Add(new UsageRule
+			{
+				KeyId = contentKey.Id,
+				LabelFilters = new[]
+				{
+					new LabelFilter
+					{
+						Label = null
+					}
 				}
 			}));
 		}
@@ -126,7 +144,7 @@ namespace Tests
 		public void Save_WithSneakilyCorruptedUsageRule_Fails()
 		{
 			var document = new CpixDocument();
-			document.AddContentKey(TestHelpers.GenerateContentKey());
+			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			var rule = TestHelpers.AddUsageRule(document);
 
 			// It was validated by Add but now we corrupt it again!
@@ -139,9 +157,9 @@ namespace Tests
 		public void AddUsageRule_WithExistingSignature_Fails()
 		{
 			var document = new CpixDocument();
-			document.AddContentKey(TestHelpers.GenerateContentKey());
+			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			TestHelpers.AddUsageRule(document);
-			document.AddUsageRuleSignature(TestHelpers.PrivateAuthor1);
+			document.UsageRules.AddSignature(TestHelpers.PrivateAuthor1);
 
 			document = TestHelpers.Reload(document);
 
@@ -152,13 +170,13 @@ namespace Tests
 		public void AddUsageRule_AfterRemovingExistingSignature_Succeeds()
 		{
 			var document = new CpixDocument();
-			document.AddContentKey(TestHelpers.GenerateContentKey());
+			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			TestHelpers.AddUsageRule(document);
-			document.AddUsageRuleSignature(TestHelpers.PrivateAuthor1);
+			document.UsageRules.AddSignature(TestHelpers.PrivateAuthor1);
 
 			document = TestHelpers.Reload(document);
 
-			document.RemoveUsageRuleSignatures();
+			document.UsageRules.RemoveAllSignatures();
 			TestHelpers.AddUsageRule(document);
 		}
 	}

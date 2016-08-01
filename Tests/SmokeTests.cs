@@ -1,4 +1,5 @@
 ﻿using Axinom.Cpix;
+using System.IO;
 using System.Linq;
 using Xunit;
 
@@ -7,12 +8,56 @@ namespace Tests
 	public sealed class SmokeTests
 	{
 		[Fact]
+		public void Save_OneClearKey_DoesNotHorriblyFail()
+		{
+			var keyData = TestHelpers.GenerateKeyData();
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(new ContentKey
+			{
+				Id = keyData.Item1,
+				Value = keyData.Item2
+			});
+
+			using (var buffer = new MemoryStream())
+			{
+				document.Save(buffer);
+
+				// Something got saved and there was no exception. Good enough!
+				Assert.NotEqual(0, buffer.Length);
+			}
+		}
+
+		[Fact]
+		public void Save_OneEncryptedKey_DoesNotHorriblyFail()
+		{
+			var keyData = TestHelpers.GenerateKeyData();
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(new ContentKey
+			{
+				Id = keyData.Item1,
+				Value = keyData.Item2
+			});
+
+			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
+
+			using (var buffer = new MemoryStream())
+			{
+				document.Save(buffer);
+
+				// Something got saved and there was no exception. Good enough!
+				Assert.NotEqual(0, buffer.Length);
+			}
+		}
+
+		[Fact]
 		public void RoundTrip_WithOneClearKey_LoadsExpectedKey()
 		{
 			var keyData = TestHelpers.GenerateKeyData();
 
 			var document = new CpixDocument();
-			document.AddContentKey(new ContentKey
+			document.ContentKeys.Add(new ContentKey
 			{
 				Id = keyData.Item1,
 				Value = keyData.Item2
@@ -34,26 +79,26 @@ namespace Tests
 			var keyData = TestHelpers.GenerateKeyData();
 
 			var document = new CpixDocument();
-			document.AddContentKey(new ContentKey
+			document.ContentKeys.Add(new ContentKey
 			{
 				Id = keyData.Item1,
 				Value = keyData.Item2
 			});
 
-			document.AddContentKeySignature(TestHelpers.PrivateAuthor1);
-			document.SetDocumentSignature(TestHelpers.PrivateAuthor1);
-			document.AddRecipient(TestHelpers.PublicRecipient1);
+			document.ContentKeys.AddSignature(TestHelpers.PrivateAuthor1);
+			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
 
 			document = TestHelpers.Reload(document, new[] { TestHelpers.PrivateRecipient1 });
 
 			Assert.Equal(1, document.ContentKeys.Count);
-			Assert.NotNull(document.DocumentSignedBy);
-			Assert.Equal(1, document.ContentKeysSignedBy.Count);
+			Assert.NotNull(document.SignedBy);
+			Assert.Equal(1, document.ContentKeys.SignedBy.Count());
 			Assert.Equal(1, document.Recipients.Count);
 
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.DocumentSignedBy.Thumbprint);
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.ContentKeysSignedBy.Single().Thumbprint);
-			Assert.Equal(TestHelpers.PrivateRecipient1.Thumbprint, document.Recipients.Single().Thumbprint);
+			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.SignedBy.Thumbprint);
+			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.ContentKeys.SignedBy.Single().Thumbprint);
+			Assert.Equal(TestHelpers.PrivateRecipient1.Thumbprint, document.Recipients.Single().Certificate.Thumbprint);
 
 			var key = document.ContentKeys.Single();
 			Assert.Equal(keyData.Item1, key.Id);

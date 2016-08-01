@@ -48,7 +48,7 @@ namespace Tests
 				KeyId = contentKey.Id
 			};
 
-			document.AddUsageRule(rule);
+			document.UsageRules.Add(rule);
 
 			return rule;
 		}

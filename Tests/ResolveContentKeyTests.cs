@@ -12,7 +12,7 @@ namespace Tests
 			var key = TestHelpers.GenerateContentKey();
 
 			var document = new CpixDocument();
-			document.AddContentKey(key);
+			document.ContentKeys.Add(key);
 
 			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new SampleDescription()));
 		}
@@ -23,14 +23,14 @@ namespace Tests
 			var key = TestHelpers.GenerateContentKey();
 
 			var document = new CpixDocument();
-			document.AddContentKey(key);
+			document.ContentKeys.Add(key);
 
 			// Two rules that match all samples - resolving a key will never work with this document.
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = key.Id
 			});
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = key.Id
 			});
@@ -44,12 +44,15 @@ namespace Tests
 			var key = TestHelpers.GenerateContentKey();
 
 			var document = new CpixDocument();
-			document.AddContentKey(key);
+			document.ContentKeys.Add(key);
 
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = key.Id,
-				AudioFilter = new AudioFilter()
+				AudioFilters = new[]
+				{
+					new AudioFilter()
+				}
 			});
 
 			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new SampleDescription
@@ -64,12 +67,15 @@ namespace Tests
 			var key = TestHelpers.GenerateContentKey();
 
 			var document = new CpixDocument();
-			document.AddContentKey(key);
+			document.ContentKeys.Add(key);
 
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = key.Id,
-				AudioFilter = new AudioFilter()
+				AudioFilters = new[]
+				{
+					new AudioFilter()
+				}
 			});
 
 			Assert.Equal(key, document.ResolveContentKey(new SampleDescription
@@ -88,58 +94,73 @@ namespace Tests
 			var highValueAudio = TestHelpers.GenerateContentKey();
 
 			var document = new CpixDocument();
-			document.AddContentKey(lowValuePeriod1);
-			document.AddContentKey(mediumValuePeriod1);
-			document.AddContentKey(highValuePeriod1);
-			document.AddContentKey(lowValueAudio);
-			document.AddContentKey(highValueAudio);
+			document.ContentKeys.Add(lowValuePeriod1);
+			document.ContentKeys.Add(mediumValuePeriod1);
+			document.ContentKeys.Add(highValuePeriod1);
+			document.ContentKeys.Add(lowValueAudio);
+			document.ContentKeys.Add(highValueAudio);
 
 			const int mediumValuePixelCount = 1280 * 720;
 			const int highValuePixelCount = 1920 * 1080;
 
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = lowValuePeriod1.Id,
-				VideoFilter = new VideoFilter
+				VideoFilters = new[]
 				{
-					MaxPixels = mediumValuePixelCount - 1
+					new VideoFilter
+					{
+						MaxPixels = mediumValuePixelCount - 1
+					}
 				}
 			});
 
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = mediumValuePeriod1.Id,
-				VideoFilter = new VideoFilter
+				VideoFilters = new[]
 				{
-					MinPixels = mediumValuePixelCount,
-					MaxPixels = highValuePixelCount - 1
+					new VideoFilter
+					{
+						MinPixels = mediumValuePixelCount,
+						MaxPixels = highValuePixelCount - 1
+					}
 				}
 			});
 
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = highValuePeriod1.Id,
-				VideoFilter = new VideoFilter
+				VideoFilters = new[]
 				{
-					MinPixels = highValuePixelCount
+					new VideoFilter
+					{
+						MinPixels = highValuePixelCount
+					}
 				}
 			});
 
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = lowValueAudio.Id,
-				AudioFilter = new AudioFilter
+				AudioFilters = new[]
 				{
-					MaxChannels = 2
+					new AudioFilter
+					{
+						MaxChannels = 2
+					}
 				}
 			});
 
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = highValueAudio.Id,
-				AudioFilter = new AudioFilter
+				AudioFilters = new[]
 				{
-					MinChannels = 3
+					new AudioFilter
+					{
+						MinChannels = 3
+					}
 				}
 			});
 
@@ -205,34 +226,49 @@ namespace Tests
 			var key3 = TestHelpers.GenerateContentKey();
 
 			var document = new CpixDocument();
-			document.AddContentKey(key1);
-			document.AddContentKey(key2);
-			document.AddContentKey(key3);
+			document.ContentKeys.Add(key1);
+			document.ContentKeys.Add(key2);
+			document.ContentKeys.Add(key3);
 
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = key1.Id,
-				AudioFilter = new AudioFilter(),
-				LabelFilter = new LabelFilter
+				AudioFilters = new[]
 				{
-					Label = "label1"
+					new AudioFilter(),
+				},
+				LabelFilters = new[]
+				{
+					new LabelFilter
+					{
+						Label = "label1"
+					}
 				}
 			});
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = key2.Id,
-				VideoFilter = new VideoFilter(),
-				LabelFilter = new LabelFilter
+				VideoFilters = new[]
 				{
-					Label = "label2"
+					new VideoFilter(),
+				},
+				LabelFilters = new[]
+				{
+					new LabelFilter
+					{
+						Label = "label2"
+					}
 				}
 			});
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = key3.Id,
-				LabelFilter = new LabelFilter
+				LabelFilters = new[]
 				{
-					Label = "label3"
+					new LabelFilter
+					{
+						Label = "label3"
+					}
 				}
 			});
 

@@ -49,30 +49,35 @@
     <Compile Include="..\Resources\SolutionAssemblyInfo.cs">
       <Link>Properties\SolutionAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Compatibility\CngSha512RSAPKCS1SignatureFormatter.cs" />
-    <Compile Include="Document.cs" />
-    <Compile Include="Entity.cs" />
-    <Compile Include="EntityCollection.cs" />
-    <Compile Include="UsageRule.cs" />
     <Compile Include="AudioFilter.cs" />
     <Compile Include="BitrateFilter.cs" />
+    <Compile Include="Compatibility\CngSha512RSAPKCS1SignatureFormatter.cs" />
+    <Compile Include="ContentKey.cs" />
+    <Compile Include="ContentKeyCollection.cs" />
+    <Compile Include="CpixDocument.cs" />
+    <Compile Include="CryptographyHelpers.cs" />
+    <Compile Include="EntityCollection.cs" />
     <Compile Include="Compatibility\RSAPKCS1SHA512SignatureDescription.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="ContentKey.cs" />
     <Compile Include="ContentKeyResolveException.cs" />
-    <Compile Include="CpixDocument.cs" />
-    <Compile Include="InvalidCpixDataException.cs" />
-    <Compile Include="DocumentModel\XmlElements.cs" />
-    <Compile Include="IUsageRule.cs" />
     <Compile Include="IAudioFilter.cs" />
     <Compile Include="IBitrateFilter.cs" />
     <Compile Include="IContentKey.cs" />
     <Compile Include="ILabelFilter.cs" />
-    <Compile Include="LabelFilter.cs" />
+    <Compile Include="InvalidCpixDataException.cs" />
+    <Compile Include="DocumentModel\XmlElements.cs" />
+    <Compile Include="IRecipient.cs" />
+    <Compile Include="IUsageRule.cs" />
     <Compile Include="IVideoFilter.cs" />
+    <Compile Include="LabelFilter.cs" />
+    <Compile Include="Recipient.cs" />
+    <Compile Include="RecipientCollection.cs" />
     <Compile Include="SampleDescription.cs" />
     <Compile Include="SampleType.cs" />
+    <Compile Include="UsageRule.cs" />
+    <Compile Include="UsageRuleCollection.cs" />
     <Compile Include="VideoFilter.cs" />
+    <Compile Include="XmlHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Resources\Schema\cpix.xsd">

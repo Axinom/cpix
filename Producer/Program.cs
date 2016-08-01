@@ -27,37 +27,37 @@ namespace Producer
 
 			#region Example: ClearKeys.xml
 			var document = new CpixDocument();
-			document.AddContentKey(GenerateNewKey());
-			document.AddContentKey(GenerateNewKey());
+			document.ContentKeys.Add(GenerateNewKey());
+			document.ContentKeys.Add(GenerateNewKey());
 			samples.Add(new Tuple<string, CpixDocument>("ClearKeys.xml", document));
 			#endregion
 
 			#region Example: Signed.xml
 			document = new CpixDocument();
-			document.AddContentKey(GenerateNewKey());
-			document.AddContentKey(GenerateNewKey());
-			document.AddContentKeySignature(signerCertificate1);
-			document.SetDocumentSignature(signerCertificate1);
+			document.ContentKeys.Add(GenerateNewKey());
+			document.ContentKeys.Add(GenerateNewKey());
+			document.ContentKeys.AddSignature(signerCertificate1);
+			document.SignedBy = signerCertificate1;
 			samples.Add(new Tuple<string, CpixDocument>("Signed.xml", document));
 			#endregion
 
 			#region Example: Encrypted.xml
 			document = new CpixDocument();
-			document.AddContentKey(GenerateNewKey());
-			document.AddContentKey(GenerateNewKey());
-			document.AddRecipient(recipientCertificate1);
-			document.AddRecipient(recipientCertificate2);
+			document.ContentKeys.Add(GenerateNewKey());
+			document.ContentKeys.Add(GenerateNewKey());
+			document.Recipients.Add(new Recipient(recipientCertificate1));
+			document.Recipients.Add(new Recipient(recipientCertificate2));
 			samples.Add(new Tuple<string, CpixDocument>("Encrypted.xml", document));
 			#endregion
 
 			#region Example: EncryptedAndSigned.xml
 			document = new CpixDocument();
-			document.AddContentKey(GenerateNewKey());
-			document.AddContentKey(GenerateNewKey());
-			document.AddRecipient(recipientCertificate1);
-			document.AddRecipient(recipientCertificate2);
-			document.AddContentKeySignature(signerCertificate1);
-			document.SetDocumentSignature(signerCertificate1);
+			document.ContentKeys.Add(GenerateNewKey());
+			document.ContentKeys.Add(GenerateNewKey());
+			document.Recipients.Add(new Recipient(recipientCertificate1));
+			document.Recipients.Add(new Recipient(recipientCertificate2));
+			document.ContentKeys.AddSignature(signerCertificate1);
+			document.SignedBy = signerCertificate1;
 			samples.Add(new Tuple<string, CpixDocument>("EncryptedAndSigned.xml", document));
 			#endregion
 
@@ -72,41 +72,50 @@ namespace Producer
 			var period1Start = new DateTimeOffset(2016, 6, 6, 6, 10, 0, TimeSpan.Zero);
 			var period2Start = period1Start + periodDuration;
 
-			document.AddContentKey(lowValueKeyPeriod1);
-			document.AddContentKey(highValueKeyPeriod1);
-			document.AddContentKey(audioKey);
+			document.ContentKeys.Add(lowValueKeyPeriod1);
+			document.ContentKeys.Add(highValueKeyPeriod1);
+			document.ContentKeys.Add(audioKey);
 
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = lowValueKeyPeriod1.Id,
 
-				VideoFilter = new VideoFilter
+				VideoFilters = new[]
 				{
-					MaxPixels = 1280 * 720 - 1
+					new VideoFilter
+					{
+						MaxPixels = 1280 * 720 - 1
+					}
 				}
 			});
 
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = highValueKeyPeriod1.Id,
 
-				VideoFilter = new VideoFilter
+				VideoFilters = new[]
 				{
-					MinPixels = 1280 * 720
+					new VideoFilter
+					{
+						MinPixels = 1280 * 720
+					}
 				}
 			});
 			
-			document.AddUsageRule(new UsageRule
+			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = audioKey.Id,
-				AudioFilter = new AudioFilter()
+				AudioFilters = new[]
+				{
+					new AudioFilter()
+				}
 			});
 
-			document.AddRecipient(recipientCertificate1);
-			document.AddRecipient(recipientCertificate2);
-			document.AddContentKeySignature(signerCertificate1);
-			document.AddUsageRuleSignature(signerCertificate2);
-			document.SetDocumentSignature(signerCertificate2);
+			document.Recipients.Add(new Recipient(recipientCertificate1));
+			document.Recipients.Add(new Recipient(recipientCertificate2));
+			document.ContentKeys.AddSignature(signerCertificate1);
+			document.UsageRules.AddSignature(signerCertificate2);
+			document.SignedBy = signerCertificate2;
 			samples.Add(new Tuple<string, CpixDocument>("WithRulesAndEncryptedAndSigned.xml", document)); 
 			#endregion
 

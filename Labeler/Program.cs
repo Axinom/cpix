@@ -21,10 +21,10 @@ namespace Labeler
 
 			// We will sign document as a whole ourselves, overwriting any existing signature.
 			// This makes everything else modifiable - without this, everything is read-only if it is already signed.
-			document.SetDocumentSignature(myCertificate);
+			document.SignedBy = myCertificate;
 
 			// Remove any signatures that cover the rules, as we are about to modify things.
-			document.RemoveUsageRuleSignatures();
+			document.UsageRules.RemoveAllSignatures();
 
 			var labels = new[]
 			{
@@ -41,19 +41,22 @@ namespace Labeler
 
 			foreach (var label in labels)
 			{
-				document.AddUsageRule(new UsageRule
+				document.UsageRules.Add(new UsageRule
 				{
 					// Just pick a random content key for each label, for sample purposes.
 					KeyId = document.ContentKeys.Skip(random.Next(document.ContentKeys.Count)).First().Id,
-					LabelFilter = new LabelFilter
+					LabelFilters = new[]
 					{
-						Label = label
+						new LabelFilter
+						{
+							Label = label
+						}
 					}
 				});
 			}
 
 			// We will then sign the created rules ourselves.
-			document.AddUsageRuleSignature(myCertificate);
+			document.UsageRules.AddSignature(myCertificate);
 
 			using (var file = File.Create("out.xml"))
 				document.Save(file);

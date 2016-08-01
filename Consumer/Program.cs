@@ -23,17 +23,17 @@ namespace Consumer
 				var cpix = CpixDocument.Load(file, new[] { recipientCertificate1 });
 
 				// Comment there exceptions out for testing with different test files.
-				if (cpix.DocumentSignedBy == null || cpix.DocumentSignedBy.Thumbprint != trustedDocumentSignerCertificate.Thumbprint)
+				if (cpix.SignedBy == null || cpix.SignedBy.Thumbprint != trustedDocumentSignerCertificate.Thumbprint)
 				{
 					//throw new SecurityException("The CPIX document is not signed by a trusted entity!");
 				}
 
-				if (!cpix.ContentKeysSignedBy.Any(c => c.Thumbprint == trustedContentKeySignerCertificate.Thumbprint))
+				if (!cpix.ContentKeys.SignedBy.Any(c => c.Thumbprint == trustedContentKeySignerCertificate.Thumbprint))
 				{
 					//throw new SecurityException("The content keys in this CPIX document are not signed by a trusted entity!");
 				}
 
-				if (cpix.UsageRules.Count != 0 && !cpix.UsageRulesSignedBy.Any(c => c.Thumbprint == trustedRulesSignerCertificate.Thumbprint))
+				if (cpix.UsageRules.Count != 0 && !cpix.UsageRules.SignedBy.Any(c => c.Thumbprint == trustedRulesSignerCertificate.Thumbprint))
 				{
 					throw new SecurityException("The content key assignment rules in this CPIX document are not signed by a trusted entity!");
 				}

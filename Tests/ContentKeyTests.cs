@@ -19,11 +19,11 @@ namespace Tests
 		public void AddContentKey_WithLoadedDocument_Fails()
 		{
 			var document = new CpixDocument();
-			document.AddContentKey(TestHelpers.GenerateContentKey());
+			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 
 			document = TestHelpers.Reload(document);
 
-			Assert.Throws<InvalidOperationException>(() => document.AddContentKey(TestHelpers.GenerateContentKey()));
+			Assert.Throws<InvalidOperationException>(() => document.ContentKeys.Add(TestHelpers.GenerateContentKey()));
 		}
 
 		[Fact]
@@ -31,27 +31,27 @@ namespace Tests
 		{
 			var document = new CpixDocument();
 
-			Assert.Throws<InvalidCpixDataException>(() => document.AddContentKey(new ContentKey
+			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeys.Add(new ContentKey
 			{
 				Id = Guid.Empty,
 				Value = new byte[16]
 			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddContentKey(new ContentKey
+			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeys.Add(new ContentKey
 			{
 				Id = Guid.NewGuid(),
 				Value = new byte[15]
 			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddContentKey(new ContentKey
+			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeys.Add(new ContentKey
 			{
 				Id = Guid.NewGuid(),
 				Value = new byte[17]
 			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddContentKey(new ContentKey
+			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeys.Add(new ContentKey
 			{
 				Id = Guid.NewGuid(),
 				Value = new byte[0]
 			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.AddContentKey(new ContentKey
+			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeys.Add(new ContentKey
 			{
 				Id = Guid.NewGuid(),
 				Value = null
@@ -64,7 +64,7 @@ namespace Tests
 			var contentKey = TestHelpers.GenerateContentKey();
 
 			var document = new CpixDocument();
-			document.AddContentKey(contentKey);
+			document.ContentKeys.Add(contentKey);
 
 			// Corrupt it!
 			contentKey.Value = null;
@@ -78,9 +78,9 @@ namespace Tests
 			var contentKey = TestHelpers.GenerateContentKey();
 
 			var document = new CpixDocument();
-			document.AddContentKey(contentKey);
+			document.ContentKeys.Add(contentKey);
 
-			Assert.Throws<ArgumentException>(() => document.AddContentKey(contentKey));
+			Assert.Throws<ArgumentException>(() => document.ContentKeys.Add(contentKey));
 		}
 	}
 }

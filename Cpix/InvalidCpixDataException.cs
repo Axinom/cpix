@@ -2,6 +2,9 @@
 
 namespace Axinom.Cpix
 {
+	/// <summary>
+	/// Thrown when some loaded or supplied data is not suitable for use in a well-formed CPIX document.
+	/// </summary>
 	[Serializable]
 	public class InvalidCpixDataException : Exception
 	{
