@@ -141,7 +141,7 @@
 	<xs:complexType name="CpixType">
 		<xs:sequence>
 			<xs:element name="DeliveryDataList" type="cpix:DeliveryDataListType" minOccurs="0"/>
-			<xs:element name="ContentKeyList" type="cpix:ContentKeyListType"/>
+			<xs:element name="ContentKeyList" type="cpix:ContentKeyListType" minOccurs="0"/>
 			<xs:element name="DRMSystemList" type="cpix:DRMSystemListType" minOccurs="0"/>
 			<xs:element name="ContentKeyPeriodList" type="cpix:ContentKeyPeriodListType" minOccurs="0"/>
 			<xs:element name="ContentKeyUsageRuleList" type="cpix:ContentKeyUsageRuleListType" minOccurs="0"/>

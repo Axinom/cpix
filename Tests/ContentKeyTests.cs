@@ -8,11 +8,11 @@ namespace Tests
 	public sealed class ContentKeyTests
 	{
 		[Fact]
-		public void Save_WithNoKeys_Fails()
+		public void Save_WithNoKeys_Succeeds()
 		{
 			var document = new CpixDocument();
 
-			Assert.Throws<InvalidOperationException>(() => document.Save(new MemoryStream()));
+			document.Save(new MemoryStream());
 		}
 
 		[Fact]
