@@ -17,7 +17,17 @@ namespace Axinom.Cpix
 		/// <summary>
 		/// Gets whether the content key is an existing encrypted content key.
 		/// </summary>
-		internal bool IsExistingEncryptedKey { get; }
+		internal bool IsExistingEncryptedKey { get; set; }
+
+		internal override void ValidateExistingEntity()
+		{
+			if (Id == Guid.Empty)
+				throw new InvalidCpixDataException("A unique key ID must be provided for each content key.");
+
+			// We skip length check if we do not have a value for an encrypted key (it will be read-only).
+			if (IsExistingEncryptedKey && Value != null && Value.Length != Constants.ContentKeyLengthInBytes)
+				throw new InvalidCpixDataException($"A {Constants.ContentKeyLengthInBytes}-byte value must be provided for each new content key.");
+		}
 
 		internal override void ValidateNewEntity()
 		{

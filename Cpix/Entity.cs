@@ -12,5 +12,10 @@
 		/// Validates that the current state of the entity is valid for a newly created/added entity.
 		/// </summary>
 		internal abstract void ValidateNewEntity();
+
+		/// <summary>
+		/// Validates that the current state of the entity is valid for a loaded existing entity.
+		/// </summary>
+		internal abstract void ValidateExistingEntity();
 	}
 }

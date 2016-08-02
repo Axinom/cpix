@@ -1,6 +1,7 @@
 ﻿using Axinom.Cpix;
 using System;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace Tests
@@ -8,22 +9,28 @@ namespace Tests
 	public sealed class ContentKeyTests
 	{
 		[Fact]
-		public void Save_WithNoKeys_Succeeds()
+		public void AddContentKey_WithLoadedEmptyDocument_Succeeds()
 		{
 			var document = new CpixDocument();
+			document = TestHelpers.Reload(document);
 
-			document.Save(new MemoryStream());
+			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document = TestHelpers.Reload(document);
+
+			Assert.Equal(1, document.ContentKeys.Count);
 		}
 
 		[Fact]
-		public void AddContentKey_WithLoadedDocument_Fails()
+		public void AddContentKey_WithLoadedDocumentAndExistingContentKey_Succeeds()
 		{
 			var document = new CpixDocument();
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-
 			document = TestHelpers.Reload(document);
 
-			Assert.Throws<InvalidOperationException>(() => document.ContentKeys.Add(TestHelpers.GenerateContentKey()));
+			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document = TestHelpers.Reload(document);
+
+			Assert.Equal(2, document.ContentKeys.Count);
 		}
 
 		[Fact]
@@ -64,11 +71,13 @@ namespace Tests
 			var contentKey = TestHelpers.GenerateContentKey();
 
 			var document = new CpixDocument();
+			// It will be validated here.
 			document.ContentKeys.Add(contentKey);
 
-			// Corrupt it!
+			// Corrupt it after validation!
 			contentKey.Value = null;
 
+			// The corruption should still be caught.
 			Assert.Throws<InvalidCpixDataException>(() => document.Save(new MemoryStream()));
 		}
 
@@ -80,7 +89,61 @@ namespace Tests
 			var document = new CpixDocument();
 			document.ContentKeys.Add(contentKey);
 
+			// Same instance.
 			Assert.Throws<ArgumentException>(() => document.ContentKeys.Add(contentKey));
+
+			// Same ID but different instance.
+			Assert.ThrowsAny<Exception>(() => document.ContentKeys.Add(new ContentKey
+			{
+				Id = contentKey.Id,
+				Value = contentKey.Value
+			}));
+		}
+
+		[Fact]
+		public void RemoveContentKey_WithNewWritableCollection_Succeeds()
+		{
+			var contentKey = TestHelpers.GenerateContentKey();
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(contentKey);
+			document.ContentKeys.Remove(contentKey);
+		}
+
+		[Fact]
+		public void RemoveContentKey_WithLoadedWritableCollection_Succeeds()
+		{
+			var contentKey = TestHelpers.GenerateContentKey();
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(contentKey);
+
+			document = TestHelpers.Reload(document);
+
+			document.ContentKeys.Remove(document.ContentKeys.Single());
+		}
+
+		[Fact]
+		public void RemoveContentKey_WithUnknownContentKey_Succeeds()
+		{
+			var contentKey = TestHelpers.GenerateContentKey();
+
+			var document = new CpixDocument();
+			document.ContentKeys.Remove(contentKey);
+		}
+
+		[Fact]
+		public void RoundTrip_WithSignedCollection_Succeeds()
+		{
+			var contentKey = TestHelpers.GenerateContentKey();
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(contentKey);
+			document.ContentKeys.AddSignature(TestHelpers.PrivateAuthor1);
+
+			document = TestHelpers.Reload(document);
+
+			Assert.Equal(1, document.ContentKeys.Count);
 		}
 	}
 }

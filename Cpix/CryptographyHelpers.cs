@@ -78,7 +78,6 @@ namespace Axinom.Cpix
 					SigningKey = signingKey
 				};
 
-
 				// Add each content key assignment rule element as a reference to sign.
 				var whatToSign = new Reference
 				{
@@ -98,9 +97,6 @@ namespace Axinom.Cpix
 				{
 					// Sign one specific element.
 					whatToSign.Uri = "#" + elementToSignId;
-
-					// Just some arbitrary transform. It... works.
-					whatToSign.AddTransform(new XmlDsigC14NTransform());
 				}
 
 				signedXml.AddReference(whatToSign);

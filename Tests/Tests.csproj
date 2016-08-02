@@ -60,6 +60,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SigningInteractionTests.cs" />
     <Compile Include="UsageRuleTests.cs" />
     <Compile Include="ContentKeyTests.cs" />
     <Compile Include="EncryptionTests.cs" />

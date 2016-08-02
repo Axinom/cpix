@@ -75,6 +75,7 @@
     <Compile Include="RecipientCollection.cs" />
     <Compile Include="SampleDescription.cs" />
     <Compile Include="SampleType.cs" />
+    <Compile Include="EntityCollectionBase.cs" />
     <Compile Include="UsageRule.cs" />
     <Compile Include="UsageRuleCollection.cs" />
     <Compile Include="VideoFilter.cs" />

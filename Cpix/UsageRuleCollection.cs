@@ -13,7 +13,12 @@ namespace Axinom.Cpix
 		{
 		}
 
-		protected override string ContainerName => "ContentKeyUsageRuleList";
+		internal override string ContainerName => "ContentKeyUsageRuleList";
+
+		protected override UsageRule DeserializeEntity(XmlElement element, XmlNamespaceManager namespaces)
+		{
+			throw new NotImplementedException();
+		}
 
 		protected override XmlElement SerializeEntity(XmlDocument document, XmlNamespaceManager namespaces, XmlElement container, UsageRule entity)
 		{

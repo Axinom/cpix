@@ -24,5 +24,10 @@ namespace Axinom.Cpix
 		{
 			throw new NotImplementedException();
 		}
+
+		internal override void ValidateExistingEntity()
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

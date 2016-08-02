@@ -8,6 +8,34 @@ namespace Tests
 	public sealed class SmokeTests
 	{
 		[Fact]
+		public void NewDocument_CreatesEmptyDocument()
+		{
+			var document = new CpixDocument();
+
+			Assert.True(document.ContentKeysAreReadable);
+			Assert.False(document.IsReadOnly);
+			Assert.Null(document.SignedBy);
+			Assert.Equal(0, document.Recipients.Count);
+			Assert.Equal(0, document.ContentKeys.Count);
+			Assert.Equal(0, document.UsageRules.Count);
+		}
+
+		[Fact]
+		public void SaveAndLoad_EmptyDocument_Succeeds()
+		{
+			var document = new CpixDocument();
+
+			document = TestHelpers.Reload(document);
+
+			Assert.True(document.ContentKeysAreReadable);
+			Assert.False(document.IsReadOnly);
+			Assert.Null(document.SignedBy);
+			Assert.Equal(0, document.Recipients.Count);
+			Assert.Equal(0, document.ContentKeys.Count);
+			Assert.Equal(0, document.UsageRules.Count);
+		}
+
+		[Fact]
 		public void Save_OneClearKey_DoesNotHorriblyFail()
 		{
 			var keyData = TestHelpers.GenerateKeyData();
@@ -74,7 +102,7 @@ namespace Tests
 		}
 
 		[Fact]
-		public void RoundTrip_WithOneKeyEncryptedAndSigned_LadsExpectedKeyAndDetectsIdentities()
+		public void RoundTrip_WithOneKeyEncryptedAndSigned_LoadsExpectedKeyAndDetectsIdentities()
 		{
 			var keyData = TestHelpers.GenerateKeyData();
 

@@ -13,18 +13,18 @@ namespace Axinom.Cpix
 		{
 		}
 
-		protected override string ContainerName => "DeliveryDataList";
+		internal override string ContainerName => "DeliveryDataList";
 
 		protected override XmlElement SerializeEntity(XmlDocument document, XmlNamespaceManager namespaces, XmlElement container, Recipient entity)
 		{
 			var recipientRsa = entity.Certificate.GetRSAPublicKey();
 
 			// Ensure that we have the document-scoped cryptographic material available.
-			if (_document.DocumentKey == null)
-				_document.GenerateKeys();
+			if (Document.DocumentKey == null)
+				Document.GenerateKeys();
 
-			var encryptedDocumentKey = recipientRsa.Encrypt(_document.DocumentKey, RSAEncryptionPadding.OaepSHA1);
-			var encryptedMacKey = recipientRsa.Encrypt(_document.MacKey, RSAEncryptionPadding.OaepSHA1);
+			var encryptedDocumentKey = recipientRsa.Encrypt(Document.DocumentKey, RSAEncryptionPadding.OaepSHA1);
+			var encryptedMacKey = recipientRsa.Encrypt(Document.MacKey, RSAEncryptionPadding.OaepSHA1);
 
 			var element = new DeliveryDataElement
 			{
@@ -76,6 +76,38 @@ namespace Axinom.Cpix
 			return XmlHelpers.InsertXmlObject(element, document, container);
 		}
 
+		protected override Recipient DeserializeEntity(XmlElement element, XmlNamespaceManager namespaces)
+		{
+			// First, just extract the X.509 certificate. It must exist or we will consider the delivery data invalid.
+			var certificateNode = element.SelectSingleNode("cpix:DeliveryKey/ds:X509Data/ds:X509Certificate", namespaces);
+
+			if (certificateNode == null)
+				throw new InvalidCpixDataException("Found a delivery data element with no X.509 certificate embedded. This is not supported.");
+
+			var certificate = new X509Certificate2(Convert.FromBase64String(certificateNode.InnerText));
+
+			// If we do not already have the document secrets available, try to load them.
+			if (Document.DocumentKey == null)
+			{
+				var matchingRecipientCertificate = Document.RecipientCertificates.FirstOrDefault(c => c.Thumbprint == certificate.Thumbprint);
+
+				if (matchingRecipientCertificate != null)
+				{
+					// Yes, we have a delivery key! Use this delivery key to load the delivery data.
+					var deliveryData = XmlHelpers.XmlElementToXmlDeserialized<DeliveryDataElement>(element);
+					deliveryData.LoadTimeValidate();
+
+					var rsa = matchingRecipientCertificate.GetRSAPrivateKey();
+					var macKey = rsa.Decrypt(deliveryData.MacMethod.Key.CipherData.CipherValue, RSAEncryptionPadding.OaepSHA1);
+					var documentKey = rsa.Decrypt(deliveryData.DocumentKey.Data.Secret.EncryptedValue.CipherData.CipherValue, RSAEncryptionPadding.OaepSHA1);
+
+					Document.ImportKeys(documentKey, macKey);
+				}
+			}
+
+			return new Recipient(certificate);
+		}
+
 		protected override void ValidateCollectionStateBeforeAdd(Recipient entity)
 		{
 			base.ValidateCollectionStateBeforeAdd(entity);
@@ -85,7 +117,7 @@ namespace Axinom.Cpix
 
 			// If there were no recipients before and we just added one, this means that keys will from now on be encrypted.
 			// We thus need to make sure that all keys are new keys - existing keys that remain clear are not tolerable!
-			if (!AllItems.Any() && _document.ContentKeys.ExistingItems.Any())
+			if (!AllItems.Any() && Document.ContentKeys.ExistingItems.Any())
 				throw new InvalidOperationException("You cannot add a recipient to a CPIX document that contains loaded clear content keys. If you wish to encrypt all such keys, you must first remove and re-add them to the document to signal that intent.");
 		}
 
@@ -94,7 +126,7 @@ namespace Axinom.Cpix
 			base.ValidateCollectionStateBeforeSave();
 
 			// If there are no recipients but the document contains existing encrypted content keys, they will remain encrypted.
-			if (!AllItems.Any() && _document.ContentKeys.ExistingItems.Any(key => key.IsExistingEncryptedKey))
+			if (!AllItems.Any() && Document.ContentKeys.ExistingItems.Any(key => key.IsExistingEncryptedKey))
 				throw new InvalidOperationException("You cannot remove all recipients from a CPIX document that contains loaded encrypted content keys. If you wish to convert all such keys to clear keys, you must first remove and re-add them to the document to signal that intent.");
 		}
 	}

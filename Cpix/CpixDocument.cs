@@ -3,9 +3,12 @@ using Axinom.Cpix.DocumentModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Xml;
 using System.Xml.Schema;
@@ -57,7 +60,7 @@ namespace Axinom.Cpix
 		/// This is always true for new documents. This may be false for loaded documents
 		/// if the content keys are encrypted and we do not possess any of the delivery keys.
 		/// </summary>
-		public bool ContentKeysAreReadable { get; private set; } = true;
+		public bool ContentKeysAreReadable => Recipients.ExistingItems.Count() == 0 || DocumentKey != null;
 
 		/// <summary>
 		/// Gets whether the document is read-only.
@@ -129,9 +132,8 @@ namespace Axinom.Cpix
 				throw new ArgumentNullException(nameof(stream));
 
 			// Validate all the entity collections.
-			Recipients.ValidateCollectionStateBeforeSave();
-			ContentKeys.ValidateCollectionStateBeforeSave();
-			UsageRules.ValidateCollectionStateBeforeSave();
+			foreach (var collection in EntityCollections)
+				collection.ValidateCollectionStateBeforeSave();
 
 			// Saving is a multi - phase process:
 			// 1) Create a new XML document, if needed. If we are working with a loaded document, we just use the existing one.
@@ -145,17 +147,19 @@ namespace Axinom.Cpix
 			// 7) Validate the document against schema to ensure that we did not accidetally generate invalid CPIX.
 			// 8) Serialize the XML document to file (everything above happens in-memory).
 
-			XmlDocument document = _loadedXml ?? CreateNewXmlDocument();
-			XmlNamespaceManager namespaces = CreateNamespaceManager(document);
+			if (_xmlDocument == null)
+			{
+				_xmlDocument = CreateNewXmlDocument();
+				_namespaceManager = CreateNamespaceManager(_xmlDocument);
+			}
 
-			Recipients.SaveChanges(document, namespaces);
-			ContentKeys.SaveChanges(document, namespaces);
-			UsageRules.SaveChanges(document, namespaces);
+			foreach (var collection in EntityCollections)
+				collection.SaveChanges(_xmlDocument, _namespaceManager);
 
 			// Sign the document!
 			if (_desiredSignedBy != null)
 			{
-				var signature = CryptographyHelpers.SignXmlElement(document, "", _desiredSignedBy);
+				var signature = CryptographyHelpers.SignXmlElement(_xmlDocument, "", _desiredSignedBy);
 				_documentSignature = new Tuple<XmlElement, X509Certificate2>(signature, _desiredSignedBy);
 				_desiredSignedBy = null;
 			}
@@ -173,32 +177,22 @@ namespace Axinom.Cpix
 					Encoding = Encoding.UTF8
 				}))
 				{
-					document.Save(writer);
+					_xmlDocument.Save(writer);
 				}
 
-				buffer.Position = 0;
-
-				// To validate the output, we read it into a new temporary XmlDocument.
-				var settings = new XmlReaderSettings
-				{
-					ValidationType = ValidationType.Schema
-				};
-				settings.Schemas.Add(_schemaSet);
-
-				var validationDocument = new XmlDocument();
-
-				// This will throw if there are schema errors.
-				validationDocument.Load(XmlReader.Create(buffer, settings));
-
+				XmlHelpers.ValidateDocumentAgainstSchema(buffer, _schemaSet);
+				
 				// Success! Copy our buffer to the output stream.
-				buffer.Position = 0;
 				buffer.CopyTo(stream);
 			}
 		}
 
 		private XmlDocument CreateNewXmlDocument()
 		{
-			return XmlHelpers.XmlObjectToXmlDocument(new DocumentRootElement());
+			var document = XmlHelpers.XmlObjectToXmlDocument(new DocumentRootElement());
+			document.Schemas = _schemaSet;
+
+			return document;
 		}
 
 		/// <summary>
@@ -211,7 +205,38 @@ namespace Axinom.Cpix
 		/// </remarks>
 		public static CpixDocument Load(Stream stream, IReadOnlyCollection<X509Certificate2> recipientCertificates = null)
 		{
-			throw new NotImplementedException();
+			if (stream == null)
+				throw new ArgumentNullException(nameof(stream));
+
+			if (recipientCertificates != null)
+				foreach (var certificate in recipientCertificates)
+					CryptographyHelpers.ValidateRecipientCertificateAndPrivateKey(certificate);
+
+			XmlHelpers.ValidateDocumentAgainstSchema(stream, _schemaSet);
+
+			var xmlDocument = new XmlDocument();
+			xmlDocument.Load(stream);
+
+			if (xmlDocument.DocumentElement?.Name != "CPIX" || xmlDocument.DocumentElement?.NamespaceURI != Constants.CpixNamespace)
+				throw new InvalidCpixDataException("The provided XML file does not appear to be a CPIX document - the name of the root element is incorrect.");
+
+			// We will fill this instance with the loaded data.
+			var document = new CpixDocument(xmlDocument, recipientCertificates);
+
+			// Verify all signatures in the document.
+			// If any signatures match one of the "known" scopes (a collection or the document), remember it.
+			document.VerifyAllSignaturesAndRememberSigners();
+
+			// Now load all the entity collections, doing the relevant logic at each step.
+			foreach (var collection in document.EntityCollections)
+				collection.Load(xmlDocument, document._namespaceManager);
+
+			// And finally, do some basic sanity checking. We do this after load to ensure any cross-validation can be done.
+			foreach (var collection in document.EntityCollections)
+				collection.ValidateCollectionStateAfterLoad();
+
+			// Sounds good to go!
+			return document;
 		}
 
 		public CpixDocument()
@@ -221,24 +246,11 @@ namespace Axinom.Cpix
 			UsageRules = new UsageRuleCollection(this);
 		}
 
-		#region Implementation details
-		private CpixDocument(XmlDocument loadedXml) : this()
-		{
-			if (loadedXml == null)
-				throw new ArgumentNullException(nameof(loadedXml));
-
-			_loadedXml = loadedXml;
-		}
-
-		// If this instance is not a new document, this references the XML structure it is based upon. The XML structure will
-		// be modified live when anything is removed, though add operations are only serialized on Save().
-		private XmlDocument _loadedXml;
-
-		// The actual signature that is actually present in the loaded document (if any).
-		private Tuple<XmlElement, X509Certificate2> _documentSignature;
-
-		// The desired identity whose signature should cover the document.
-		private X509Certificate2 _desiredSignedBy;
+		#region Internal API
+		/// <summary>
+		/// Gets the collection of certificates referencing private keys that we can potentially use to receive CPIX data.
+		/// </summary>
+		internal IReadOnlyCollection<X509Certificate2> RecipientCertificates { get; private set; }
 
 		/// <summary>
 		/// Gets the document key or null if no document key has been loaded/generated
@@ -262,6 +274,24 @@ namespace Axinom.Cpix
 			Random.GetBytes(MacKey);
 		}
 
+		internal void ImportKeys(byte[] documentKey, byte[] macKey)
+		{
+			if (documentKey == null)
+				throw new ArgumentNullException(nameof(documentKey));
+
+			if (macKey == null)
+				throw new ArgumentNullException(nameof(macKey));
+
+			if (documentKey.Length != Constants.DocumentKeyLengthInBytes)
+				throw new InvalidCpixDataException($"Invalid document key length. Expected {Constants.DocumentKeyLengthInBytes} bytes, received {documentKey.Length} bytes.");
+
+			if (macKey.Length != Constants.MacKeyLengthInBytes)
+				throw new InvalidCpixDataException($"Invalid MAC key length. Expected {Constants.MacKeyLengthInBytes} bytes, received {macKey.Length} bytes.");
+
+			DocumentKey = documentKey;
+			MacKey = macKey;
+		}
+
 		/// <summary>
 		/// Throws an exception if the document is read-only.
 		/// </summary>
@@ -273,7 +303,122 @@ namespace Axinom.Cpix
 			throw new InvalidOperationException("The document is read-only. You must remove or re-apply any digital signatures on the document to make it writable.");
 		}
 
-		internal static XmlNamespaceManager CreateNamespaceManager(XmlDocument document)
+		/// <summary>
+		/// Gets a random number generator associated with this instance of the document.
+		/// </summary>
+		internal readonly RandomNumberGenerator Random = RandomNumberGenerator.Create();
+		#endregion
+
+		#region Implementation details
+		/// <summary>
+		/// All the entity collections *in processing order*.
+		/// </summary>
+		private IEnumerable<EntityCollectionBase> EntityCollections => new EntityCollectionBase[]
+		{
+			Recipients,
+			ContentKeys,
+			UsageRules
+		};
+
+		private CpixDocument(XmlDocument loadedXml, IReadOnlyCollection<X509Certificate2> recipientCertificates) : this()
+		{
+			if (loadedXml == null)
+				throw new ArgumentNullException(nameof(loadedXml));
+
+			_xmlDocument = loadedXml;
+			_namespaceManager = CreateNamespaceManager(_xmlDocument);
+
+			RecipientCertificates = recipientCertificates ?? new X509Certificate2[0];
+		}
+
+		// If this instance is not a new document, this references the XML structure it is based upon. The XML structure will
+		// be modified live when anything is removed, though add operations are only serialized on Save().
+		private XmlDocument _xmlDocument;
+
+		// Namespace manager for the XML document in _xmlDocument;
+		private XmlNamespaceManager _namespaceManager;
+
+		// The actual signature that is actually present in the loaded document (if any).
+		private Tuple<XmlElement, X509Certificate2> _documentSignature;
+
+		// The desired identity whose signature should cover the document.
+		private X509Certificate2 _desiredSignedBy;
+
+		private void VerifyAllSignaturesAndRememberSigners()
+		{
+			Func<EntityCollectionBase, string> tryGetCollectionSignatureReferenceUri = delegate (EntityCollectionBase collection)
+			{
+				var containerElement = (XmlElement)_xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:" + collection.ContainerName, _namespaceManager);
+
+				if (containerElement == null)
+					return null;
+
+				var elementId = containerElement.GetAttribute("id");
+
+				if (elementId == "")
+					return null;
+
+				return "#" + elementId;
+			};
+
+			// Maps reference URIs to entity collections for all collections that exist in XML and can be referenced.
+			var collectionReferenceUris = EntityCollections
+				.Select(c => new
+				{
+					Collection = c,
+					ReferenceUri = tryGetCollectionSignatureReferenceUri(c)
+				})
+				.Where(x => x.ReferenceUri != null)
+				.ToDictionary(x => x.ReferenceUri, x => x.Collection);
+
+			foreach (XmlElement signature in _xmlDocument.SelectNodes("/cpix:CPIX/ds:Signature", _namespaceManager))
+			{
+				var signedXml = new SignedXml(_xmlDocument);
+				signedXml.LoadXml(signature);
+
+				// We verify all signatures using the data embedded within them.
+				if (!signedXml.CheckSignature())
+					throw new SecurityException("CPIX signature failed to verify - the document has been tampered with!");
+
+				// The signature must include a certificate for the signer in order to be useful to us.
+				var certificateElement = signature.SelectSingleNode("ds:KeyInfo/ds:X509Data/ds:X509Certificate", _namespaceManager);
+
+				if (certificateElement == null)
+					continue;
+
+				var certificate = new X509Certificate2(Convert.FromBase64String(certificateElement.InnerText));
+
+				var referenceUris = signedXml.SignedInfo.References.Cast<Reference>().Select(r => r.Uri).ToArray();
+
+				if (referenceUris.Length != 1)
+				{
+					// Length is not 1? This is not any signature we recognize.
+					continue;
+				}
+
+				var referenceUri = referenceUris.Single();
+
+				if (referenceUri == "")
+				{
+					// This is a document-level signature.
+					_documentSignature = new Tuple<XmlElement, X509Certificate2>(signature, certificate);
+					_desiredSignedBy = certificate;
+				}
+				else if (collectionReferenceUris.ContainsKey(referenceUri))
+				{
+					// This is a signature on one of the entity collections.
+					var collection = collectionReferenceUris[referenceUri];
+
+					collection.ImportExistingSignature(signature, certificate);
+				}
+				else
+				{
+					// Unknown thing was signed. We will just pretend the signature does not exist (besides verification).
+				}
+			}
+		}
+
+		private static XmlNamespaceManager CreateNamespaceManager(XmlDocument document)
 		{
 			var manager = new XmlNamespaceManager(document.NameTable);
 			manager.AddNamespace("cpix", Constants.CpixNamespace);
@@ -329,8 +474,6 @@ namespace Axinom.Cpix
 
 		// Contains all the XML Schema information required to validate a CPIX document.
 		private static readonly XmlSchemaSet _schemaSet;
-
-		internal readonly RandomNumberGenerator Random = RandomNumberGenerator.Create();
 		#endregion
 	}
 }
