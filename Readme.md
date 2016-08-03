@@ -8,7 +8,7 @@ THIS IS HIGHLY EXPERIMENTAL AND NOT COMPATIBLE WITH ANY PUBLISHED VERSION OF CPI
 Platform compatibility
 ======================
 
-This library is compatible with .NET Framework 4.6.0 and newer.
+This library is compatible with .NET Framework 4.6.2 and newer.
 
 Features
 ========

@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Axinom.Cpix</RootNamespace>
     <AssemblyName>Axinom.Cpix</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -51,14 +51,12 @@
     </Compile>
     <Compile Include="AudioFilter.cs" />
     <Compile Include="BitrateFilter.cs" />
-    <Compile Include="Compatibility\CngSha512RSAPKCS1SignatureFormatter.cs" />
     <Compile Include="ContentKey.cs" />
     <Compile Include="ContentKeyCollection.cs" />
     <Compile Include="CpixDocument.cs" />
     <Compile Include="CryptographyHelpers.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="EntityCollection.cs" />
-    <Compile Include="Compatibility\RSAPKCS1SHA512SignatureDescription.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="ContentKeyResolveException.cs" />
     <Compile Include="IAudioFilter.cs" />

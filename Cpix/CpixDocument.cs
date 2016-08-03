@@ -1,5 +1,4 @@
-﻿using Axinom.Cpix.Compatibility;
-using Axinom.Cpix.DocumentModel;
+﻿using Axinom.Cpix.DocumentModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -431,10 +430,6 @@ namespace Axinom.Cpix
 
 		static CpixDocument()
 		{
-			// For compatibility with .NET Framework < 4.6.2.
-			// Remove once 4.6.2 is published and can be safely targeted.
-			RSAPKCS1SHA512SignatureDescription.Register();
-
 			// Load the XSD for CPIX and all the referenced schemas.
 			_schemaSet = LoadCpixSchema();
 		}

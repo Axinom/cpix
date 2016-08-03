@@ -1,5 +1,4 @@
-﻿using Axinom.Cpix.Compatibility;
-using System;
+﻿using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
 using System.Xml;
@@ -102,7 +101,7 @@ namespace Axinom.Cpix
 				signedXml.AddReference(whatToSign);
 
 				// A nice strong algorithm without known weaknesses that are easily exploitable.
-				signedXml.SignedInfo.SignatureMethod = RSAPKCS1SHA512SignatureDescription.Name;
+				signedXml.SignedInfo.SignatureMethod = SignedXml.XmlDsigRSASHA512Url;
 
 				// Canonical XML 1.0 (omit comments); I suppose it works fine, no deep thoughts about this.
 				signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigCanonicalizationUrl;
