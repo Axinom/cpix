@@ -42,31 +42,5 @@ namespace Axinom.Cpix
 				return xmlDocument;
 			}
 		}
-
-		internal static void ValidateDocumentAgainstSchema(Stream documentStream, XmlSchemaSet schemaSet)
-		{
-			// Validating much be done as a separate XmlDocument, not associated with the "normal" one
-			// because the presence of schema information causes Canonical XML processing to be incorrect,
-			// leading to failures to verify and/or generate digital signatures.
-
-			var settings = new XmlReaderSettings
-			{
-				ValidationType = ValidationType.None,
-				CloseInput = false
-			};
-
-			settings.Schemas.Add(schemaSet);
-
-			// Read from the start. We don't support any fancy scenarios.
-			documentStream.Position = 0;
-
-			var document = new XmlDocument();
-
-			using (var reader = XmlReader.Create(documentStream, settings))
-				document.Load(reader);
-
-			// Reset for the next guy, just to be nice.
-			documentStream.Position = 0;
-		}
 	}
 }

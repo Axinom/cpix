@@ -140,7 +140,7 @@ namespace Axinom.Cpix
 			//    it already contains the elements that will survive into the saved document (but not any new elements).
 			// 2) Serialize any new delivery data for the recipients. Sign if needed.
 			// 3) Serialize any new content keys. Sign if needed.
-			// 4) Serialize any new usazge rules. Sign if needed.
+			// 4) Serialize any new usage rules. Sign if needed.
 			// 5) Sign document if needed.
 			// 6) Treat all items as having been newly loaded from the saved document (for forward consistency).
 			// 7) Validate the document against schema to ensure that we did not accidetally generate invalid CPIX.
@@ -168,28 +168,55 @@ namespace Axinom.Cpix
 			{
 				using (var writer = XmlWriter.Create(buffer, new XmlWriterSettings
 				{
-					// The serialization we do results in some duplicate namespace declarations being generated.
-					// Hmm... does this correctly handle already signed data? Let's hope so!
-					NamespaceHandling = NamespaceHandling.OmitDuplicates,
-					Indent = true,
-					IndentChars = "\t",
+					// NB! Do not apply any formatting here, as digital signatures have already been generated
+					// and any formatting will invalidate the signatures!
 					Encoding = Encoding.UTF8
 				}))
 				{
 					_xmlDocument.Save(writer);
 				}
 
-				XmlHelpers.ValidateDocumentAgainstSchema(buffer, _schemaSet);
-				
+				// Reload the document from the buffer in order to validate it against schema (sanity check).
+				buffer.Position = 0;
+				LoadDocumentAndValidateAgainstSchema(buffer);
+
 				// Success! Copy our buffer to the output stream.
+				buffer.Position = 0;
 				buffer.CopyTo(stream);
 			}
 		}
 
-		private XmlDocument CreateNewXmlDocument()
+		private static XmlDocument CreateNewXmlDocument()
 		{
 			var document = XmlHelpers.XmlObjectToXmlDocument(new DocumentRootElement());
 			document.Schemas = _schemaSet;
+
+			return document;
+		}
+
+		private static XmlDocument LoadDocumentAndValidateAgainstSchema(Stream stream)
+		{
+			var settings = new XmlReaderSettings
+			{
+				// NB! XML Schema validation is actually required for correct XML Digital Signature processing!
+				// This is because without schema validation on load, newlines are mangled by .NET Framework
+				// when executing the Canonical XML transformation. Therefore, always perform validation!
+				// More info: https://connect.microsoft.com/VisualStudio/feedback/details/3002812/xmldsigc14ntransform-incorrectly-strips-whitespace-and-does-it-inconsistently
+				ValidationType = ValidationType.Schema,
+
+				// We are not the owner of the stream, so let's leave it open.
+				CloseInput = false
+			};
+
+			settings.Schemas.Add(_schemaSet);
+
+			var document = new XmlDocument();
+
+			// NB! Whitespace in XML Digital Signature scope is signed, as well! Do not remove any whitespace!
+			document.PreserveWhitespace = true;
+
+			using (var reader = XmlReader.Create(stream, settings))
+				document.Load(reader);
 
 			return document;
 		}
@@ -211,10 +238,7 @@ namespace Axinom.Cpix
 				foreach (var certificate in recipientCertificates)
 					CryptographyHelpers.ValidateRecipientCertificateAndPrivateKey(certificate);
 
-			XmlHelpers.ValidateDocumentAgainstSchema(stream, _schemaSet);
-
-			var xmlDocument = new XmlDocument();
-			xmlDocument.Load(stream);
+			var xmlDocument = LoadDocumentAndValidateAgainstSchema(stream);
 
 			if (xmlDocument.DocumentElement?.Name != "CPIX" || xmlDocument.DocumentElement?.NamespaceURI != Constants.CpixNamespace)
 				throw new InvalidCpixDataException("The provided XML file does not appear to be a CPIX document - the name of the root element is incorrect.");
