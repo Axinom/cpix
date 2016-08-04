@@ -5,6 +5,8 @@ using Xunit;
 
 namespace Tests
 {
+	// TODO: Test for inclusivity and exclusivity of numeric ranges.
+
 	public sealed class ResolveContentKeyTests
 	{
 		[Fact]
@@ -119,6 +121,78 @@ namespace Tests
 			Assert.Equal(key, document.ResolveContentKey(new SampleDescription
 			{
 				Type = SampleType.Audio
+			}));
+		}
+
+		[Fact]
+		public void ResolveContentKey_WithOneFilterTypeMatchOtherFilterTypeNonMatch_Fails()
+		{
+			var key = TestHelpers.GenerateContentKey();
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(key);
+
+			document.UsageRules.Add(new UsageRule
+			{
+				KeyId = key.Id,
+
+				// This rule requries the sample to be both audio and video. Nothing should ever match it!
+				AudioFilters = new[]
+				{
+					new AudioFilter()
+				},
+				VideoFilters = new[]
+				{
+					new VideoFilter()
+				}
+			});
+
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new SampleDescription
+			{
+				Type = SampleType.Video
+			}));
+		}
+
+		[Fact]
+		public void ResolveContentKey_WithTwoBitrateRanges_MatchesInEitherRangeButNotOutside()
+		{
+			var key = TestHelpers.GenerateContentKey();
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(key);
+
+			document.UsageRules.Add(new UsageRule
+			{
+				KeyId = key.Id,
+
+				// Either bitrate 0-100 or bitrate 1000-1100. Both ranges should match but not in between.
+				BitrateFilters = new[]
+				{
+					new BitrateFilter
+					{
+						MinBitrate = 0,
+						MaxBitrate = 100
+					},
+					new BitrateFilter
+					{
+						MinBitrate = 1000,
+						MaxBitrate = 1100
+					}
+				}
+			});
+
+			document.ResolveContentKey(new SampleDescription
+			{
+				Bitrate = 50
+			});
+			document.ResolveContentKey(new SampleDescription
+			{
+				Bitrate = 1050
+			});
+
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new SampleDescription
+			{
+				Bitrate = 500
 			}));
 		}
 
