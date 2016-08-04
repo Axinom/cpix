@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Tests
 {
-	public sealed class ContentKeyTests
+	public sealed class ContentKeyCrudTests
 	{
 		[Fact]
 		public void AddContentKey_WithLoadedEmptyDocument_Succeeds()

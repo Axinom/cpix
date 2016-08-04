@@ -53,6 +53,26 @@ namespace Tests
 			return rule;
 		}
 
+		public static void PopulateCollections(CpixDocument document)
+		{
+			document.Recipients.Add(new Recipient(PublicRecipient1));
+			document.Recipients.Add(new Recipient(PublicRecipient2));
+
+			var key1 = GenerateContentKey();
+			var key2 = GenerateContentKey();
+
+			document.ContentKeys.Add(key1);
+			document.ContentKeys.Add(key2);
+
+			AddUsageRule(document);
+			AddUsageRule(document);
+
+			// Sanity check.
+			foreach (var collection in document.EntityCollections)
+				if (collection.Count == 0)
+					throw new Exception("TestHelpers need update - not all collections got populated!");
+		}
+
 		public static readonly RandomNumberGenerator Random = RandomNumberGenerator.Create();
 
 		public static readonly X509Certificate2 PublicAuthor1 = new X509Certificate2("Author1.cer");

@@ -41,7 +41,7 @@ namespace Axinom.Cpix
 			if (Contains(item))
 				throw new ArgumentException("The item is already in this collection.");
 
-			item.ValidateNewEntity();
+			item.ValidateNewEntity(Document);
 
 			ValidateCollectionStateBeforeAdd(item);
 
@@ -97,7 +97,7 @@ namespace Axinom.Cpix
 		/// <summary>
 		/// Gets the number of items in the collection.
 		/// </summary>
-		public int Count => AllItems.Count();
+		public override int Count => AllItems.Count();
 
 		#region Internal API
 		internal IEnumerable<TEntityImplementation> NewItems => _newItems;
@@ -109,9 +109,6 @@ namespace Axinom.Cpix
 
 		internal override void SaveChanges(XmlDocument document, XmlNamespaceManager namespaces)
 		{
-			if (IsReadOnly)
-				return;
-
 			var containerElement = (XmlElement)document.SelectSingleNode("/cpix:CPIX/cpix:" + ContainerName, namespaces);
 
 			if (Count == 0 && SignedBy.Count() == 0)

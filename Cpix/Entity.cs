@@ -10,12 +10,14 @@
 	{
 		/// <summary>
 		/// Validates that the current state of the entity is valid for a newly created/added entity.
+		/// The document is supplied to facilitate cross-checking with other parts of the document.
 		/// </summary>
-		internal abstract void ValidateNewEntity();
+		internal abstract void ValidateNewEntity(CpixDocument document);
 
 		/// <summary>
 		/// Validates that the current state of the entity is valid for a loaded existing entity.
+		/// The document is supplied to facilitate cross-checking with other parts of the document.
 		/// </summary>
-		internal abstract void ValidateExistingEntity();
+		internal abstract void ValidateExistingEntity(CpixDocument document);
 	}
 }

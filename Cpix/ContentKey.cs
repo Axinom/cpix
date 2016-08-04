@@ -19,7 +19,7 @@ namespace Axinom.Cpix
 		/// </summary>
 		internal bool IsExistingEncryptedKey { get; set; }
 
-		internal override void ValidateExistingEntity()
+		internal override void ValidateExistingEntity(CpixDocument document)
 		{
 			if (Id == Guid.Empty)
 				throw new InvalidCpixDataException("A unique key ID must be provided for each content key.");
@@ -29,7 +29,7 @@ namespace Axinom.Cpix
 				throw new InvalidCpixDataException($"A {Constants.ContentKeyLengthInBytes}-byte value must be provided for each new content key.");
 		}
 
-		internal override void ValidateNewEntity()
+		internal override void ValidateNewEntity(CpixDocument document)
 		{
 			if (Id == Guid.Empty)
 				throw new InvalidCpixDataException("A unique key ID must be provided for each content key.");

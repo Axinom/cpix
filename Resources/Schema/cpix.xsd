@@ -64,7 +64,7 @@
 	</xs:complexType>
 	<xs:complexType name="ContentKeyPeriodListType">
 		<xs:sequence>
-			<xs:element name="ContentKeyPeriod" type="cpix:ContentKeyPeriodType" maxOccurs="unbounded"/>
+			<xs:element name="ContentKeyPeriod" type="cpix:ContentKeyPeriodType" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 		<xs:attribute name="id" type="xs:ID" use="optional"/>
 		<xs:attribute name="updateVersion" type="xs:integer" use="optional"/>
@@ -83,7 +83,7 @@
 	</xs:complexType>
 	<xs:complexType name="DRMSystemListType">
 		<xs:sequence>
-			<xs:element name="DRMSystem" type="cpix:DRMSystemType" maxOccurs="unbounded"/>
+			<xs:element name="DRMSystem" type="cpix:DRMSystemType" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 		<xs:attribute name="id" type="xs:ID" use="optional"/>
 		<xs:attribute name="updateVersion" type="xs:integer" use="optional"/>
@@ -112,7 +112,7 @@
 	</xs:complexType>
 	<xs:complexType name="ContentKeyListType">
 		<xs:sequence>
-			<xs:element name="ContentKey" type="cpix:ContentKeyType" maxOccurs="unbounded"/>
+			<xs:element name="ContentKey" type="cpix:ContentKeyType" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 		<xs:attribute name="id" type="xs:ID" use="optional"/>
 		<xs:attribute name="updateVersion" type="xs:integer" use="optional"/>
@@ -133,7 +133,7 @@
 	</xs:complexType>
 	<xs:complexType name="DeliveryDataListType">
 		<xs:sequence>
-			<xs:element name="DeliveryData" type="cpix:DeliveryDataType" maxOccurs="unbounded"/>
+			<xs:element name="DeliveryData" type="cpix:DeliveryDataType" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 		<xs:attribute name="id" type="xs:ID" use="optional"/>
 		<xs:attribute name="updateVersion" type="xs:integer" use="optional"/>

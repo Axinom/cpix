@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace Axinom.Cpix.DocumentModel
@@ -12,112 +12,148 @@ namespace Axinom.Cpix.DocumentModel
 	{
 	}
 
-	///// <summary>
-	///// We just use this to serialize content keys - hence it intentionally does not contain any of the other elements.
-	///// </summary>
-	//[XmlRoot("CPIX", Namespace = Constants.CpixNamespace)]
-	//public sealed class DocumentRootElement
-	//{
-	//	[XmlElement]
-	//	public List<DeliveryDataElement> DeliveryData { get; set; } = new List<DeliveryDataElement>();
+	[XmlRoot("ContentKeyUsageRule", Namespace = Constants.CpixNamespace)]
+	public sealed class UsageRuleElement
+	{
+		[XmlAttribute("kid")]
+		public Guid KeyId { get; set; }
 
-	//	[XmlElement("ContentKey")]
-	//	public List<ContentKeyElement> ContentKeys { get; set; } = new List<ContentKeyElement>();
-	//}
+		[XmlElement("LabelFilter")]
+		public LabelFilterElement[] LabelFilters { get; set; }
 
-	//[XmlRoot("ContentKeyUsageRule", Namespace = Constants.CpixNamespace)]
-	//public sealed class UsageRuleElement
-	//{
-	//	[XmlAttribute("keyId")]
-	//	public Guid KeyId { get; set; }
+		[XmlElement("VideoFilter")]
+		public VideoFilterElement[] VideoFilters { get; set; }
 
-	//	[XmlElement]
-	//	public LabelFilterElement LabelFilter { get; set; }
+		[XmlElement("AudioFilter")]
+		public AudioFilterElement[] AudioFilters { get; set; }
 
-	//	[XmlElement]
-	//	public VideoFilterElement VideoFilter { get; set; }
+		[XmlElement("BitrateFilter")]
+		public BitrateFilterElement[] BitrateFilters { get; set; }
 
-	//	[XmlElement]
-	//	public AudioFilterElement AudioFilter { get; set; }
+		[XmlAnyElement]
+		public XmlElement[] UnknownFilters { get; set; }
 
-	//	[XmlElement]
-	//	public BitrateFilterElement BitrateFilter { get; set; }
-	//}
+		internal void LoadTimeValidate()
+		{
+			// Malformed rules will not work right for resolving but who are we to say what is malformed or not.
+			// Nothing to really validate here, in essence. Go wild!
+		}
+	}
 
-	//public sealed class LabelFilterElement
-	//{
-	//	[XmlAttribute("label")]
-	//	public string Label { get; set; }
-	//}
+	public sealed class LabelFilterElement
+	{
+		[XmlAttribute("label")]
+		public string Label { get; set; }
+	}
 
-	//public sealed class VideoFilterElement
-	//{
-	//	[XmlIgnore]
-	//	public long? MinPixels { get; set; }
+	public sealed class VideoFilterElement
+	{
+		[XmlIgnore]
+		public long? MinPixels { get; set; }
 
-	//	[XmlIgnore]
-	//	public long? MaxPixels { get; set; }
+		[XmlIgnore]
+		public long? MaxPixels { get; set; }
 
-	//	[XmlAttribute("minPixels")]
-	//	public string MinPixelsAsXmlString
-	//	{
-	//		get { return MinPixels?.ToString(); }
-	//		set { MinPixels = value != null ? (long?)long.Parse(value) : null; }
-	//	}
+		[XmlAttribute("minPixels")]
+		public string MinPixelsAsXmlString
+		{
+			get { return MinPixels?.ToString(); }
+			set { MinPixels = value != null ? (long?)long.Parse(value) : null; }
+		}
 
-	//	[XmlAttribute("maxPixels")]
-	//	public string MaxPixelsAsXmlString
-	//	{
-	//		get { return MaxPixels?.ToString(); }
-	//		set { MaxPixels = value != null ? (long?)long.Parse(value) : null; }
-	//	}
-	//}
+		[XmlAttribute("maxPixels")]
+		public string MaxPixelsAsXmlString
+		{
+			get { return MaxPixels?.ToString(); }
+			set { MaxPixels = value != null ? (long?)long.Parse(value) : null; }
+		}
 
-	//public sealed class AudioFilterElement
-	//{
-	//	[XmlIgnore]
-	//	public int? MinChannels { get; set; }
+		[XmlIgnore]
+		public bool? Hdr { get; set; }
 
-	//	[XmlIgnore]
-	//	public int? MaxChannels { get; set; }
+		[XmlIgnore]
+		public bool? Wcg { get; set; }
 
-	//	[XmlAttribute("minChannels")]
-	//	public string MinChannelsAsXmlString
-	//	{
-	//		get { return MinChannels?.ToString(); }
-	//		set { MinChannels = value != null ? (int?)int.Parse(value) : null; }
-	//	}
+		[XmlAttribute("hdr")]
+		public string HdrAsXmlString
+		{
+			get { return Hdr?.ToString(); }
+			set { Hdr = value != null ? (bool?)bool.Parse(value) : null; }
+		}
 
-	//	[XmlAttribute("maxChannels")]
-	//	public string MaxChannelsAsXmlString
-	//	{
-	//		get { return MaxChannels?.ToString(); }
-	//		set { MaxChannels = value != null ? (int?)int.Parse(value) : null; }
-	//	}
-	//}
+		[XmlAttribute("wcg")]
+		public string WcgAsXmlString
+		{
+			get { return Wcg?.ToString(); }
+			set { Wcg = value != null ? (bool?)bool.Parse(value) : null; }
+		}
 
-	//public sealed class BitrateFilterElement
-	//{
-	//	[XmlIgnore]
-	//	public long? MinBitrate { get; set; }
+		[XmlIgnore]
+		public long? MinFps { get; set; }
 
-	//	[XmlIgnore]
-	//	public long? MaxBitrate { get; set; }
+		[XmlIgnore]
+		public long? MaxFps { get; set; }
 
-	//	[XmlAttribute("minBitrate")]
-	//	public string MinBitrateAsXmlString
-	//	{
-	//		get { return MinBitrate?.ToString(); }
-	//		set { MinBitrate = value != null ? (long?)long.Parse(value) : null; }
-	//	}
+		[XmlAttribute("minFps")]
+		public string MinFpsAsXmlString
+		{
+			get { return MinFps?.ToString(); }
+			set { MinFps = value != null ? (long?)long.Parse(value) : null; }
+		}
 
-	//	[XmlAttribute("maxBitrate")]
-	//	public string MaxBitrateAsXmlString
-	//	{
-	//		get { return MaxBitrate?.ToString(); }
-	//		set { MaxBitrate = value != null ? (long?)long.Parse(value) : null; }
-	//	}
-	//}
+		[XmlAttribute("maxFps")]
+		public string MaxFpsAsXmlString
+		{
+			get { return MaxFps?.ToString(); }
+			set { MaxFps = value != null ? (long?)long.Parse(value) : null; }
+		}
+	}
+
+	public sealed class AudioFilterElement
+	{
+		[XmlIgnore]
+		public int? MinChannels { get; set; }
+
+		[XmlIgnore]
+		public int? MaxChannels { get; set; }
+
+		[XmlAttribute("minChannels")]
+		public string MinChannelsAsXmlString
+		{
+			get { return MinChannels?.ToString(); }
+			set { MinChannels = value != null ? (int?)int.Parse(value) : null; }
+		}
+
+		[XmlAttribute("maxChannels")]
+		public string MaxChannelsAsXmlString
+		{
+			get { return MaxChannels?.ToString(); }
+			set { MaxChannels = value != null ? (int?)int.Parse(value) : null; }
+		}
+	}
+
+	public sealed class BitrateFilterElement
+	{
+		[XmlIgnore]
+		public long? MinBitrate { get; set; }
+
+		[XmlIgnore]
+		public long? MaxBitrate { get; set; }
+
+		[XmlAttribute("minBitrate")]
+		public string MinBitrateAsXmlString
+		{
+			get { return MinBitrate?.ToString(); }
+			set { MinBitrate = value != null ? (long?)long.Parse(value) : null; }
+		}
+
+		[XmlAttribute("maxBitrate")]
+		public string MaxBitrateAsXmlString
+		{
+			get { return MaxBitrate?.ToString(); }
+			set { MaxBitrate = value != null ? (long?)long.Parse(value) : null; }
+		}
+	}
 
 	[XmlRoot("ContentKey", Namespace = Constants.CpixNamespace)]
 	public sealed class ContentKeyElement
@@ -241,7 +277,7 @@ namespace Axinom.Cpix.DocumentModel
 		/// </summary>
 		internal void LoadTimeValidate()
 		{
-			// DeliveryKey was already checked by CpixDocument we would not have gotten here.
+			// DeliveryKey was already checked by CpixDocument or we would not have gotten here.
 
 			if (DocumentKey == null)
 				throw new NotSupportedException("DeliveryData/DocumentKey element is missing.");

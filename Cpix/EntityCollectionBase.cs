@@ -13,6 +13,11 @@ namespace Axinom.Cpix
 	public abstract class EntityCollectionBase
 	{
 		/// <summary>
+		/// Gets the count of items in the collection.
+		/// </summary>
+		public abstract int Count { get; }
+
+		/// <summary>
 		/// Gets whether the collection is read-only. Always returns true if the entire document is read-only.
 		/// 
 		/// The collection is read-only if you are dealing with a loaded CPIX document that contains signatures covering this
@@ -163,7 +168,7 @@ namespace Axinom.Cpix
 		{
 			// Just individually validate each new item.
 			foreach (var item in NewEntities)
-				item.ValidateNewEntity();
+				item.ValidateNewEntity(Document);
 
 			// No need to validate any existing entities, as we won't save them even if modified.
 		}
@@ -174,7 +179,7 @@ namespace Axinom.Cpix
 		private void ValidateEntitiesAfterLoad()
 		{
 			foreach (var item in ExistingEntities)
-				item.ValidateExistingEntity();
+				item.ValidateExistingEntity(Document);
 		}
 		#endregion
 	}

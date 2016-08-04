@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Tests
 {
-	public sealed class UsageRuleTests
+	public sealed class UsageRuleCrudTests
 	{
 		[Fact]
 		public void AddUsageRule_WithNewDocument_AddsUsageRule()
@@ -70,7 +70,10 @@ namespace Tests
 		{
 			var document = new CpixDocument();
 
+			// Key ID is null.
 			Assert.Throws<InvalidCpixDataException>(() => document.UsageRules.Add(new UsageRule()));
+
+			// Key ID does not reference existing key.
 			Assert.Throws<InvalidCpixDataException>(() => document.UsageRules.Add(new UsageRule
 			{
 				KeyId = Guid.NewGuid()
@@ -94,13 +97,13 @@ namespace Tests
 			Assert.Throws<InvalidCpixDataException>(() => document.UsageRules.Add(new UsageRule
 			{
 				KeyId = contentKey.Id,
-				AudioFilters = new[]
-				{
-					new AudioFilter(),
-				},
 				VideoFilters = new[]
 				{
-					new VideoFilter()
+					new VideoFilter
+					{
+						MaxPixels = 10,
+						MinPixels = 11
+					}
 				}
 			}));
 			Assert.Throws<InvalidCpixDataException>(() => document.UsageRules.Add(new UsageRule
@@ -110,8 +113,8 @@ namespace Tests
 				{
 					new VideoFilter
 					{
-						MaxPixels = 10,
-						MinPixels = 11
+						MaxFramesPerSecond = 10,
+						MinFramesPerSecond = 11
 					}
 				}
 			}));
@@ -145,11 +148,14 @@ namespace Tests
 		{
 			var document = new CpixDocument();
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+
+			// It will be validated here.
 			var rule = TestHelpers.AddUsageRule(document);
 
-			// It was validated by Add but now we corrupt it again!
+			// Corrupt it after validation!
 			rule.KeyId = Guid.NewGuid();
 
+			// The corruption should still be caught.
 			Assert.ThrowsAny<Exception>(() => document.Save(new MemoryStream()));
 		}
 
@@ -178,6 +184,72 @@ namespace Tests
 
 			document.UsageRules.RemoveAllSignatures();
 			TestHelpers.AddUsageRule(document);
+		}
+
+		[Fact]
+		public void RemoveUsageRule_WithNewWritableCollection_Succeeds()
+		{
+			var contentKey = TestHelpers.GenerateContentKey();
+			var rule = new UsageRule
+			{
+				KeyId = contentKey.Id
+			};
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(contentKey);
+			document.UsageRules.Add(rule);
+			document.UsageRules.Remove(rule);
+		}
+
+		[Fact]
+		public void RemoveUsageRule_WithLoadedWritableCollection_Succeeds()
+		{
+			var contentKey = TestHelpers.GenerateContentKey();
+			var rule = new UsageRule
+			{
+				KeyId = contentKey.Id
+			};
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(contentKey);
+			document.UsageRules.Add(rule);
+
+			document = TestHelpers.Reload(document);
+
+			document.UsageRules.Remove(document.UsageRules.Single());
+		}
+
+		[Fact]
+		public void RemoveUsageRule_WithUnknownUsageRule_Succeeds()
+		{
+			var contentKey = TestHelpers.GenerateContentKey();
+			var rule = new UsageRule
+			{
+				KeyId = contentKey.Id
+			};
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(contentKey);
+			document.UsageRules.Remove(rule);
+		}
+
+		[Fact]
+		public void RoundTrip_WithSignedCollection_Succeeds()
+		{
+			var contentKey = TestHelpers.GenerateContentKey();
+			var rule = new UsageRule
+			{
+				KeyId = contentKey.Id
+			};
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(contentKey);
+			document.UsageRules.Add(rule);
+			document.UsageRules.AddSignature(TestHelpers.PrivateAuthor1);
+
+			document = TestHelpers.Reload(document);
+
+			Assert.Equal(1, document.UsageRules.Count);
 		}
 	}
 }

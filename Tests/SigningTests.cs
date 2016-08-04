@@ -1,5 +1,6 @@
 ﻿using Axinom.Cpix;
 using System;
+using System.IO;
 using System.Linq;
 using Xunit;
 
@@ -8,151 +9,247 @@ namespace Tests
 	public sealed class SigningTests
 	{
 		[Fact]
-		public void AddingContentKeySignature_ToNewDocument_Succeeds()
+		public void AddingSignatures_ToEverythingInEmptyNewDocument_Succeeds()
 		{
 			var document = new CpixDocument();
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			document.ContentKeys.AddSignature(TestHelpers.PrivateAuthor1);
-
-			document = TestHelpers.Reload(document);
-
-			Assert.Equal(1, document.ContentKeys.SignedBy.Count());
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.ContentKeys.SignedBy.Single().Thumbprint);
-		}
-
-		[Fact]
-		public void AddingContentKeySignature_ToLoadedDocument_Fails()
-		{
-			var document = new CpixDocument();
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			document = TestHelpers.Reload(document);
-
-			// It would be strange to sign content keys when you are not actually the one adding them to the
-			// document on initial creation, so we outlaw this purely on grounds of security model sensibility.
-			Assert.Throws<InvalidOperationException>(() => document.ContentKeys.AddSignature(TestHelpers.PrivateAuthor1));
-		}
-
-		[Fact]
-		public void AddingDocumentSignature_ToNewDocument_Succeeds()
-		{
-			var document = new CpixDocument();
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			document.SignedBy = TestHelpers.PrivateAuthor1;
 
+			foreach (var collection in document.EntityCollections)
+			{
+				collection.AddSignature(TestHelpers.PrivateAuthor1);
+				collection.AddSignature(TestHelpers.PrivateAuthor2);
+			}
+
 			document = TestHelpers.Reload(document);
 
-			Assert.NotNull(document.SignedBy);
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.SignedBy.Thumbprint);
+			foreach (var collection in document.EntityCollections)
+			{
+				Assert.Equal(2, collection.SignedBy.Count());
+
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
+			}
+
+			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.SignedBy?.Thumbprint);
 		}
 
 		[Fact]
-		public void AddingDocumentSignature_ToLoadedPreviouslyUnsignedDocument_Succeeds()
+		public void AddingSignatures_ToEverythingInEmptyLoadedDocument_Succeeds()
 		{
 			var document = new CpixDocument();
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-
 			document = TestHelpers.Reload(document);
 
 			document.SignedBy = TestHelpers.PrivateAuthor1;
+
+			foreach (var collection in document.EntityCollections)
+			{
+				collection.AddSignature(TestHelpers.PrivateAuthor1);
+				collection.AddSignature(TestHelpers.PrivateAuthor2);
+			}
+
 			document = TestHelpers.Reload(document);
 
-			Assert.NotNull(document.SignedBy);
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.SignedBy.Thumbprint);
+			foreach (var collection in document.EntityCollections)
+			{
+				Assert.Equal(2, collection.SignedBy.Count());
+
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
+			}
+
+			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.SignedBy?.Thumbprint);
 		}
 
 		[Fact]
-		public void ReplacingDocumentSignature_OnLoadedPreviouslySignedDocument_Succeeds()
+		public void AddingSignature_OnEverythingInAlreadySignedEmptyDocument_Succeeds()
 		{
 			var document = new CpixDocument();
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			document.SignedBy = TestHelpers.PrivateAuthor1;
+
+			foreach (var collection in document.EntityCollections)
+				collection.AddSignature(TestHelpers.PrivateAuthor1);
+
+			document = TestHelpers.Reload(document);
+
+			// Mark the entire document for re-signing, making it editable.
+			document.SignedBy = TestHelpers.PrivateAuthor1;
+
+			foreach (var collection in document.EntityCollections)
+				collection.AddSignature(TestHelpers.PrivateAuthor2);
+
+			document = TestHelpers.Reload(document);
+
+			foreach (var collection in document.EntityCollections)
+			{
+				Assert.Equal(2, collection.SignedBy.Count());
+
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
+			}
+		}
+
+		[Fact]
+		public void ReplacingSignature_OnEverythingInEmptyDocument_Succeeds()
+		{
+			var document = new CpixDocument();
+			document.SignedBy = TestHelpers.PrivateAuthor1;
+
+			foreach (var collection in document.EntityCollections)
+				collection.AddSignature(TestHelpers.PrivateAuthor1);
 
 			document = TestHelpers.Reload(document);
 
 			document.SignedBy = TestHelpers.PrivateAuthor2;
 
+			foreach (var collection in document.EntityCollections)
+			{
+				collection.RemoveAllSignatures();
+				collection.AddSignature(TestHelpers.PrivateAuthor2);
+			}
+
 			document = TestHelpers.Reload(document);
 
-			Assert.NotNull(document.SignedBy);
-
-			Assert.Equal(TestHelpers.PrivateAuthor2.Thumbprint, document.SignedBy.Thumbprint);
+			foreach (var collection in document.EntityCollections)
+			{
+				Assert.Equal(1, collection.SignedBy.Count());
+				Assert.Equal(TestHelpers.PrivateAuthor2.Thumbprint, collection.SignedBy.Single().Thumbprint);
+			}
+			
+			Assert.Equal(TestHelpers.PrivateAuthor2.Thumbprint, document.SignedBy?.Thumbprint);
 		}
 
 		[Fact]
-		public void ReplacingDocumentSignature_WithNewSignatureFromSameIdentity_Succeeds()
+		public void AddingSignatures_ToEverythingInFullyPopulatedNewDocument_Succeeds()
 		{
 			var document = new CpixDocument();
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			document.SignedBy = TestHelpers.PrivateAuthor1;
-
-			document = TestHelpers.Reload(document);
+			TestHelpers.PopulateCollections(document);
 
 			document.SignedBy = TestHelpers.PrivateAuthor1;
 
-			// We modify some data to verify that the above actually "did" something.
-			document.UsageRules.Add(new UsageRule
+			foreach (var collection in document.EntityCollections)
 			{
-				KeyId = document.ContentKeys.Single().Id
-			});
+				collection.AddSignature(TestHelpers.PrivateAuthor1);
+				collection.AddSignature(TestHelpers.PrivateAuthor2);
+			}
 
 			document = TestHelpers.Reload(document);
 
-			Assert.NotNull(document.SignedBy);
+			foreach (var collection in document.EntityCollections)
+			{
+				Assert.Equal(2, collection.SignedBy.Count());
 
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.SignedBy.Thumbprint);
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
+			}
+
+			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.SignedBy?.Thumbprint);
+		}
+
+		[Fact]
+		public void AddingSignatures_ToEverythingInFullyPopulatedLoadedDocument_Succeeds()
+		{
+			var document = new CpixDocument();
+			TestHelpers.PopulateCollections(document);
+
+			document = TestHelpers.Reload(document);
+
+			document.SignedBy = TestHelpers.PrivateAuthor1;
+
+			foreach (var collection in document.EntityCollections)
+			{
+				collection.AddSignature(TestHelpers.PrivateAuthor1);
+				collection.AddSignature(TestHelpers.PrivateAuthor2);
+			}
+
+			document = TestHelpers.Reload(document);
+
+			foreach (var collection in document.EntityCollections)
+			{
+				Assert.Equal(2, collection.SignedBy.Count());
+
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
+			}
+
+			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.SignedBy?.Thumbprint);
+		}
+
+		[Fact]
+		public void AddingSignature_OnEverythingInAlreadySignedFullyPopulatedDocument_Succeeds()
+		{
+			var document = new CpixDocument();
+			TestHelpers.PopulateCollections(document);
+
+			document.SignedBy = TestHelpers.PrivateAuthor1;
+
+			foreach (var collection in document.EntityCollections)
+				collection.AddSignature(TestHelpers.PrivateAuthor1);
+
+			document = TestHelpers.Reload(document);
+
+			// Mark the entire document for re-signing, making it editable.
+			document.SignedBy = TestHelpers.PrivateAuthor1;
+
+			foreach (var collection in document.EntityCollections)
+				collection.AddSignature(TestHelpers.PrivateAuthor2);
+
+			document = TestHelpers.Reload(document);
+
+			foreach (var collection in document.EntityCollections)
+			{
+				Assert.Equal(2, collection.SignedBy.Count());
+
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
+			}
+		}
+
+		[Fact]
+		public void ReplacingSignature_OnEverythingInFullyPopulatedDocument_Succeeds()
+		{
+			var document = new CpixDocument();
+			TestHelpers.PopulateCollections(document);
+
+			document.SignedBy = TestHelpers.PrivateAuthor1;
+
+			foreach (var collection in document.EntityCollections)
+				collection.AddSignature(TestHelpers.PrivateAuthor1);
+
+			document = TestHelpers.Reload(document);
+
+			document.SignedBy = TestHelpers.PrivateAuthor2;
+
+			foreach (var collection in document.EntityCollections)
+			{
+				collection.RemoveAllSignatures();
+				collection.AddSignature(TestHelpers.PrivateAuthor2);
+			}
+
+			document = TestHelpers.Reload(document);
+
+			foreach (var collection in document.EntityCollections)
+			{
+				Assert.Equal(1, collection.SignedBy.Count());
+				Assert.Equal(TestHelpers.PrivateAuthor2.Thumbprint, collection.SignedBy.Single().Thumbprint);
+			}
+
+			Assert.Equal(TestHelpers.PrivateAuthor2.Thumbprint, document.SignedBy?.Thumbprint);
 		}
 
 		[Fact]
 		public void RemovingDocumentSignature_Succeeds()
 		{
 			var document = new CpixDocument();
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			document.SignedBy = TestHelpers.PrivateAuthor1;
 
 			document = TestHelpers.Reload(document);
 
+			Assert.NotNull(document.SignedBy);
 			document.SignedBy = null;
 
 			document = TestHelpers.Reload(document);
 
 			Assert.Null(document.SignedBy);
-		}
-
-		[Fact]
-		public void LoadingDocument_WithTwiceSignedContentKeys_DetectsBothSignatures()
-		{
-			var document = new CpixDocument();
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			document.ContentKeys.AddSignature(TestHelpers.PrivateAuthor1);
-			document.ContentKeys.AddSignature(TestHelpers.PrivateAuthor2);
-
-			document = TestHelpers.Reload(document);
-
-			Assert.Null(document.SignedBy);
-			Assert.Equal(2, document.ContentKeys.SignedBy.Count());
-
-			Assert.Equal(1, document.ContentKeys.SignedBy.Count(signer => signer.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
-			Assert.Equal(1, document.ContentKeys.SignedBy.Count(signer => signer.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
-		}
-
-		[Fact]
-		public void LoadingDocument_WithSignedEverything_DetectsAllSignatures()
-		{
-			var document = new CpixDocument();
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			TestHelpers.AddUsageRule(document);
-			document.SignedBy = TestHelpers.PrivateAuthor1;
-			document.ContentKeys.AddSignature(TestHelpers.PrivateAuthor1);
-			document.UsageRules.AddSignature(TestHelpers.PrivateAuthor1);
-
-			document = TestHelpers.Reload(document);
-
-			Assert.Equal(1, document.ContentKeys.SignedBy.Count());
-			Assert.NotNull(document.SignedBy);
-
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.UsageRules.SignedBy.Single().Thumbprint);
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.ContentKeys.SignedBy.Single().Thumbprint);
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.SignedBy.Thumbprint);
 		}
 
 		[Fact]
@@ -166,14 +263,7 @@ namespace Tests
 			Assert.ThrowsAny<ArgumentException>(() => document.SignedBy = TestHelpers.PublicAuthor1);
 			Assert.ThrowsAny<ArgumentException>(() => document.UsageRules.AddSignature(TestHelpers.PublicAuthor1));
 		}
-
-		[Fact]
-		public void AddUsageRuleSignature_WithNoUsageRules_Fails()
-		{
-			var document = new CpixDocument();
-			Assert.Throws<InvalidOperationException>(() => document.UsageRules.AddSignature(TestHelpers.PrivateAuthor1));
-		}
-
+		
 		[Fact]
 		public void AddUsageRuleSignature_WithSignedDocument_Fails()
 		{
@@ -185,63 +275,6 @@ namespace Tests
 			document = TestHelpers.Reload(document);
 
 			Assert.Throws<InvalidOperationException>(() => TestHelpers.AddUsageRule(document));
-		}
-
-		[Fact]
-		public void AddUsageRuleSignature_WithExistingUsageRuleSignatures_Succeeds()
-		{
-			var document = new CpixDocument();
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			TestHelpers.AddUsageRule(document);
-			document.UsageRules.AddSignature(TestHelpers.PrivateAuthor1);
-
-			document = TestHelpers.Reload(document);
-
-			document.UsageRules.AddSignature(TestHelpers.PrivateAuthor2);
-
-			document = TestHelpers.Reload(document);
-
-			Assert.Equal(2, document.UsageRules.SignedBy.Count());
-			Assert.Equal(1, document.UsageRules.SignedBy.Count(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
-			Assert.Equal(1, document.UsageRules.SignedBy.Count(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
-		}
-
-		[Fact]
-		public void ResignUsageRules_WithSameIdentity_Succeeds()
-		{
-			var document = new CpixDocument();
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			TestHelpers.AddUsageRule(document);
-			document.UsageRules.AddSignature(TestHelpers.PrivateAuthor1);
-
-			document = TestHelpers.Reload(document);
-
-			document.UsageRules.RemoveAllSignatures();
-			document.UsageRules.AddSignature(TestHelpers.PrivateAuthor1);
-
-			document = TestHelpers.Reload(document);
-
-			Assert.Equal(1, document.UsageRules.SignedBy.Count());
-			Assert.Equal(1, document.UsageRules.SignedBy.Count(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
-		}
-
-		[Fact]
-		public void ResignUsageRules_WithDifferentIdentity_Succeeds()
-		{
-			var document = new CpixDocument();
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			TestHelpers.AddUsageRule(document);
-			document.UsageRules.AddSignature(TestHelpers.PrivateAuthor1);
-
-			document = TestHelpers.Reload(document);
-
-			document.UsageRules.RemoveAllSignatures();
-			document.UsageRules.AddSignature(TestHelpers.PrivateAuthor2);
-
-			document = TestHelpers.Reload(document);
-
-			Assert.Equal(1, document.UsageRules.SignedBy.Count());
-			Assert.Equal(1, document.UsageRules.SignedBy.Count(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
 		}
 	}
 }

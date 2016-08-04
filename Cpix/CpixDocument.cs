@@ -336,7 +336,7 @@ namespace Axinom.Cpix
 		/// <summary>
 		/// All the entity collections *in processing order*.
 		/// </summary>
-		private IEnumerable<EntityCollectionBase> EntityCollections => new EntityCollectionBase[]
+		internal IEnumerable<EntityCollectionBase> EntityCollections => new EntityCollectionBase[]
 		{
 			Recipients,
 			ContentKeys,

@@ -61,8 +61,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="SigningInteractionTests.cs" />
-    <Compile Include="UsageRuleTests.cs" />
-    <Compile Include="ContentKeyTests.cs" />
+    <Compile Include="UsageRuleCrudTests.cs" />
+    <Compile Include="ContentKeyCrudTests.cs" />
     <Compile Include="ContentKeyEncryptionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResolveContentKeyTests.cs" />
