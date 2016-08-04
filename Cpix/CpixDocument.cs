@@ -106,20 +106,24 @@ namespace Axinom.Cpix
 
 			sampleDescription.Validate();
 
-			throw new NotImplementedException();
+			if (UsageRules.Count == 0)
+				throw new InvalidOperationException("Cannot resolve content keys for media samples as no content key usage rules are defined.");
 
-			//var results = UsageRules
-			//	.Where(rule => EvaluateUsageRule(rule, sampleDescription))
-			//	.Select(rule => ContentKeys.Single(key => key.Id == rule.KeyId))
-			//	.ToArray();
+			if (UsageRules.Any(r => r.ContainsUnsupportedFilters))
+				throw new NotSupportedException("The content key usage rules in the CPIX document contain filters that are not supported by the current implementation. No content keys can be resolved.");
 
-			//if (results.Length == 0)
-			//	throw new ContentKeyResolveException("No content keys were assigned to samples matching the provided sample description.");
+			var results = UsageRules
+				.Where(rule => EvaluateUsageRule(rule, sampleDescription))
+				.Select(rule => ContentKeys.Single(key => key.Id == rule.KeyId))
+				.ToArray();
 
-			//if (results.Length > 1)
-			//	throw new ContentKeyResolveException("Multiple content keys were assigned to samples matching the provided sample description.");
+			if (results.Length == 0)
+				throw new ContentKeyResolveException("No content keys were assigned to samples matching the provided sample description.");
 
-			//return results[0];
+			if (results.Length > 1)
+				throw new ContentKeyResolveException("Multiple content keys were assigned to samples matching the provided sample description.");
+
+			return results[0];
 		}
 
 		/// <summary>
@@ -327,13 +331,6 @@ namespace Axinom.Cpix
 		}
 
 		/// <summary>
-		/// Gets a random number generator associated with this instance of the document.
-		/// </summary>
-		internal readonly RandomNumberGenerator Random = RandomNumberGenerator.Create();
-		#endregion
-
-		#region Implementation details
-		/// <summary>
 		/// All the entity collections *in processing order*.
 		/// </summary>
 		internal IEnumerable<EntityCollectionBase> EntityCollections => new EntityCollectionBase[]
@@ -343,6 +340,13 @@ namespace Axinom.Cpix
 			UsageRules
 		};
 
+		/// <summary>
+		/// Gets a random number generator associated with this instance of the document.
+		/// </summary>
+		internal readonly RandomNumberGenerator Random = RandomNumberGenerator.Create();
+		#endregion
+
+		#region Implementation details
 		private CpixDocument(XmlDocument loadedXml, IReadOnlyCollection<X509Certificate2> recipientCertificates) : this()
 		{
 			if (loadedXml == null)
@@ -439,6 +443,82 @@ namespace Axinom.Cpix
 					// Unknown thing was signed. We will just pretend the signature does not exist (besides verification).
 				}
 			}
+		}
+
+		private static bool EvaluateUsageRule(IUsageRule rule, SampleDescription sample)
+		{
+			// Each TYPE of filter is combined with AND.
+			// Each filter of the SAME type is combined with OR.
+			// OR is evaluated before AND.
+
+			// We go through all the filter lists and return false if we find a filter list that all evaluate to false.
+
+			if (rule.VideoFilters?.Count > 0 && !rule.VideoFilters.Any(f => EvaluateVideoFilter(f, sample)))
+				return false;
+
+			if (rule.AudioFilters?.Count > 0 && !rule.AudioFilters.Any(f => EvaluateAudioFilter(f, sample)))
+				return false;
+
+			if (rule.BitrateFilters?.Count > 0 && !rule.BitrateFilters.Any(f => EvaluateBitrateFilter(f, sample)))
+				return false;
+
+			if (rule.LabelFilters?.Count > 0 && !rule.LabelFilters.Any(f => EvaluateLabelFilter(f, sample)))
+				return false;
+
+			// All filter lists with anything in them said we are good to go. It's a match!
+			return true;
+		}
+
+		private static bool EvaluateVideoFilter(IVideoFilter filter, SampleDescription sample)
+		{
+			if (sample.Type != SampleType.Video)
+				return false;
+
+			if (filter.MinPixels != null && !(sample.PicturePixelCount >= filter.MinPixels))
+				return false;
+			if (filter.MaxPixels != null && !(sample.PicturePixelCount <= filter.MaxPixels))
+				return false;
+
+			if (filter.MinFramesPerSecond != null && !(sample.PicturePixelCount > filter.MinFramesPerSecond))
+				return false;
+			if (filter.MaxFramesPerSecond != null && !(sample.PicturePixelCount <= filter.MaxFramesPerSecond))
+				return false;
+
+			if (filter.WideColorGamut != null && sample.WideColorGamut != filter.WideColorGamut)
+				return false;
+
+			if (filter.HighDynamicRange != null && sample.HighDynamicRange != filter.HighDynamicRange)
+				return false;
+
+			return true;
+		}
+
+		private static bool EvaluateAudioFilter(IAudioFilter filter, SampleDescription sample)
+		{
+			if (sample.Type != SampleType.Audio)
+				return false;
+
+			if (filter.MinChannels != null && !(sample.AudioChannelCount >= filter.MinChannels))
+				return false;
+			if (filter.MaxChannels != null && !(sample.AudioChannelCount <= filter.MaxChannels))
+				return false;
+
+			return true;
+		}
+
+		private static bool EvaluateBitrateFilter(IBitrateFilter filter, SampleDescription sample)
+		{
+			if (filter.MinBitrate != null && !(sample.Bitrate >= filter.MinBitrate))
+				return false;
+			if (filter.MaxBitrate != null && !(sample.Bitrate <= filter.MaxBitrate))
+				return false;
+
+			return true;
+		}
+
+		private static bool EvaluateLabelFilter(ILabelFilter filter, SampleDescription sample)
+		{
+			return sample.Labels?.Any(l => l == filter.Label) == true;
 		}
 
 		private static XmlNamespaceManager CreateNamespaceManager(XmlDocument document)

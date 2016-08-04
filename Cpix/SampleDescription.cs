@@ -31,7 +31,25 @@ namespace Axinom.Cpix
 		/// If null, sample will not match any filters that require a specific picture pixel count.
 		/// </summary>
 		public long? PicturePixelCount { get; set; }
-		
+
+		/// <summary>
+		/// Video nominal frames per second. Only valid if Type == Video.
+		/// If null, sample will not match any filters that require a specific value;
+		/// </summary>
+		public long? VideoFramesPerSecond { get; set; }
+
+		/// <summary>
+		/// Whether the picture uses WCG. Only valid if Type == Video.
+		/// If null, sample will not match any filters that require a specific value;
+		/// </summary>
+		public bool? WideColorGamut { get; set; }
+
+		/// <summary>
+		/// Whether the picture uses HDR. Only valid if Type == Video.
+		/// If null, sample will not match any filters that require a specific value;
+		/// </summary>
+		public bool? HighDynamicRange { get; set; }
+
 		/// <summary>
 		/// Labels that exist on the sample.
 		/// If null, sample will not match any filters that require a specific label on the sample.
@@ -48,6 +66,15 @@ namespace Axinom.Cpix
 
 			if (PicturePixelCount != null && Type != SampleType.Video)
 				throw new ArgumentException("Sample description cannot define picture pixel count unless Type == Video.");
+
+			if (VideoFramesPerSecond != null && Type != SampleType.Video)
+				throw new ArgumentException("Sample description cannot define VideoFramesPerSecond unless Type == Video.");
+
+			if (WideColorGamut != null && Type != SampleType.Video)
+				throw new ArgumentException("Sample description cannot define WideColorGamut unless Type == Video.");
+
+			if (HighDynamicRange != null && Type != SampleType.Video)
+				throw new ArgumentException("Sample description cannot define HighDynamicRange unless Type == Video.");
 		}
 	}
 }

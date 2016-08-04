@@ -1,5 +1,6 @@
 ﻿using Axinom.Cpix;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Tests
@@ -14,7 +15,7 @@ namespace Tests
 			var document = new CpixDocument();
 			document.ContentKeys.Add(key);
 
-			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new SampleDescription()));
+			Assert.Throws<InvalidOperationException>(() => document.ResolveContentKey(new SampleDescription()));
 		}
 
 		[Fact]
@@ -39,7 +40,43 @@ namespace Tests
 		}
 
 		[Fact]
-		public void ResolveContentKEy_WithRulesButNoMatch_ThrowsException()
+		public void ResolveContentKey_WithUnsupportedFilters_Fails()
+		{
+			var key = TestHelpers.GenerateContentKey();
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(key);
+
+			// This matches all samples.
+			document.UsageRules.Add(new UsageRule
+			{
+				KeyId = key.Id
+			});
+
+			// This matches some crazy label AND contains unsupported filters.
+			// The presence of this should be enough to completely disable any key resolving.
+			var rule = new UsageRule
+			{
+				KeyId = key.Id,
+
+				LabelFilters = new[]
+				{
+					new LabelFilter
+					{
+						Label = "299999999999999999999999999999999999"
+					}
+				}
+			};
+			document.UsageRules.Add(rule);
+
+			// We do this after Add() since normally such filters cannot be added (and save would also reject it).
+			rule.ContainsUnsupportedFilters = true;
+
+			Assert.Throws<NotSupportedException>(() => document.ResolveContentKey(new SampleDescription()));
+		}
+
+		[Fact]
+		public void ResolveContentKey_WithRulesButNoMatch_ThrowsException()
 		{
 			var key = TestHelpers.GenerateContentKey();
 
@@ -55,6 +92,7 @@ namespace Tests
 				}
 			});
 
+			// Not finding a match is an error - all samples must be matched to exactly one content key.
 			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new SampleDescription
 			{
 				Type = SampleType.Video
@@ -83,7 +121,7 @@ namespace Tests
 				Type = SampleType.Audio
 			}));
 		}
-		
+
 		[Fact]
 		public void ResolveContentKey_WithRealisticFilters_MatchesAsExpected()
 		{
