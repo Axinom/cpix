@@ -9,11 +9,13 @@ namespace Axinom.Cpix
 {
 	sealed class RecipientCollection : EntityCollection<IRecipient, Recipient>
 	{
+		public const string ContainerXmlElementName = "DeliveryDataList";
+
 		internal RecipientCollection(CpixDocument document) : base(document)
 		{
 		}
 
-		internal override string ContainerName => "DeliveryDataList";
+		internal override string ContainerName => ContainerXmlElementName;
 
 		protected override XmlElement SerializeEntity(XmlDocument document, XmlNamespaceManager namespaces, XmlElement container, Recipient entity)
 		{

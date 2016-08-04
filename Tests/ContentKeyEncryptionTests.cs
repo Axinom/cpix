@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Tests
 {
-	public sealed class EncryptionTests
+	public sealed class ContentKeyEncryptionTests
 	{
 		[Fact]
 		public void LoadingEncryptedKey_WithRecipientPrivateKey_DecryptsKey()
@@ -70,16 +70,54 @@ namespace Tests
 		}
 
 		[Fact]
-		public void AddRecipient_WithLoadedDocument_Fails()
+		public void LoadingDocument_WithTwoRecipients_DecryptsContentKeysWithEitherRecipient()
+		{
+			var document = new CpixDocument();
+			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+
+			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
+			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient2));
+
+			var decryptedDocument1 = TestHelpers.Reload(document, new[] { TestHelpers.PrivateRecipient1 });
+			var decryptedDocument2 = TestHelpers.Reload(document, new[] { TestHelpers.PrivateRecipient2 });
+
+			Assert.True(decryptedDocument1.ContentKeysAreReadable);
+			Assert.True(decryptedDocument2.ContentKeysAreReadable);
+		}
+
+		[Fact]
+		public void AddRecipient_WithLoadedDocumentAndReadContentKeys_Fails()
 		{
 			var document = new CpixDocument();
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 
 			document = TestHelpers.Reload(document);
 
-			// Conceivably, one might wish to relax it so you can add recipients if you have access to the document key
-			// but there does not appear to be any real world scenario for that, so it seems pointless to consider here.
+			// The keys are read-only so they cannot be encrypted!
 			Assert.Throws<InvalidOperationException>(() => document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1)));
+		}
+
+		[Fact]
+		public void AddRecipient_WithLoadedDocumentAndWrittenContentKeys_SucceedsAndDecryptsContentKeys()
+		{
+			var document = new CpixDocument();
+			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+
+			document = TestHelpers.Reload(document);
+
+			// Re-add keys to mark them for processing. They will be encrypted.
+			var keys = document.ContentKeys.ToArray();
+			document.ContentKeys.Clear();
+
+			foreach (var key in keys)
+				document.ContentKeys.Add(key);
+
+			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
+
+			document = TestHelpers.Reload(document, new[] { TestHelpers.PrivateRecipient1 });
+
+			Assert.Equal(1, document.Recipients.Count);
+			Assert.True(document.ContentKeysAreReadable);
 		}
 	}
 }

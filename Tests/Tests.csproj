@@ -63,7 +63,7 @@
     <Compile Include="SigningInteractionTests.cs" />
     <Compile Include="UsageRuleTests.cs" />
     <Compile Include="ContentKeyTests.cs" />
-    <Compile Include="EncryptionTests.cs" />
+    <Compile Include="ContentKeyEncryptionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResolveContentKeyTests.cs" />
     <Compile Include="SigningTests.cs" />

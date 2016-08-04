@@ -9,11 +9,13 @@ namespace Axinom.Cpix
 {
 	sealed class ContentKeyCollection : EntityCollection<IContentKey, ContentKey>
 	{
+		public const string ContainerXmlElementName = "ContentKeyList";
+
 		public ContentKeyCollection(CpixDocument document) : base(document)
 		{
 		}
 
-		internal override string ContainerName => "ContentKeyList";
+		internal override string ContainerName => ContainerXmlElementName;
 
 		protected override XmlElement SerializeEntity(XmlDocument document, XmlNamespaceManager namespaces, XmlElement container, ContentKey entity)
 		{

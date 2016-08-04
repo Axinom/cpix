@@ -1,6 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Xml;
-using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace Axinom.Cpix
@@ -41,6 +42,54 @@ namespace Axinom.Cpix
 
 				return xmlDocument;
 			}
+		}
+
+		internal static XmlElement InsertTopLevelCpixXmlElementInCorrectOrder(XmlElement element, XmlDocument document)
+		{
+			// If this returns null, our element should be the first one.
+			var insertAfter = TryDetectInsertAfterElementForCpixTopLevelInsertion(element, document);
+
+			if (insertAfter == null)
+				return (XmlElement)document.DocumentElement.PrependChild(element);
+			else
+				return (XmlElement)document.DocumentElement.InsertAfter(element, insertAfter);
+		}
+
+		private static XmlElement TryDetectInsertAfterElementForCpixTopLevelInsertion(XmlElement element, XmlDocument document)
+		{
+			// Top-level elements have a specific order they need to be in! We insert in the appropriate order.
+
+			var theseComeBefore = Constants.TopLevelXmlElementOrder
+				.TakeWhile(item => item.Item1 != element.LocalName || item.Item2 != element.NamespaceURI)
+				.ToArray();
+
+			// If we got everything, this means the current element is unknown and we have a defect!
+			if (theseComeBefore.Length == Constants.TopLevelXmlElementOrder.Length)
+				throw new ArgumentException("The correct ordering of this element in a CPIX document cannot be determined as the element is unknown.", nameof(element));
+
+			if (theseComeBefore.Length == 0)
+				return null; // This is the first element.
+
+			// If there already exist elements of the same type, add after the latest of the same type.
+			var insertAfter = document.DocumentElement.ChildNodes.OfType<XmlElement>()
+				.LastOrDefault(e => e.LocalName == element.LocalName && e.NamespaceURI == element.NamespaceURI);
+
+			if (insertAfter != null)
+				return insertAfter;
+
+			// Otherwise, add after whatever we detect should come right before us.
+			// We start scanning from the last one, obviously.
+			foreach (var candidate in theseComeBefore.Reverse())
+			{
+				insertAfter = document.DocumentElement.ChildNodes.OfType<XmlElement>()
+					.LastOrDefault(e => e.LocalName == candidate.Item1 && e.NamespaceURI == candidate.Item2);
+
+				if (insertAfter != null)
+					return insertAfter;
+			}
+
+			// None of the "come before" exist? Then our element is the first one!
+			return null;
 		}
 	}
 }

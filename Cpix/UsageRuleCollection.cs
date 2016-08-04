@@ -9,11 +9,13 @@ namespace Axinom.Cpix
 {
 	sealed class UsageRuleCollection : EntityCollection<IUsageRule, UsageRule>
 	{
+		public const string ContainerXmlElementName = "ContentKeyUsageRuleList";
+
 		public UsageRuleCollection(CpixDocument document) : base(document)
 		{
 		}
 
-		internal override string ContainerName => "ContentKeyUsageRuleList";
+		internal override string ContainerName => ContainerXmlElementName;
 
 		protected override UsageRule DeserializeEntity(XmlElement element, XmlNamespaceManager namespaces)
 		{

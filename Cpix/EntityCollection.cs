@@ -128,7 +128,10 @@ namespace Axinom.Cpix
 
 			// We need a container element, so create one if it is missing.
 			if (containerElement == null)
-				containerElement = (XmlElement)document.DocumentElement.AppendChild(document.CreateElement("cpix:" + ContainerName, Constants.CpixNamespace));
+			{
+				var element = document.CreateElement("cpix:" + ContainerName, Constants.CpixNamespace);
+				containerElement = XmlHelpers.InsertTopLevelCpixXmlElementInCorrectOrder(element, document);
+			}
 
 			// Add any new items and then mark them as existing items.
 			foreach (var item in _newItems.ToArray())
