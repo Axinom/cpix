@@ -4,14 +4,20 @@ using System.Xml.Serialization;
 
 namespace Axinom.Cpix.DocumentModel
 {
+	// We stash these in a sub-namespace since XmlSerializer tends to expect types to be public (and workarounds are not nice).
+	//
+	// Nullable types are not well supported by XmlSerializer, so we use the idiom of *AsXmlString to manually serialize
+	// to/from the string-form of the data. XmlSerializer just converts between XML strings and string objects there.
+
 	/// <summary>
-	/// Just for creating a new blank document.
+	/// Just for creating a new blank document. The contents are serialized independently.
 	/// </summary>
 	[XmlRoot("CPIX", Namespace = Constants.CpixNamespace)]
 	public sealed class DocumentRootElement
 	{
 	}
 
+	#region Usage rules
 	[XmlRoot("ContentKeyUsageRule", Namespace = Constants.CpixNamespace)]
 	public sealed class UsageRuleElement
 	{
@@ -154,7 +160,9 @@ namespace Axinom.Cpix.DocumentModel
 			set { MaxBitrate = value != null ? (long?)long.Parse(value) : null; }
 		}
 	}
+	#endregion
 
+	#region Content keys
 	[XmlRoot("ContentKey", Namespace = Constants.CpixNamespace)]
 	public sealed class ContentKeyElement
 	{
@@ -207,7 +215,9 @@ namespace Axinom.Cpix.DocumentModel
 			}
 		}
 	}
+	#endregion
 
+	#region Cryptographic elements (shared)
 	public sealed class DataElement
 	{
 		/// <summary>
@@ -253,13 +263,9 @@ namespace Axinom.Cpix.DocumentModel
 		[XmlAttribute]
 		public string Algorithm { get; set; }
 	}
+	#endregion
 
-	public sealed class X509Data
-	{
-		[XmlElement("X509Certificate")]
-		public byte[] Certificate { get; set; }
-	}
-
+	#region Delivery data
 	[XmlRoot("DeliveryData", Namespace = Constants.CpixNamespace)]
 	public sealed class DeliveryDataElement
 	{
@@ -352,4 +358,11 @@ namespace Axinom.Cpix.DocumentModel
 		[XmlElement(Namespace = Constants.XmlDigitalSignatureNamespace)]
 		public X509Data X509Data { get; set; }
 	}
+
+	public sealed class X509Data
+	{
+		[XmlElement("X509Certificate")]
+		public byte[] Certificate { get; set; }
+	}
+	#endregion
 }

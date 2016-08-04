@@ -8,33 +8,23 @@ namespace Axinom.Cpix
 {
 	/// <summary>
 	/// A collection of entities stored in a CPIX document.
-	/// 
-	/// An item in the collection may be freely modified after adding, before the document is first saved but
-	/// items loaded from an existing document (and any saved entities) are read-only and must be replaced in whole.
 	/// </summary>
 	/// <remarks>
-	/// The entity interface must be immutable but the implementation should be mutable. Adding new entities into the
-	/// collection takes place by creating an instance of the implementation class and adding it to the collection,
-	/// after which it is treated as immutable.
+	/// An item added to the collection must not be modified after Add().
+	/// An item retrieved from the collection must not be modified, ever.
 	/// 
-	/// This may not always be enforced by the API for technical/convenience reasons but is always the principle
-	/// to follow. Violations may lead to undefined behavior.
+	/// Violation of these constraints may lead to undefined behavior.
 	/// </remarks>
-	public abstract class EntityCollection<TEntityInterface, TEntityImplementation> : EntityCollectionBase, ICollection<TEntityInterface> where TEntityImplementation : Entity, TEntityInterface
+	public abstract class EntityCollection<TEntity> : EntityCollectionBase, ICollection<TEntity> where TEntity : Entity
 	{
 		/// <summary>
 		/// Adds a new item to the collection.
 		/// The item will be validated and should not be modified by the caller after this.
 		/// </summary>
-		public void Add(TEntityInterface itemAsInterface)
+		public void Add(TEntity item)
 		{
-			if (itemAsInterface == null)
-				throw new ArgumentNullException(nameof(itemAsInterface));
-
-			var item = itemAsInterface as TEntityImplementation;
-
 			if (item == null)
-				throw new ArgumentException("Entities added into this collection must be of type " + typeof(TEntityImplementation).Name);
+				throw new ArgumentNullException(nameof(item));
 
 			VerifyNotReadOnly();
 
@@ -61,19 +51,17 @@ namespace Axinom.Cpix
 			_existingItemsData.Clear();
 		}
 
-		public bool Contains(TEntityInterface item) => AllItems.Contains(item);
+		public bool Contains(TEntity item) => AllItems.Contains(item);
 
-		public void CopyTo(TEntityInterface[] array, int arrayIndex)
+		public void CopyTo(TEntity[] array, int arrayIndex)
 		{
 			var items = AllItems.ToArray();
 			Array.Copy(items, 0, array, arrayIndex, items.Length);
 		}
 
-		public bool Remove(TEntityInterface itemAsInterface)
+		public bool Remove(TEntity item)
 		{
 			VerifyNotReadOnly();
-
-			var item = itemAsInterface as TEntityImplementation;
 
 			if (item == null)
 				return false;
@@ -91,7 +79,7 @@ namespace Axinom.Cpix
 			return true;
 		}
 
-		public IEnumerator<TEntityInterface> GetEnumerator() => AllItems.GetEnumerator();
+		public IEnumerator<TEntity> GetEnumerator() => AllItems.GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => AllItems.GetEnumerator();
 
 		/// <summary>
@@ -100,9 +88,9 @@ namespace Axinom.Cpix
 		public override int Count => AllItems.Count();
 
 		#region Internal API
-		internal IEnumerable<TEntityImplementation> NewItems => _newItems;
-		internal IEnumerable<TEntityImplementation> ExistingItems => _existingItemsData.Select(data => data.Item1);
-		internal IEnumerable<TEntityImplementation> AllItems => ExistingItems.Concat(_newItems);
+		internal IEnumerable<TEntity> NewItems => _newItems;
+		internal IEnumerable<TEntity> ExistingItems => _existingItemsData.Select(data => data.Item1);
+		internal IEnumerable<TEntity> AllItems => ExistingItems.Concat(_newItems);
 
 		protected override IEnumerable<Entity> ExistingEntities => ExistingItems;
 		protected override IEnumerable<Entity> NewEntities => _newItems;
@@ -136,7 +124,7 @@ namespace Axinom.Cpix
 				var element = SerializeEntity(document, namespaces, containerElement, item);
 
 				_newItems.Remove(item);
-				_existingItemsData.Add(new Tuple<TEntityImplementation, XmlElement>(item, element));
+				_existingItemsData.Add(new Tuple<TEntity, XmlElement>(item, element));
 			}
 
 			SaveNewSignatures(document, containerElement);
@@ -154,7 +142,7 @@ namespace Axinom.Cpix
 			{
 				// Entities will all be validated later, when everything is loaded (to simplify reference handling).
 				var entity = DeserializeEntity(element, namespaces);
-				_existingItemsData.Add(new Tuple<TEntityImplementation, XmlElement>(entity, element));
+				_existingItemsData.Add(new Tuple<TEntity, XmlElement>(entity, element));
 			}
 		}
 		#endregion
@@ -167,25 +155,25 @@ namespace Axinom.Cpix
 		/// <summary>
 		/// Serializes an entity into the indicated container in the XML document, returning the newly created XML element.
 		/// </summary>
-		protected abstract XmlElement SerializeEntity(XmlDocument document, XmlNamespaceManager namespaces, XmlElement container, TEntityImplementation entity);
+		protected abstract XmlElement SerializeEntity(XmlDocument document, XmlNamespaceManager namespaces, XmlElement container, TEntity entity);
 
 		/// <summary>
 		/// Deserializes an entity from an XML document, returning it.
 		/// </summary>
-		protected abstract TEntityImplementation DeserializeEntity(XmlElement element, XmlNamespaceManager namespaces);
+		protected abstract TEntity DeserializeEntity(XmlElement element, XmlNamespaceManager namespaces);
 
 		/// <summary>
 		/// Performs collection-scope validation before an entity is added to the collection.
 		/// The entity has already passed individual validation, so this just concerns "global" state validation.
 		/// </summary>
-		protected virtual void ValidateCollectionStateBeforeAdd(TEntityImplementation entity)
+		protected virtual void ValidateCollectionStateBeforeAdd(TEntity entity)
 		{
 		}
 		#endregion
 
 		#region Implementation details
-		private readonly List<TEntityImplementation> _newItems = new List<TEntityImplementation>();
-		private readonly List<Tuple<TEntityImplementation, XmlElement>> _existingItemsData = new List<Tuple<TEntityImplementation, XmlElement>>();
+		private readonly List<TEntity> _newItems = new List<TEntity>();
+		private readonly List<Tuple<TEntity, XmlElement>> _existingItemsData = new List<Tuple<TEntity, XmlElement>>();
 		#endregion
 	}
 }

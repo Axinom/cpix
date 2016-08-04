@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace Axinom.Cpix
 {
-	sealed class RecipientCollection : EntityCollection<IRecipient, Recipient>
+	sealed class RecipientCollection : EntityCollection<Recipient>
 	{
 		public const string ContainerXmlElementName = "DeliveryDataList";
 

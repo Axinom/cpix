@@ -3,7 +3,7 @@
 	/// <summary>
 	/// A label filter attached to a new content key assignment rule.
 	/// </summary>
-	public sealed class LabelFilter : ILabelFilter
+	public sealed class LabelFilter
 	{
 		/// <summary>
 		/// The label that must exist on samples that match this filter. The meaning of labels is implementation-defined.

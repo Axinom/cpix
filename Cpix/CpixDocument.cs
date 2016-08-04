@@ -40,17 +40,17 @@ namespace Axinom.Cpix
 		/// 
 		/// If this collection is empty, the content keys within the CPIX document are not encrypted.
 		/// </summary>
-		public EntityCollection<IRecipient, Recipient> Recipients { get; }
+		public EntityCollection<Recipient> Recipients { get; }
 
 		/// <summary>
 		/// Gets the set of content keys stored in the CPIX document.
 		/// </summary>
-		public EntityCollection<IContentKey, ContentKey> ContentKeys { get; }
+		public EntityCollection<ContentKey> ContentKeys { get; }
 
 		/// <summary>
 		/// Gets the set of usage rules stored in the CPIX document.
 		/// </summary>
-		public EntityCollection<IUsageRule, UsageRule> UsageRules { get; }
+		public EntityCollection<UsageRule> UsageRules { get; }
 
 		/// <summary>
 		/// Whether the values of content keys are readable.
@@ -99,7 +99,7 @@ namespace Axinom.Cpix
 		/// The content key assignment rules are resolved and exactly one match is assumed. No match
 		/// or multiple matches are considered an error condition (ambiguities are not allowed).
 		/// </summary>
-		public IContentKey ResolveContentKey(SampleDescription sampleDescription)
+		public ContentKey ResolveContentKey(SampleDescription sampleDescription)
 		{
 			if (sampleDescription == null)
 				throw new ArgumentNullException(nameof(sampleDescription));
@@ -445,7 +445,7 @@ namespace Axinom.Cpix
 			}
 		}
 
-		private static bool EvaluateUsageRule(IUsageRule rule, SampleDescription sample)
+		private static bool EvaluateUsageRule(UsageRule rule, SampleDescription sample)
 		{
 			// Each TYPE of filter is combined with AND.
 			// Each filter of the SAME type is combined with OR.
@@ -469,7 +469,7 @@ namespace Axinom.Cpix
 			return true;
 		}
 
-		private static bool EvaluateVideoFilter(IVideoFilter filter, SampleDescription sample)
+		private static bool EvaluateVideoFilter(VideoFilter filter, SampleDescription sample)
 		{
 			if (sample.Type != SampleType.Video)
 				return false;
@@ -493,7 +493,7 @@ namespace Axinom.Cpix
 			return true;
 		}
 
-		private static bool EvaluateAudioFilter(IAudioFilter filter, SampleDescription sample)
+		private static bool EvaluateAudioFilter(AudioFilter filter, SampleDescription sample)
 		{
 			if (sample.Type != SampleType.Audio)
 				return false;
@@ -506,7 +506,7 @@ namespace Axinom.Cpix
 			return true;
 		}
 
-		private static bool EvaluateBitrateFilter(IBitrateFilter filter, SampleDescription sample)
+		private static bool EvaluateBitrateFilter(BitrateFilter filter, SampleDescription sample)
 		{
 			if (filter.MinBitrate != null && !(sample.Bitrate >= filter.MinBitrate))
 				return false;
@@ -516,7 +516,7 @@ namespace Axinom.Cpix
 			return true;
 		}
 
-		private static bool EvaluateLabelFilter(ILabelFilter filter, SampleDescription sample)
+		private static bool EvaluateLabelFilter(LabelFilter filter, SampleDescription sample)
 		{
 			return sample.Labels?.Any(l => l == filter.Label) == true;
 		}

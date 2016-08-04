@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace Axinom.Cpix
 {
-	sealed class ContentKeyCollection : EntityCollection<IContentKey, ContentKey>
+	sealed class ContentKeyCollection : EntityCollection<ContentKey>
 	{
 		public const string ContainerXmlElementName = "ContentKeyList";
 

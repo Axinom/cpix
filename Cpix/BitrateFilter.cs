@@ -3,7 +3,7 @@
 	/// <summary>
 	/// A read-only view of a bitrate filter attached to a content key assignment rule.
 	/// </summary>
-	public sealed class BitrateFilter : IBitrateFilter
+	public sealed class BitrateFilter
 	{
 		/// <summary>
 		/// The minimum nominal bitrate of a stream containing matching samples (inclusive).

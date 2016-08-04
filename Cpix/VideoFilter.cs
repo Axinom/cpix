@@ -4,7 +4,7 @@
 	/// A video filter attached to a new content key assignment rule.
 	/// Only video samples can match this filter - any other type of sample is never a match.
 	/// </summary>
-	public sealed class VideoFilter : IVideoFilter
+	public sealed class VideoFilter
 	{
 		/// <summary>
 		/// The minimum number of pixels that must be present in the pictures encoded by the

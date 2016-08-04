@@ -2,7 +2,7 @@
 
 namespace Axinom.Cpix
 {
-	public sealed class ContentKey : Entity, IContentKey
+	public sealed class ContentKey : Entity
 	{
 		/// <summary>
 		/// Unique ID of the content key.

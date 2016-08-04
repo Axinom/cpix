@@ -59,15 +59,8 @@
     <Compile Include="EntityCollection.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="ContentKeyResolveException.cs" />
-    <Compile Include="IAudioFilter.cs" />
-    <Compile Include="IBitrateFilter.cs" />
-    <Compile Include="IContentKey.cs" />
-    <Compile Include="ILabelFilter.cs" />
     <Compile Include="InvalidCpixDataException.cs" />
     <Compile Include="DocumentModel\XmlElements.cs" />
-    <Compile Include="IRecipient.cs" />
-    <Compile Include="IUsageRule.cs" />
-    <Compile Include="IVideoFilter.cs" />
     <Compile Include="LabelFilter.cs" />
     <Compile Include="Recipient.cs" />
     <Compile Include="RecipientCollection.cs" />

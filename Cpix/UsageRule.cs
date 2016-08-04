@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Axinom.Cpix
 {
-	public sealed class UsageRule : Entity, IUsageRule
+	public sealed class UsageRule : Entity
 	{
 		/// <summary>
 		/// The ID of the content key that this usage rule applies to.
@@ -21,12 +21,7 @@ namespace Axinom.Cpix
 		public ICollection<AudioFilter> AudioFilters { get; set; } = new List<AudioFilter>();
 		public ICollection<LabelFilter> LabelFilters { get; set; } = new List<LabelFilter>();
 		public ICollection<BitrateFilter> BitrateFilters { get; set; } = new List<BitrateFilter>();
-
-		IReadOnlyCollection<IVideoFilter> IUsageRule.VideoFilters => (IReadOnlyCollection<IVideoFilter>)VideoFilters;
-		IReadOnlyCollection<IAudioFilter> IUsageRule.AudioFilters => (IReadOnlyCollection<IAudioFilter>)AudioFilters;
-		IReadOnlyCollection<ILabelFilter> IUsageRule.LabelFilters => (IReadOnlyCollection<ILabelFilter>)LabelFilters;
-		IReadOnlyCollection<IBitrateFilter> IUsageRule.BitrateFilters => (IReadOnlyCollection<IBitrateFilter>)BitrateFilters;
-
+		
 		internal override void ValidateNewEntity(CpixDocument document)
 		{
 			// This can happen if an entity with unsupported filters gets re-added to a document, for some misguided reason.

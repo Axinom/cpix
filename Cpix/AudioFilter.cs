@@ -4,7 +4,7 @@
 	/// An audio filter attached to a new content key assignment rule.
 	/// Only audio samples can match this filter - any other type of sample is never a match.
 	/// </summary>
-	public sealed class AudioFilter : IAudioFilter
+	public sealed class AudioFilter
 	{
 		/// <summary>
 		/// The minimum number of channels that must be present in the

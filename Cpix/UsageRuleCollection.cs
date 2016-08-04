@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace Axinom.Cpix
 {
-	sealed class UsageRuleCollection : EntityCollection<IUsageRule, UsageRule>
+	sealed class UsageRuleCollection : EntityCollection<UsageRule>
 	{
 		public const string ContainerXmlElementName = "ContentKeyUsageRuleList";
 

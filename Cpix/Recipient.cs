@@ -6,7 +6,7 @@ namespace Axinom.Cpix
 	/// <summary>
 	/// An identity that is authorized to access the content keys of a CPIX document.
 	/// </summary>
-	public sealed class Recipient : Entity, IRecipient
+	public sealed class Recipient : Entity
 	{
 		/// <summary>
 		/// A certificate identifying the recipient and the asymmetric key used to secure communications.
