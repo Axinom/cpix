@@ -1,4 +1,4 @@
-﻿using Axinom.Cpix.DocumentModel;
+﻿using Axinom.Cpix.Internal;
 using System;
 using System.Linq;
 using System.Security;

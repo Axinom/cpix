@@ -2,7 +2,7 @@
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace Axinom.Cpix.DocumentModel
+namespace Axinom.Cpix.Internal
 {
 	// We stash these in a sub-namespace since XmlSerializer tends to expect types to be public (and workarounds are not nice).
 	//

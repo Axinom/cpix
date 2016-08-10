@@ -60,7 +60,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="ContentKeyResolveException.cs" />
     <Compile Include="InvalidCpixDataException.cs" />
-    <Compile Include="DocumentModel\XmlElements.cs" />
+    <Compile Include="Internal\XmlElements.cs" />
     <Compile Include="LabelFilter.cs" />
     <Compile Include="Recipient.cs" />
     <Compile Include="RecipientCollection.cs" />

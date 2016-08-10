@@ -1,9 +1,5 @@
-﻿using Axinom.Cpix.DocumentModel;
-using System;
-using System.Collections.Generic;
+﻿using Axinom.Cpix.Internal;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace Axinom.Cpix
