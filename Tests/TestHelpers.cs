@@ -45,7 +45,30 @@ namespace Tests
 
 			var rule = new UsageRule
 			{
-				KeyId = contentKey.Id
+				KeyId = contentKey.Id,
+
+				// Some arbitrary filters here, just to generate interesting test data.
+				AudioFilters = new[]
+				{
+					new AudioFilter
+					{
+						MaxChannels = 5,
+						MinChannels = 0
+					}
+				},
+				BitrateFilters = new[]
+				{
+					new BitrateFilter
+					{
+						MinBitrate = 100,
+						MaxBitrate = 5198493
+					},
+					new BitrateFilter
+					{
+						MinBitrate = 5198494,
+						MaxBitrate = 100000000000000
+					}
+				}
 			};
 
 			document.UsageRules.Add(rule);

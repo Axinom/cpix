@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -90,6 +91,38 @@ namespace Axinom.Cpix
 
 			// None of the "come before" exist? Then our element is the first one!
 			return null;
+		}
+
+		/// <summary>
+		/// Loads, reformats/indents and saves an XML document.
+		/// </summary>
+		internal static void PrettyPrintXml(Stream input, Stream output)
+		{
+			var document = new XmlDocument();
+			document.PreserveWhitespace = true;
+			document.Load(input);
+
+			using (var writer = XmlWriter.Create(output, new XmlWriterSettings
+			{
+				Encoding = Encoding.UTF8,
+				Indent = true,
+				IndentChars = "\t",
+				CloseOutput = false
+			}))
+			{
+				document.Save(writer);
+			}
+		}
+
+		internal static XmlNamespaceManager CreateCpixNamespaceManager(XmlDocument document)
+		{
+			var manager = new XmlNamespaceManager(document.NameTable);
+			manager.AddNamespace("cpix", Constants.CpixNamespace);
+			manager.AddNamespace("pskc", Constants.PskcNamespace);
+			manager.AddNamespace("enc", Constants.XmlEncryptionNamespace);
+			manager.AddNamespace("ds", Constants.XmlDigitalSignatureNamespace);
+
+			return manager;
 		}
 	}
 }

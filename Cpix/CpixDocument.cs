@@ -153,14 +153,14 @@ namespace Axinom.Cpix
 			if (_xmlDocument == null)
 			{
 				_xmlDocument = CreateNewXmlDocument();
-				_namespaceManager = CreateNamespaceManager(_xmlDocument);
+				_namespaceManager = XmlHelpers.CreateCpixNamespaceManager(_xmlDocument);
 			}
 
 			foreach (var collection in EntityCollections)
 				collection.SaveChanges(_xmlDocument, _namespaceManager);
 
-			// Sign the document!
-			if (_desiredSignedBy != null)
+			// If an existing signature has been removed and we have a new signer, sign the document!
+			if (_documentSignature == null && _desiredSignedBy != null)
 			{
 				var signature = CryptographyHelpers.SignXmlElement(_xmlDocument, "", _desiredSignedBy);
 				_documentSignature = new Tuple<XmlElement, X509Certificate2>(signature, _desiredSignedBy);
@@ -353,7 +353,7 @@ namespace Axinom.Cpix
 				throw new ArgumentNullException(nameof(loadedXml));
 
 			_xmlDocument = loadedXml;
-			_namespaceManager = CreateNamespaceManager(_xmlDocument);
+			_namespaceManager = XmlHelpers.CreateCpixNamespaceManager(_xmlDocument);
 
 			RecipientCertificates = recipientCertificates ?? new X509Certificate2[0];
 		}
@@ -368,7 +368,8 @@ namespace Axinom.Cpix
 		// The actual signature that is actually present in the loaded document (if any).
 		private Tuple<XmlElement, X509Certificate2> _documentSignature;
 
-		// The desired identity whose signature should cover the document.
+		// If _documentSignature is null, this is the desired identity whose signature will cover the document on save.
+		// If _documentSignature is not null, this is the current signer of the document.
 		private X509Certificate2 _desiredSignedBy;
 
 		private void VerifyAllSignaturesAndRememberSigners()
@@ -519,17 +520,6 @@ namespace Axinom.Cpix
 		private static bool EvaluateLabelFilter(LabelFilter filter, SampleDescription sample)
 		{
 			return sample.Labels?.Any(l => l == filter.Label) == true;
-		}
-
-		private static XmlNamespaceManager CreateNamespaceManager(XmlDocument document)
-		{
-			var manager = new XmlNamespaceManager(document.NameTable);
-			manager.AddNamespace("cpix", Constants.CpixNamespace);
-			manager.AddNamespace("pskc", Constants.PskcNamespace);
-			manager.AddNamespace("enc", Constants.XmlEncryptionNamespace);
-			manager.AddNamespace("ds", Constants.XmlDigitalSignatureNamespace);
-
-			return manager;
 		}
 
 		static CpixDocument()
