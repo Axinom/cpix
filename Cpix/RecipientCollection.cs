@@ -75,7 +75,7 @@ namespace Axinom.Cpix
 				}
 			};
 
-			return XmlHelpers.InsertXmlObject(element, document, container);
+			return XmlHelpers.AppendXmlObjectAsChild(element, document, container);
 		}
 
 		protected override Recipient DeserializeEntity(XmlElement element, XmlNamespaceManager namespaces)

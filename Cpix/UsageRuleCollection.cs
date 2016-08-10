@@ -72,7 +72,7 @@ namespace Axinom.Cpix
 					.ToArray();
 			}
 
-			return XmlHelpers.InsertXmlObject(element, document, container);
+			return XmlHelpers.AppendXmlObjectAsChild(element, document, container);
 		}
 
 		protected override UsageRule DeserializeEntity(XmlElement element, XmlNamespaceManager namespaces)

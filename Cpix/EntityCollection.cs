@@ -114,7 +114,12 @@ namespace Axinom.Cpix
 			// We need a container element, so create one if it is missing.
 			if (containerElement == null)
 			{
-				var element = document.CreateElement("cpix:" + ContainerName, Constants.CpixNamespace);
+				var rootElement = document.DocumentElement;
+
+				// This namespace must exist, as the root element itself uses it. We will reuse the same prefix.
+				var prefix = rootElement.GetPrefixOfNamespace(Constants.CpixNamespace);
+				var element = document.CreateElement(prefix, ContainerName, Constants.CpixNamespace);
+
 				containerElement = XmlHelpers.InsertTopLevelCpixXmlElementInCorrectOrder(element, document);
 			}
 
