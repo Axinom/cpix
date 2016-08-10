@@ -227,6 +227,22 @@ namespace Axinom.Cpix
 
 		/// <summary>
 		/// Loads a CPIX document from a stream, decrypting it using the key pairs
+		/// of the identity referenced by the provided certificate, if required.
+		/// </summary>
+		/// <remarks>
+		/// All digital signatures are verified. Note that a valid signature does not mean that the signer
+		/// is trusted! It is the caller's responsibility to ensure that any signers are trusted!
+		/// </remarks>
+		public static CpixDocument Load(Stream stream, X509Certificate2 recipientCertificate)
+		{
+			if (recipientCertificate == null)
+				throw new ArgumentNullException(nameof(recipientCertificate));
+
+			return Load(stream, new[] { recipientCertificate });
+		}
+
+		/// <summary>
+		/// Loads a CPIX document from a stream, decrypting it using the key pairs
 		/// of the identities referenced by the provided certificates, if required.
 		/// </summary>
 		/// <remarks>

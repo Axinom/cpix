@@ -1,21 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.25123.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cpix", "Cpix\Cpix.csproj", "{8706C176-A754-4C23-A9B7-855E6B1BDDB1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Producer", "Producer\Producer.csproj", "{4E00EB8F-AABD-4109-8AB6-65BAE35B1842}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resources", "Resources\Resources.csproj", "{A46001B7-E050-4859-8175-84C730BA3223}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Consumer", "Consumer\Consumer.csproj", "{6CD99D4A-34C0-4129-AA85-A005F97561AF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{AB2BB39A-D2F1-4A3B-9F64-5764DE754402}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{C9D71E49-E2C1-4C2F-A56D-B5255F90C6F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Labeler", "Labeler\Labeler.csproj", "{0425264E-A198-414D-8A0E-72A402BDB1A2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadmeQuickStartExamples", "ReadmeQuickStartExamples\ReadmeQuickStartExamples.csproj", "{D9DDFDAF-CAE6-4365-AB4A-A40B7FBFB3F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,33 +23,23 @@ Global
 		{8706C176-A754-4C23-A9B7-855E6B1BDDB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8706C176-A754-4C23-A9B7-855E6B1BDDB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8706C176-A754-4C23-A9B7-855E6B1BDDB1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4E00EB8F-AABD-4109-8AB6-65BAE35B1842}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4E00EB8F-AABD-4109-8AB6-65BAE35B1842}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4E00EB8F-AABD-4109-8AB6-65BAE35B1842}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4E00EB8F-AABD-4109-8AB6-65BAE35B1842}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A46001B7-E050-4859-8175-84C730BA3223}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A46001B7-E050-4859-8175-84C730BA3223}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A46001B7-E050-4859-8175-84C730BA3223}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A46001B7-E050-4859-8175-84C730BA3223}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6CD99D4A-34C0-4129-AA85-A005F97561AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6CD99D4A-34C0-4129-AA85-A005F97561AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6CD99D4A-34C0-4129-AA85-A005F97561AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6CD99D4A-34C0-4129-AA85-A005F97561AF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C9D71E49-E2C1-4C2F-A56D-B5255F90C6F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C9D71E49-E2C1-4C2F-A56D-B5255F90C6F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C9D71E49-E2C1-4C2F-A56D-B5255F90C6F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C9D71E49-E2C1-4C2F-A56D-B5255F90C6F5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0425264E-A198-414D-8A0E-72A402BDB1A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0425264E-A198-414D-8A0E-72A402BDB1A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0425264E-A198-414D-8A0E-72A402BDB1A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0425264E-A198-414D-8A0E-72A402BDB1A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9DDFDAF-CAE6-4365-AB4A-A40B7FBFB3F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9DDFDAF-CAE6-4365-AB4A-A40B7FBFB3F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9DDFDAF-CAE6-4365-AB4A-A40B7FBFB3F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9DDFDAF-CAE6-4365-AB4A-A40B7FBFB3F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{4E00EB8F-AABD-4109-8AB6-65BAE35B1842} = {AB2BB39A-D2F1-4A3B-9F64-5764DE754402}
-		{6CD99D4A-34C0-4129-AA85-A005F97561AF} = {AB2BB39A-D2F1-4A3B-9F64-5764DE754402}
-		{0425264E-A198-414D-8A0E-72A402BDB1A2} = {AB2BB39A-D2F1-4A3B-9F64-5764DE754402}
+		{D9DDFDAF-CAE6-4365-AB4A-A40B7FBFB3F6} = {AB2BB39A-D2F1-4A3B-9F64-5764DE754402}
 	EndGlobalSection
 EndGlobal
