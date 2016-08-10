@@ -81,12 +81,12 @@ namespace Axinom.Cpix
 						if (string.IsNullOrEmpty(ns.Key))
 						{
 							// Default namespace.
-							writer.WriteAttributeString(null, "xmlns", "http://www.w3.org/2000/xmlns/", ns.Value);
+							writer.WriteAttributeString(null, "xmlns", Constants.XmlnsNamespace, ns.Value);
 						}
 						else
 						{
 							// Prefixed namespace.
-							writer.WriteAttributeString("xmlns", ns.Key, "http://www.w3.org/2000/xmlns/", ns.Value);
+							writer.WriteAttributeString("xmlns", ns.Key, Constants.XmlnsNamespace, ns.Value);
 						}
 					}
 
