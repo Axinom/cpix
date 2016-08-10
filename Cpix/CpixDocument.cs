@@ -211,6 +211,10 @@ namespace Axinom.Cpix
 			enc.Value = Constants.XmlEncryptionNamespace;
 			document.DocumentElement.Attributes.Append(enc);
 
+			var pskc = document.CreateAttribute("xmlns", "pskc", Constants.XmlnsNamespace);
+			pskc.Value = Constants.PskcNamespace;
+			document.DocumentElement.Attributes.Append(pskc);
+
 			// The signature generation code will still duplicate the namespace declaration because that's just what it
 			// does but at least for the majority of "normal" content, this improves readability quite a lot.
 

@@ -218,6 +218,7 @@ namespace Axinom.Cpix.Internal
 	#endregion
 
 	#region Cryptographic elements (shared)
+	[XmlRoot(Namespace = Constants.PskcNamespace)]
 	public sealed class DataElement
 	{
 		/// <summary>
