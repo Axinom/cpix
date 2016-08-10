@@ -18,6 +18,11 @@ namespace Axinom.Cpix
 		public abstract int Count { get; }
 
 		/// <summary>
+		/// Removes all items from the collection.
+		/// </summary>
+		public abstract void Clear();
+
+		/// <summary>
 		/// Gets whether the collection is read-only. Always returns true if the entire document is read-only.
 		/// 
 		/// The collection is read-only if you are dealing with a loaded CPIX document that contains signatures covering this

@@ -38,7 +38,7 @@ namespace Axinom.Cpix
 			_newItems.Add(item);
 		}
 
-		public void Clear()
+		public override void Clear()
 		{
 			VerifyNotReadOnly();
 

@@ -9,63 +9,83 @@ namespace Tests
 	/// </summary>
 	public sealed class SigningInteractionTests
 	{
-		[Fact]
-		public void RemoveEntity_WithRemovedCollectionSignature_Succeeds()
+		private Func<CpixDocument, EntityCollectionBase> RecipientsSelector = doc => doc.Recipients;
+		private Func<CpixDocument, EntityCollectionBase> ContentKeysSelector = doc => doc.ContentKeys;
+		private Func<CpixDocument, EntityCollectionBase> UsageRulesSelector = doc => doc.UsageRules;
+
+		private Action<CpixDocument> AddRecipient = doc => doc.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
+		private Action<CpixDocument> AddContentKey = doc => doc.ContentKeys.Add(TestHelpers.GenerateContentKey());
+		private Action<CpixDocument> AddUsageRule = doc =>
 		{
-			Execute_RemoveEntity_WithRemovedCollectionSignature(doc => doc.ContentKeys, doc => doc.ContentKeys.Add(TestHelpers.GenerateContentKey()), doc => doc.ContentKeys.Clear());
-			Execute_RemoveEntity_WithRemovedCollectionSignature(doc => doc.Recipients, doc => doc.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1)), doc => doc.Recipients.Clear());
+			doc.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			TestHelpers.AddUsageRule(doc);
+		};
+
+		[Fact]
+		public void Clear_WithRemovedCollectionSignature_Succeeds()
+		{
+			Execute_Clear_WithRemovedCollectionSignature(RecipientsSelector, AddRecipient);
+			Execute_Clear_WithRemovedCollectionSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithRemovedCollectionSignature(UsageRulesSelector, AddUsageRule);
 		}
 
 		[Fact]
-		public void RemoveEntity_WithReappliedCollectionSignature_Succeeds()
+		public void Clear_WithReappliedCollectionSignature_Succeeds()
 		{
-			Execute_RemoveEntity_WithReappliedCollectionSignature(doc => doc.ContentKeys, doc => doc.ContentKeys.Add(TestHelpers.GenerateContentKey()), doc => doc.ContentKeys.Clear());
-			Execute_RemoveEntity_WithReappliedCollectionSignature(doc => doc.Recipients, doc => doc.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1)), doc => doc.Recipients.Clear());
+			Execute_Clear_WithReappliedCollectionSignature(RecipientsSelector, AddRecipient);
+			Execute_Clear_WithReappliedCollectionSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithReappliedCollectionSignature(UsageRulesSelector, AddUsageRule);
 		}
 
 		[Fact]
-		public void RemoveEntity_WithRemoveDocumentSignature_Succeeds()
+		public void Clear_WithRemoveDocumentSignature_Succeeds()
 		{
-			Execute_RemoveEntity_WithRemovedDocumentSignature(doc => doc.ContentKeys, doc => doc.ContentKeys.Add(TestHelpers.GenerateContentKey()), doc => doc.ContentKeys.Clear());
-			Execute_RemoveEntity_WithRemovedDocumentSignature(doc => doc.Recipients, doc => doc.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1)), doc => doc.Recipients.Clear());
+			Execute_Clear_WithRemovedDocumentSignature(RecipientsSelector, AddRecipient);
+			Execute_Clear_WithRemovedDocumentSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithRemovedDocumentSignature(UsageRulesSelector, AddUsageRule);
 		}
 
 		[Fact]
-		public void RemoveEntity_WithReappliedDocumentSignature_Succeeds()
+		public void Clear_WithReappliedDocumentSignature_Succeeds()
 		{
-			Execute_RemoveEntity_WithReappliedDocumentSignature(doc => doc.ContentKeys, doc => doc.ContentKeys.Add(TestHelpers.GenerateContentKey()), doc => doc.ContentKeys.Clear());
-			Execute_RemoveEntity_WithReappliedDocumentSignature(doc => doc.Recipients, doc => doc.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1)), doc => doc.Recipients.Clear());
+			Execute_Clear_WithReappliedDocumentSignature(RecipientsSelector, AddRecipient);
+			Execute_Clear_WithReappliedDocumentSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithReappliedDocumentSignature(UsageRulesSelector, AddUsageRule);
 		}
 
 		[Fact]
-		public void RemoveEntity_WithReappliedDocumentAndCollectionSignature_Succeeds()
+		public void Clear_WithReappliedDocumentAndCollectionSignature_Succeeds()
 		{
-			Execute_RemoveEntity_WithReappliedDocumentAndCollectionSignature(doc => doc.ContentKeys, doc => doc.ContentKeys.Add(TestHelpers.GenerateContentKey()), doc => doc.ContentKeys.Clear());
-			Execute_RemoveEntity_WithReappliedDocumentAndCollectionSignature(doc => doc.Recipients, doc => doc.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1)), doc => doc.Recipients.Clear());
+			Execute_Clear_WithReappliedDocumentAndCollectionSignature(RecipientsSelector, AddRecipient);
+			Execute_Clear_WithReappliedDocumentAndCollectionSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithReappliedDocumentAndCollectionSignature(UsageRulesSelector, AddUsageRule);
 		}
 
 		[Fact]
-		public void RemoveEntity_WithExistingCollectionSignature_Fails()
+		public void Clear_WithExistingCollectionSignature_Fails()
 		{
-			Execute_RemoveEntity_WithExistingCollectionSignature(doc => doc.ContentKeys, doc => doc.ContentKeys.Add(TestHelpers.GenerateContentKey()), doc => doc.ContentKeys.Clear());
-			Execute_RemoveEntity_WithExistingCollectionSignature(doc => doc.Recipients, doc => doc.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1)), doc => doc.Recipients.Clear());
+			Execute_Clear_WithExistingCollectionSignature(RecipientsSelector, AddRecipient);
+			Execute_Clear_WithExistingCollectionSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithExistingCollectionSignature(UsageRulesSelector, AddUsageRule);
 		}
 
 		[Fact]
-		public void RemoveEntity_WithExistingDocumentSignature_Fails()
+		public void Clear_WithExistingDocumentSignature_Fails()
 		{
-			Execute_RemoveEntity_WithExistingDocumentSignature(doc => doc.ContentKeys, doc => doc.ContentKeys.Add(TestHelpers.GenerateContentKey()), doc => doc.ContentKeys.Clear());
-			Execute_RemoveEntity_WithExistingDocumentSignature(doc => doc.Recipients, doc => doc.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1)), doc => doc.Recipients.Clear());
+			Execute_Clear_WithExistingDocumentSignature(RecipientsSelector, AddRecipient);
+			Execute_Clear_WithExistingDocumentSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithExistingDocumentSignature(UsageRulesSelector, AddUsageRule);
 		}
 
 		[Fact]
-		public void RemoveEntity_WithExistingDocumentAndCollectionSignature_Fails()
+		public void Clear_WithExistingDocumentAndCollectionSignature_Fails()
 		{
-			Execute_RemoveEntity_WithExistingDocumentSignature(doc => doc.ContentKeys, doc => doc.ContentKeys.Add(TestHelpers.GenerateContentKey()), doc => doc.ContentKeys.Clear());
-			Execute_RemoveEntity_WithExistingDocumentSignature(doc => doc.Recipients, doc => doc.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1)), doc => doc.Recipients.Clear());
+			Execute_Clear_WithExistingDocumentSignature(RecipientsSelector, AddRecipient);
+			Execute_Clear_WithExistingDocumentSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithExistingDocumentSignature(UsageRulesSelector, AddUsageRule);
 		}
 
-		private static void Execute_RemoveEntity_WithRemovedCollectionSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity, Action<CpixDocument> removeEntity)
+		private static void Execute_Clear_WithRemovedCollectionSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity)
 		{
 			var document = new CpixDocument();
 			var collection = collectionSelector(document);
@@ -78,10 +98,10 @@ namespace Tests
 
 			collection.RemoveAllSignatures();
 
-			removeEntity(document);
+			collection.Clear();
 		}
 
-		private static void Execute_RemoveEntity_WithReappliedCollectionSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity, Action<CpixDocument> removeEntity)
+		private static void Execute_Clear_WithReappliedCollectionSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity)
 		{
 			var document = new CpixDocument();
 			var collection = collectionSelector(document);
@@ -95,10 +115,10 @@ namespace Tests
 			collection.RemoveAllSignatures();
 			collection.AddSignature(TestHelpers.PrivateAuthor1);
 
-			removeEntity(document);
+			collection.Clear();
 		}
 
-		private static void Execute_RemoveEntity_WithRemovedDocumentSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity, Action<CpixDocument> removeEntity)
+		private static void Execute_Clear_WithRemovedDocumentSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity)
 		{
 			var document = new CpixDocument();
 			var collection = collectionSelector(document);
@@ -111,10 +131,10 @@ namespace Tests
 
 			document.SignedBy = null;
 
-			removeEntity(document);
+			collection.Clear();
 		}
 
-		private static void Execute_RemoveEntity_WithReappliedDocumentSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity, Action<CpixDocument> removeEntity)
+		private static void Execute_Clear_WithReappliedDocumentSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity)
 		{
 			var document = new CpixDocument();
 			var collection = collectionSelector(document);
@@ -127,10 +147,10 @@ namespace Tests
 
 			document.SignedBy = TestHelpers.PrivateAuthor1;
 
-			removeEntity(document);
+			collection.Clear();
 		}
 
-		private static void Execute_RemoveEntity_WithReappliedDocumentAndCollectionSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity, Action<CpixDocument> removeEntity)
+		private static void Execute_Clear_WithReappliedDocumentAndCollectionSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity)
 		{
 			var document = new CpixDocument();
 			var collection = collectionSelector(document);
@@ -146,10 +166,10 @@ namespace Tests
 			collection.RemoveAllSignatures();
 			collection.AddSignature(TestHelpers.PrivateAuthor1);
 
-			removeEntity(document);
+			collection.Clear();
 		}
 
-		private static void Execute_RemoveEntity_WithExistingCollectionSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity, Action<CpixDocument> removeEntity)
+		private static void Execute_Clear_WithExistingCollectionSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity)
 		{
 			var document = new CpixDocument();
 			var collection = collectionSelector(document);
@@ -160,10 +180,10 @@ namespace Tests
 			document = TestHelpers.Reload(document);
 			collection = collectionSelector(document);
 
-			Assert.Throws<InvalidOperationException>(() => removeEntity(document));
+			Assert.Throws<InvalidOperationException>(() => collection.Clear());
 		}
 
-		private static void Execute_RemoveEntity_WithExistingDocumentSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity, Action<CpixDocument> removeEntity)
+		private static void Execute_Clear_WithExistingDocumentSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity)
 		{
 			var document = new CpixDocument();
 			var collection = collectionSelector(document);
@@ -174,10 +194,10 @@ namespace Tests
 			document = TestHelpers.Reload(document);
 			collection = collectionSelector(document);
 
-			Assert.Throws<InvalidOperationException>(() => removeEntity(document));
+			Assert.Throws<InvalidOperationException>(() => collection.Clear());
 		}
 
-		private static void Execute_RemoveEntity_WithExistingDocumentAndCollectionSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity, Action<CpixDocument> removeEntity)
+		private static void Execute_Clear_WithExistingDocumentAndCollectionSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity)
 		{
 			var document = new CpixDocument();
 			var collection = collectionSelector(document);
@@ -189,7 +209,7 @@ namespace Tests
 			document = TestHelpers.Reload(document);
 			collection = collectionSelector(document);
 
-			Assert.Throws<InvalidOperationException>(() => removeEntity(document));
+			Assert.Throws<InvalidOperationException>(() => collection.Clear());
 		}
 	}
 }
