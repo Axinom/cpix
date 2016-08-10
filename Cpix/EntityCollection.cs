@@ -45,10 +45,10 @@ namespace Axinom.Cpix
 			_newItems.Clear();
 
 			// We also delete any XML elements for loaded items.
-			foreach (var data in _existingItemsData)
+			foreach (var data in _loadedItemsData)
 				data.Item2.ParentNode.RemoveChild(data.Item2);
 
-			_existingItemsData.Clear();
+			_loadedItemsData.Clear();
 		}
 
 		public bool Contains(TEntity item) => AllItems.Contains(item);
@@ -69,13 +69,13 @@ namespace Axinom.Cpix
 			if (_newItems.Remove(item))
 				return true;
 
-			var loadedItemData = _existingItemsData.SingleOrDefault(d => d.Item1 == item);
+			var loadedItemData = _loadedItemsData.SingleOrDefault(d => d.Item1 == item);
 
 			if (loadedItemData == null)
 				return false;
 
 			loadedItemData.Item2.ParentNode.RemoveChild(loadedItemData.Item2);
-			_existingItemsData.Remove(loadedItemData);
+			_loadedItemsData.Remove(loadedItemData);
 			return true;
 		}
 
@@ -89,10 +89,10 @@ namespace Axinom.Cpix
 
 		#region Internal API
 		internal IEnumerable<TEntity> NewItems => _newItems;
-		internal IEnumerable<TEntity> ExistingItems => _existingItemsData.Select(data => data.Item1);
-		internal IEnumerable<TEntity> AllItems => ExistingItems.Concat(_newItems);
+		internal IEnumerable<TEntity> LoadedItems => _loadedItemsData.Select(data => data.Item1);
+		internal IEnumerable<TEntity> AllItems => LoadedItems.Concat(_newItems);
 
-		protected override IEnumerable<Entity> ExistingEntities => ExistingItems;
+		protected override IEnumerable<Entity> LoadedEntities => LoadedItems;
 		protected override IEnumerable<Entity> NewEntities => _newItems;
 
 		internal override void SaveChanges(XmlDocument document, XmlNamespaceManager namespaces)
@@ -123,13 +123,13 @@ namespace Axinom.Cpix
 				containerElement = XmlHelpers.InsertTopLevelCpixXmlElementInCorrectOrder(element, document);
 			}
 
-			// Add any new items and then mark them as existing items.
+			// Add any new items and then mark them as loaded items.
 			foreach (var item in _newItems.ToArray())
 			{
 				var element = SerializeEntity(document, namespaces, containerElement, item);
 
 				_newItems.Remove(item);
-				_existingItemsData.Add(new Tuple<TEntity, XmlElement>(item, element));
+				_loadedItemsData.Add(new Tuple<TEntity, XmlElement>(item, element));
 			}
 
 			SaveNewSignatures(document, containerElement);
@@ -147,7 +147,7 @@ namespace Axinom.Cpix
 			{
 				// Entities will all be validated later, when everything is loaded (to simplify reference handling).
 				var entity = DeserializeEntity(element, namespaces);
-				_existingItemsData.Add(new Tuple<TEntity, XmlElement>(entity, element));
+				_loadedItemsData.Add(new Tuple<TEntity, XmlElement>(entity, element));
 			}
 		}
 		#endregion
@@ -178,7 +178,7 @@ namespace Axinom.Cpix
 
 		#region Implementation details
 		private readonly List<TEntity> _newItems = new List<TEntity>();
-		private readonly List<Tuple<TEntity, XmlElement>> _existingItemsData = new List<Tuple<TEntity, XmlElement>>();
+		private readonly List<Tuple<TEntity, XmlElement>> _loadedItemsData = new List<Tuple<TEntity, XmlElement>>();
 		#endregion
 	}
 }

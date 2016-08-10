@@ -6,14 +6,14 @@
 	public sealed class BitrateFilter
 	{
 		/// <summary>
-		/// The minimum nominal bitrate of a stream containing matching samples (inclusive).
+		/// The minimum nominal bitrate of the content key context (inclusive).
 		/// 
 		/// If null, the minimum bitrate is zero.
 		/// </summary>
 		public long? MinBitrate { get; set; }
 
 		/// <summary>
-		/// The maximum nominal bitrate of a stream containing matching samples (inclusive).
+		/// The maximum nominal bitrate of the content key context (inclusive).
 		/// 
 		/// If null, the maximum bitrate is infinity.
 		/// </summary>

@@ -75,7 +75,7 @@ namespace Axinom.Cpix
 				}
 			};
 
-			return XmlHelpers.AppendXmlObjectAsChild(element, document, container);
+			return XmlHelpers.AppendChildAndReuseNamespaces(element, document, container);
 		}
 
 		protected override Recipient DeserializeEntity(XmlElement element, XmlNamespaceManager namespaces)
@@ -96,7 +96,7 @@ namespace Axinom.Cpix
 				if (matchingRecipientCertificate != null)
 				{
 					// Yes, we have a delivery key! Use this delivery key to load the delivery data.
-					var deliveryData = XmlHelpers.XmlElementToXmlDeserialized<DeliveryDataElement>(element);
+					var deliveryData = XmlHelpers.Deserialize<DeliveryDataElement>(element);
 					deliveryData.LoadTimeValidate();
 
 					var rsa = matchingRecipientCertificate.GetRSAPrivateKey();
@@ -118,8 +118,8 @@ namespace Axinom.Cpix
 				throw new InvalidOperationException("The collection already contains a recipient identified by the same certificate.");
 
 			// If there were no recipients before and we just added one, this means that keys will from now on be encrypted.
-			// We thus need to make sure that all keys are new keys - existing keys that remain clear are not tolerable!
-			if (!AllItems.Any() && Document.ContentKeys.ExistingItems.Any())
+			// We thus need to make sure that all keys are new keys - loaded keys that remain clear are not tolerable!
+			if (!AllItems.Any() && Document.ContentKeys.LoadedItems.Any())
 				throw new InvalidOperationException("You cannot add a recipient to a CPIX document that contains loaded clear content keys. If you wish to encrypt all such keys, you must first remove and re-add them to the document to signal that intent.");
 		}
 
@@ -127,8 +127,8 @@ namespace Axinom.Cpix
 		{
 			base.ValidateCollectionStateBeforeSave();
 
-			// If there are no recipients but the document contains existing encrypted content keys, they will remain encrypted.
-			if (!AllItems.Any() && Document.ContentKeys.ExistingItems.Any(key => key.IsExistingEncryptedKey))
+			// If there are no recipients but the document contains loaded encrypted content keys, they will remain encrypted.
+			if (!AllItems.Any() && Document.ContentKeys.LoadedItems.Any(key => key.IsLoadedEncryptedKey))
 				throw new InvalidOperationException("You cannot remove all recipients from a CPIX document that contains loaded encrypted content keys. If you wish to convert all such keys to clear keys, you must first remove and re-add them to the document to signal that intent.");
 		}
 	}

@@ -6,7 +6,8 @@
 	public sealed class LabelFilter
 	{
 		/// <summary>
-		/// The label that must exist on samples that match this filter. The meaning of labels is implementation-defined.
+		/// The label that must exist on a content key context that matches this filter.
+		/// The meaning of labels is implementation-defined - they are just arbitrary freeform strings.
 		/// 
 		/// A null value is a syntax error.
 		/// </summary>

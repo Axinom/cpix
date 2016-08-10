@@ -1,8 +1,7 @@
 ﻿namespace Axinom.Cpix
 {
-	public enum SampleType
+	public enum ContentKeyContextType
 	{
-		Other,
 		Video,
 		Audio
 	}

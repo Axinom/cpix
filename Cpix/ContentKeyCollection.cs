@@ -79,12 +79,12 @@ namespace Axinom.Cpix
 				element.Data.Secret.PlainValue = entity.Value;
 			}
 
-			return XmlHelpers.AppendXmlObjectAsChild(element, document, container);
+			return XmlHelpers.AppendChildAndReuseNamespaces(element, document, container);
 		}
 
 		protected override ContentKey DeserializeEntity(XmlElement element, XmlNamespaceManager namespaces)
 		{
-			var contentKey = XmlHelpers.XmlElementToXmlDeserialized<ContentKeyElement>(element);
+			var contentKey = XmlHelpers.Deserialize<ContentKeyElement>(element);
 			contentKey.LoadTimeValidate();
 
 			if (contentKey.HasPlainValue && Document.Recipients.Any())
@@ -132,7 +132,7 @@ namespace Axinom.Cpix
 			{
 				Id = contentKey.KeyId,
 				Value = value,
-				IsExistingEncryptedKey = contentKey.HasEncryptedValue
+				IsLoadedEncryptedKey = contentKey.HasEncryptedValue
 			};
 		}
 

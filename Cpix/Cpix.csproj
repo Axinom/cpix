@@ -53,6 +53,8 @@
     <Compile Include="BitrateFilter.cs" />
     <Compile Include="ContentKey.cs" />
     <Compile Include="ContentKeyCollection.cs" />
+    <Compile Include="ContentKeyResolveAmbiguityException.cs" />
+    <Compile Include="ContentKeyResolveImpossibleException.cs" />
     <Compile Include="CpixDocument.cs" />
     <Compile Include="CryptographyHelpers.cs" />
     <Compile Include="Entity.cs" />
@@ -64,8 +66,8 @@
     <Compile Include="LabelFilter.cs" />
     <Compile Include="Recipient.cs" />
     <Compile Include="RecipientCollection.cs" />
-    <Compile Include="SampleDescription.cs" />
-    <Compile Include="SampleType.cs" />
+    <Compile Include="ContentKeyContext.cs" />
+    <Compile Include="ContentKeyContextType.cs" />
     <Compile Include="EntityCollectionBase.cs" />
     <Compile Include="UsageRule.cs" />
     <Compile Include="UsageRuleCollection.cs" />

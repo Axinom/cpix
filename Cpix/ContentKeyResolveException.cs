@@ -2,6 +2,9 @@
 
 namespace Axinom.Cpix
 {
+	/// <summary>
+	/// Thrown when it is not possible to resolve a content key for a context key context.
+	/// </summary>
 	[Serializable]
 	public class ContentKeyResolveException : Exception
 	{

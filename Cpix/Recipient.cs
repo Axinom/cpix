@@ -26,7 +26,7 @@ namespace Axinom.Cpix
 			CryptographyHelpers.ValidateRecipientCertificateAndPublicKey(Certificate);
 		}
 
-		internal override void ValidateExistingEntity(CpixDocument document)
+		internal override void ValidateLoadedEntity(CpixDocument document)
 		{
 			// We do not particularly care if someone has, with highly questionable intent, used weak certificates
 			// in their CPIX documented generated via other mechanisms. We won't use them ourselves but we can ignore them here.

@@ -18,26 +18,30 @@ namespace Axinom.Cpix
 	/// A CPIX document, either created anew for saving or loaded from file for reading and/or modifying.
 	/// </summary>
 	/// <remarks>
-	/// All content keys are automatically encrypted on save and delivery data generated for all recipients,
-	/// unless no recipients are defined, in which case the content keys are saved in the clear.
+	/// All content keys are automatically encrypted on save and delivery data generated for all recipients.
+	/// If no recipients are defined then the content keys are saved in the clear. Converting from one scenario
+	/// to the other is fine, but you must then re-add all content keys that were loaded from an existing document.
 	/// 
 	/// There are two scopes of digital signatures supported by this implementation:
-	/// * Any number of signatures may be applied to each entity collection.
-	/// * Oee signature may be applied to the entire document.
+	/// * Any number of signatures may be applied to each entity collection (*List elements in the XML).
+	/// * One signature may be applied to the entire document.
 	/// 
 	/// Any signatures whose scopes do not match the above data sets are validated on load but otherwise ignored,
 	/// though validated again on save to ensure that files that fail verification are inadvertently not created.
 	/// 
-	/// You must have the private keys to re-sign any of these parts that you modify,
-	/// removing any existing signature before performing your modifications.
+	/// To modify any part of a signed document, you must first remove the signature.
+	/// To modify any signed entity collection, you must first remove all signatures on it.
+	/// You may immediately re-apply any removed signatures, if you wish, provided that you have the private keys.
 	/// 
-	/// You must have a delivery key in order to modify a loaded set of content keys.
+	/// You must have a delivery key in order to modify a loaded set of content keys. If you do not have a delivery key,
+	/// you will be able to see content key metadata and cannot add new content keys to the document.
 	/// </remarks>
 	public sealed class CpixDocument
 	{
 		/// <summary>
 		/// Gets the set of recipients that the CPIX document is meant to be securely delivered to.
 		/// 
+		/// If this collections contains entries, the content keys within the CPIX document are encrypted.
 		/// If this collection is empty, the content keys within the CPIX document are not encrypted.
 		/// </summary>
 		public EntityCollection<Recipient> Recipients { get; }
@@ -59,7 +63,7 @@ namespace Axinom.Cpix
 		/// This is always true for new documents. This may be false for loaded documents
 		/// if the content keys are encrypted and we do not possess any of the delivery keys.
 		/// </summary>
-		public bool ContentKeysAreReadable => Recipients.ExistingItems.Count() == 0 || DocumentKey != null;
+		public bool ContentKeysAreReadable => Recipients.LoadedItems.Count() == 0 || DocumentKey != null;
 
 		/// <summary>
 		/// Gets whether the document is read-only.
@@ -74,7 +78,7 @@ namespace Axinom.Cpix
 		/// 
 		/// You must have the private key of the identity who you set as the signer.
 		/// 
-		/// Set to null to remove any existing signature from the document.
+		/// Set to null to remove the signature from the document.
 		/// </summary>
 		public X509Certificate2 SignedBy
 		{
@@ -95,33 +99,34 @@ namespace Axinom.Cpix
 		}
 
 		/// <summary>
-		/// Finds a suitable content key to samples that conform to the provided sample description.
-		/// The content key assignment rules are resolved and exactly one match is assumed. No match
+		/// Finds a suitable content key for a content key context.
+		/// 
+		/// All content key usage rules are evaluated and exactly one match is expected. No match
 		/// or multiple matches are considered an error condition (ambiguities are not allowed).
 		/// </summary>
-		public ContentKey ResolveContentKey(SampleDescription sampleDescription)
+		public ContentKey ResolveContentKey(ContentKeyContext context)
 		{
-			if (sampleDescription == null)
-				throw new ArgumentNullException(nameof(sampleDescription));
+			if (context == null)
+				throw new ArgumentNullException(nameof(context));
 
-			sampleDescription.Validate();
+			context.Validate();
 
 			if (UsageRules.Count == 0)
-				throw new InvalidOperationException("Cannot resolve content keys for media samples as no content key usage rules are defined.");
+				throw new ContentKeyResolveImpossibleException("Cannot resolve content key as no usage rules are defined.");
 
 			if (UsageRules.Any(r => r.ContainsUnsupportedFilters))
-				throw new NotSupportedException("The content key usage rules in the CPIX document contain filters that are not supported by the current implementation. No content keys can be resolved.");
+				throw new NotSupportedException("The usage rules in the CPIX document contain filters that are not supported by the current implementation. No content keys can be resolved.");
 
 			var results = UsageRules
-				.Where(rule => EvaluateUsageRule(rule, sampleDescription))
+				.Where(rule => EvaluateUsageRule(rule, context))
 				.Select(rule => ContentKeys.Single(key => key.Id == rule.KeyId))
 				.ToArray();
 
 			if (results.Length == 0)
-				throw new ContentKeyResolveException("No content keys were assigned to samples matching the provided sample description.");
+				throw new ContentKeyResolveException("No content keys resolved to the content key context.");
 
 			if (results.Length > 1)
-				throw new ContentKeyResolveException("Multiple content keys were assigned to samples matching the provided sample description.");
+				throw new ContentKeyResolveAmbiguityException("Multiple content keys resolved to the content key context.");
 
 			return results[0];
 		}
@@ -159,7 +164,7 @@ namespace Axinom.Cpix
 			foreach (var collection in EntityCollections)
 				collection.SaveChanges(_xmlDocument, _namespaceManager);
 
-			// If an existing signature has been removed and we have a new signer, sign the document!
+			// If a loaded signature has been removed and we have a new signer, sign the document!
 			if (_documentSignature == null && _desiredSignedBy != null)
 			{
 				var signature = CryptographyHelpers.SignXmlElement(_xmlDocument, "", _desiredSignedBy);
@@ -192,7 +197,7 @@ namespace Axinom.Cpix
 
 		private static XmlDocument CreateNewXmlDocument()
 		{
-			var document = XmlHelpers.XmlObjectToXmlDocument(new DocumentRootElement());
+			var document = XmlHelpers.Serialize(new DocumentRootElement());
 			document.Schemas = _schemaSet;
 
 			// For documents we create from the start, let's incldue some useful namespace prefix delcarations right
@@ -467,7 +472,7 @@ namespace Axinom.Cpix
 					// This is a signature on one of the entity collections.
 					var collection = collectionReferenceUris[referenceUri];
 
-					collection.ImportExistingSignature(signature, certificate);
+					collection.ImportLoadedSignature(signature, certificate);
 				}
 				else
 				{
@@ -476,7 +481,7 @@ namespace Axinom.Cpix
 			}
 		}
 
-		private static bool EvaluateUsageRule(UsageRule rule, SampleDescription sample)
+		private static bool EvaluateUsageRule(UsageRule rule, ContentKeyContext context)
 		{
 			// Each TYPE of filter is combined with AND.
 			// Each filter of the SAME type is combined with OR.
@@ -484,72 +489,72 @@ namespace Axinom.Cpix
 
 			// We go through all the filter lists and return false if we find a filter list that all evaluate to false.
 
-			if (rule.VideoFilters?.Count > 0 && !rule.VideoFilters.Any(f => EvaluateVideoFilter(f, sample)))
+			if (rule.VideoFilters?.Count > 0 && !rule.VideoFilters.Any(f => EvaluateVideoFilter(f, context)))
 				return false;
 
-			if (rule.AudioFilters?.Count > 0 && !rule.AudioFilters.Any(f => EvaluateAudioFilter(f, sample)))
+			if (rule.AudioFilters?.Count > 0 && !rule.AudioFilters.Any(f => EvaluateAudioFilter(f, context)))
 				return false;
 
-			if (rule.BitrateFilters?.Count > 0 && !rule.BitrateFilters.Any(f => EvaluateBitrateFilter(f, sample)))
+			if (rule.BitrateFilters?.Count > 0 && !rule.BitrateFilters.Any(f => EvaluateBitrateFilter(f, context)))
 				return false;
 
-			if (rule.LabelFilters?.Count > 0 && !rule.LabelFilters.Any(f => EvaluateLabelFilter(f, sample)))
+			if (rule.LabelFilters?.Count > 0 && !rule.LabelFilters.Any(f => EvaluateLabelFilter(f, context)))
 				return false;
 
 			// All filter lists with anything in them said we are good to go. It's a match!
 			return true;
 		}
 
-		private static bool EvaluateVideoFilter(VideoFilter filter, SampleDescription sample)
+		private static bool EvaluateVideoFilter(VideoFilter filter, ContentKeyContext context)
 		{
-			if (sample.Type != SampleType.Video)
+			if (context.Type != ContentKeyContextType.Video)
 				return false;
 
-			if (filter.MinPixels != null && !(sample.PicturePixelCount >= filter.MinPixels))
+			if (filter.MinPixels != null && !(context.PicturePixelCount >= filter.MinPixels))
 				return false;
-			if (filter.MaxPixels != null && !(sample.PicturePixelCount <= filter.MaxPixels))
-				return false;
-
-			if (filter.MinFramesPerSecond != null && !(sample.PicturePixelCount > filter.MinFramesPerSecond))
-				return false;
-			if (filter.MaxFramesPerSecond != null && !(sample.PicturePixelCount <= filter.MaxFramesPerSecond))
+			if (filter.MaxPixels != null && !(context.PicturePixelCount <= filter.MaxPixels))
 				return false;
 
-			if (filter.WideColorGamut != null && sample.WideColorGamut != filter.WideColorGamut)
+			if (filter.MinFramesPerSecond != null && !(context.PicturePixelCount > filter.MinFramesPerSecond))
+				return false;
+			if (filter.MaxFramesPerSecond != null && !(context.PicturePixelCount <= filter.MaxFramesPerSecond))
 				return false;
 
-			if (filter.HighDynamicRange != null && sample.HighDynamicRange != filter.HighDynamicRange)
+			if (filter.WideColorGamut != null && context.WideColorGamut != filter.WideColorGamut)
+				return false;
+
+			if (filter.HighDynamicRange != null && context.HighDynamicRange != filter.HighDynamicRange)
 				return false;
 
 			return true;
 		}
 
-		private static bool EvaluateAudioFilter(AudioFilter filter, SampleDescription sample)
+		private static bool EvaluateAudioFilter(AudioFilter filter, ContentKeyContext context)
 		{
-			if (sample.Type != SampleType.Audio)
+			if (context.Type != ContentKeyContextType.Audio)
 				return false;
 
-			if (filter.MinChannels != null && !(sample.AudioChannelCount >= filter.MinChannels))
+			if (filter.MinChannels != null && !(context.AudioChannelCount >= filter.MinChannels))
 				return false;
-			if (filter.MaxChannels != null && !(sample.AudioChannelCount <= filter.MaxChannels))
+			if (filter.MaxChannels != null && !(context.AudioChannelCount <= filter.MaxChannels))
 				return false;
 
 			return true;
 		}
 
-		private static bool EvaluateBitrateFilter(BitrateFilter filter, SampleDescription sample)
+		private static bool EvaluateBitrateFilter(BitrateFilter filter, ContentKeyContext context)
 		{
-			if (filter.MinBitrate != null && !(sample.Bitrate >= filter.MinBitrate))
+			if (filter.MinBitrate != null && !(context.Bitrate >= filter.MinBitrate))
 				return false;
-			if (filter.MaxBitrate != null && !(sample.Bitrate <= filter.MaxBitrate))
+			if (filter.MaxBitrate != null && !(context.Bitrate <= filter.MaxBitrate))
 				return false;
 
 			return true;
 		}
 
-		private static bool EvaluateLabelFilter(LabelFilter filter, SampleDescription sample)
+		private static bool EvaluateLabelFilter(LabelFilter filter, ContentKeyContext context)
 		{
-			return sample.Labels?.Any(l => l == filter.Label) == true;
+			return context.Labels?.Any(l => l == filter.Label) == true;
 		}
 
 		static CpixDocument()

@@ -28,10 +28,10 @@ namespace Axinom.Cpix
 			if (ContainsUnsupportedFilters)
 				throw new InvalidCpixDataException("Cannot add a content key usage rule that contains unsupported filters. Such usage rules can only be passed through unmodified when processing a CPIX document.");
 
-			ValidateExistingEntity(document);
+			ValidateLoadedEntity(document);
 		}
 
-		internal override void ValidateExistingEntity(CpixDocument document)
+		internal override void ValidateLoadedEntity(CpixDocument document)
 		{
 			if (!document.ContentKeys.Any(ck => ck.Id == KeyId))
 				throw new InvalidCpixDataException("Content key usage rule references a content key that is not present in the CPIX document.");

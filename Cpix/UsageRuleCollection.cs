@@ -68,12 +68,12 @@ namespace Axinom.Cpix
 					.ToArray();
 			}
 
-			return XmlHelpers.AppendXmlObjectAsChild(element, document, container);
+			return XmlHelpers.AppendChildAndReuseNamespaces(element, document, container);
 		}
 
 		protected override UsageRule DeserializeEntity(XmlElement element, XmlNamespaceManager namespaces)
 		{
-			var raw = XmlHelpers.XmlElementToXmlDeserialized<UsageRuleElement>(element);
+			var raw = XmlHelpers.Deserialize<UsageRuleElement>(element);
 			raw.LoadTimeValidate();
 
 			var rule = new UsageRule

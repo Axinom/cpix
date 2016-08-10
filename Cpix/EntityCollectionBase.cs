@@ -28,7 +28,7 @@ namespace Axinom.Cpix
 		/// The collection is read-only if you are dealing with a loaded CPIX document that contains signatures covering this
 		/// collection. Remove any collection-scoped signatures and document-scoped signatures to make the collection writable.
 		/// </summary>
-		public bool IsReadOnly => Document.IsReadOnly || _existingSignatures.Any();
+		public bool IsReadOnly => Document.IsReadOnly || _loadedSignatures.Any();
 
 		/// <summary>
 		/// Applies a digital signature to the collection.
@@ -54,17 +54,17 @@ namespace Axinom.Cpix
 		/// <summary>
 		/// Gets the certificates of the identities that have signed this collection.
 		/// </summary>
-		public IEnumerable<X509Certificate2> SignedBy => ExistingSigners.Concat(_newSigners);
+		public IEnumerable<X509Certificate2> SignedBy => LoadedSigners.Concat(_newSigners);
 
 		/// <summary>
 		/// Removes all digital signatures that apply to this collection.
 		/// </summary>
 		public void RemoveAllSignatures()
 		{
-			foreach (var signature in _existingSignatures)
+			foreach (var signature in _loadedSignatures)
 				signature.Item1.ParentNode.RemoveChild(signature.Item1);
 
-			_existingSignatures.Clear();
+			_loadedSignatures.Clear();
 			_newSigners.Clear();
 		}
 
@@ -84,9 +84,9 @@ namespace Axinom.Cpix
 		/// </summary>
 		internal abstract void Load(XmlDocument document, XmlNamespaceManager namespaces);
 
-		internal void ImportExistingSignature(XmlElement signature, X509Certificate2 certificate)
+		internal void ImportLoadedSignature(XmlElement signature, X509Certificate2 certificate)
 		{
-			_existingSignatures.Add(new Tuple<XmlElement, X509Certificate2>(signature, certificate));
+			_loadedSignatures.Add(new Tuple<XmlElement, X509Certificate2>(signature, certificate));
 		}
 
 		/// <summary>
@@ -109,11 +109,11 @@ namespace Axinom.Cpix
 		#region Protected API
 		protected CpixDocument Document { get; }
 
-		protected abstract IEnumerable<Entity> ExistingEntities { get; }
+		protected abstract IEnumerable<Entity> LoadedEntities { get; }
 		protected abstract IEnumerable<Entity> NewEntities { get; }
 
 		protected IEnumerable<X509Certificate2> NewSigners => _newSigners;
-		protected IEnumerable<X509Certificate2> ExistingSigners => _existingSignatures.Select(s => s.Item2);
+		protected IEnumerable<X509Certificate2> LoadedSigners => _loadedSignatures.Select(s => s.Item2);
 
 		protected EntityCollectionBase(CpixDocument document)
 		{
@@ -157,14 +157,14 @@ namespace Axinom.Cpix
 				var signature = CryptographyHelpers.SignXmlElement(document, elementId, signer);
 
 				_newSigners.Remove(signer);
-				_existingSignatures.Add(new Tuple<XmlElement, X509Certificate2>(signature, signer));
+				_loadedSignatures.Add(new Tuple<XmlElement, X509Certificate2>(signature, signer));
 			}
 		}
 		#endregion
 
 		#region Implementation details
 		private readonly List<X509Certificate2> _newSigners = new List<X509Certificate2>();
-		private readonly List<Tuple<XmlElement, X509Certificate2>> _existingSignatures = new List<Tuple<XmlElement, X509Certificate2>>();
+		private readonly List<Tuple<XmlElement, X509Certificate2>> _loadedSignatures = new List<Tuple<XmlElement, X509Certificate2>>();
 
 		/// <summary>
 		/// Performs validation of the collection's contents before it is saved.
@@ -175,7 +175,7 @@ namespace Axinom.Cpix
 			foreach (var item in NewEntities)
 				item.ValidateNewEntity(Document);
 
-			// No need to validate any existing entities, as we won't save them even if modified.
+			// No need to validate any loaded entities, as we won't save them even if modified.
 		}
 
 		/// <summary>
@@ -183,8 +183,8 @@ namespace Axinom.Cpix
 		/// </summary>
 		private void ValidateEntitiesAfterLoad()
 		{
-			foreach (var item in ExistingEntities)
-				item.ValidateExistingEntity(Document);
+			foreach (var item in LoadedEntities)
+				item.ValidateLoadedEntity(Document);
 		}
 		#endregion
 	}

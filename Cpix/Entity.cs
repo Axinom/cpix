@@ -1,10 +1,10 @@
 ﻿namespace Axinom.Cpix
 {
 	/// <summary>
-	/// Entity base class for internal use only.
+	/// Base class for all types of CPIX entities. For internal use only.
 	/// </summary>
 	/// <remarks>
-	/// Acts as an internal interface to the entities, exposing general purpose entity features but only to this library.
+	/// Acts as an internal interface to the entities, exposing internal general purpose entity features.
 	/// </remarks>
 	public abstract class Entity
 	{
@@ -15,9 +15,9 @@
 		internal abstract void ValidateNewEntity(CpixDocument document);
 
 		/// <summary>
-		/// Validates that the current state of the entity is valid for a loaded existing entity.
+		/// Validates that the current state of the entity is valid for a loaded entity.
 		/// The document is supplied to facilitate cross-checking with other parts of the document.
 		/// </summary>
-		internal abstract void ValidateExistingEntity(CpixDocument document);
+		internal abstract void ValidateLoadedEntity(CpixDocument document);
 	}
 }

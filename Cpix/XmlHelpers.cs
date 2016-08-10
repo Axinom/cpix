@@ -10,7 +10,10 @@ namespace Axinom.Cpix
 {
 	static class XmlHelpers
 	{
-		internal static T XmlElementToXmlDeserialized<T>(XmlElement element)
+		/// <summary>
+		/// XML-deserializes an object of type T from an XmlElement.
+		/// </summary>
+		internal static T Deserialize<T>(XmlElement element)
 		{
 			using (var buffer = new MemoryStream())
 			{
@@ -24,23 +27,29 @@ namespace Axinom.Cpix
 			}
 		}
 
-		internal static XmlElement AppendXmlObjectAsChild<T>(T xmlObject, XmlDocument document, XmlElement parent)
+		/// <summary>
+		/// Appends a child element XML-serialized from an object of type T and reuses already-declared namespaces in doing so.
+		/// </summary>
+		internal static XmlElement AppendChildAndReuseNamespaces<T>(T xmlObject, XmlDocument document, XmlElement parent)
 		{
 			// We have a little problem here. See, XmlSerializer generates full documents, which means that
 			// it will declare the namespaces on absolutely everything it genreates. This causes a lot of
 			// redundancy and spam. We need to reuse the namespaces as far as possible.
 
+			// The navigator gives us access to the namespaces that are in scope at the parent element.
 			var parentNavigator = parent.CreateNavigator();
+			var namespaces = parentNavigator.GetNamespacesInScope(XmlNamespaceScope.ExcludeXml);
 
-			// These namespaces are defined in scope of the parent node, and thus usable also by us.
-			var declaredNamespaces = parentNavigator.GetNamespacesInScope(XmlNamespaceScope.ExcludeXml);
-
-			var serialized = XmlObjectToXmlElementWithReusedNamespaces(xmlObject, declaredNamespaces);
+			var serialized = CreateXmlElementAndReuseNamespaces(xmlObject, namespaces);
 
 			return (XmlElement)parent.AppendChild(document.ImportNode(serialized, true));
 		}
 
-		internal static XmlElement XmlObjectToXmlElementWithReusedNamespaces<T>(T xmlObject, IDictionary<string, string> namespacesToReuse)
+		/// <summary>
+		/// Transforms an object of type T to an XmlElement via XML-serialization,
+		/// reusing existing namespaces instead of re-declaring them.
+		/// </summary>
+		internal static XmlElement CreateXmlElementAndReuseNamespaces<T>(T xmlObject, IDictionary<string, string> namespacesToReuse)
 		{
 			if (xmlObject == null)
 				throw new ArgumentNullException(nameof(xmlObject));
@@ -105,7 +114,10 @@ namespace Axinom.Cpix
 			}
 		}
 
-		internal static XmlDocument XmlObjectToXmlDocument<T>(T xmlObject)
+		/// <summary>
+		/// XML-serializes an object of type T, returning it as an XmlDocument.
+		/// </summary>
+		internal static XmlDocument Serialize<T>(T xmlObject)
 		{
 			using (var intermediateXmlBuffer = new MemoryStream())
 			{
@@ -122,6 +134,10 @@ namespace Axinom.Cpix
 			}
 		}
 
+		/// <summary>
+		/// Top-level CPIX elements must be inserted to the document in a specific order, as the CPIX document
+		/// is strictly ordered. This method will automatically insert elements in the correct order.
+		/// </summary>
 		internal static XmlElement InsertTopLevelCpixXmlElementInCorrectOrder(XmlElement element, XmlDocument document)
 		{
 			// If this returns null, our element should be the first one.
@@ -171,7 +187,7 @@ namespace Axinom.Cpix
 		}
 
 		/// <summary>
-		/// Loads, reformats/indents and saves an XML document.
+		/// Loads, reformats/indents and saves an XML document. Used primarily just for testing with formatted XML.
 		/// </summary>
 		internal static void PrettyPrintXml(Stream input, Stream output)
 		{
@@ -191,6 +207,9 @@ namespace Axinom.Cpix
 			}
 		}
 
+		/// <summary>
+		/// Creates a namespace manager with some convenient namespaces predefined.
+		/// </summary>
 		internal static XmlNamespaceManager CreateCpixNamespaceManager(XmlDocument document)
 		{
 			var manager = new XmlNamespaceManager(document.NameTable);

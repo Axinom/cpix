@@ -17,7 +17,7 @@ namespace Tests
 			var document = new CpixDocument();
 			document.ContentKeys.Add(key);
 
-			Assert.Throws<InvalidOperationException>(() => document.ResolveContentKey(new SampleDescription()));
+			Assert.Throws<ContentKeyResolveImpossibleException>(() => document.ResolveContentKey(new ContentKeyContext()));
 		}
 
 		[Fact]
@@ -28,7 +28,7 @@ namespace Tests
 			var document = new CpixDocument();
 			document.ContentKeys.Add(key);
 
-			// Two rules that match all samples - resolving a key will never work with this document.
+			// Two rules that match all contexts - resolving a key will never work with this document.
 			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = key.Id
@@ -38,7 +38,7 @@ namespace Tests
 				KeyId = key.Id
 			});
 
-			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new SampleDescription()));
+			Assert.Throws<ContentKeyResolveAmbiguityException>(() => document.ResolveContentKey(new ContentKeyContext()));
 		}
 
 		[Fact]
@@ -49,7 +49,7 @@ namespace Tests
 			var document = new CpixDocument();
 			document.ContentKeys.Add(key);
 
-			// This matches all samples.
+			// This matches all contexts.
 			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = key.Id
@@ -74,7 +74,7 @@ namespace Tests
 			// We do this after Add() since normally such filters cannot be added (and save would also reject it).
 			rule.ContainsUnsupportedFilters = true;
 
-			Assert.Throws<NotSupportedException>(() => document.ResolveContentKey(new SampleDescription()));
+			Assert.Throws<NotSupportedException>(() => document.ResolveContentKey(new ContentKeyContext()));
 		}
 
 		[Fact]
@@ -94,10 +94,10 @@ namespace Tests
 				}
 			});
 
-			// Not finding a match is an error - all samples must be matched to exactly one content key.
-			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new SampleDescription
+			// Not finding a match is an error - all contexts must be matched to exactly one content key.
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Video
+				Type = ContentKeyContextType.Video
 			}));
 		}
 
@@ -118,9 +118,9 @@ namespace Tests
 				}
 			});
 
-			Assert.Equal(key, document.ResolveContentKey(new SampleDescription
+			Assert.Equal(key, document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Audio
+				Type = ContentKeyContextType.Audio
 			}));
 		}
 
@@ -136,7 +136,7 @@ namespace Tests
 			{
 				KeyId = key.Id,
 
-				// This rule requries the sample to be both audio and video. Nothing should ever match it!
+				// This rule requries the context to be both audio and video. Nothing should ever match it!
 				AudioFilters = new[]
 				{
 					new AudioFilter()
@@ -147,9 +147,9 @@ namespace Tests
 				}
 			});
 
-			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new SampleDescription
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Video
+				Type = ContentKeyContextType.Video
 			}));
 		}
 
@@ -181,16 +181,16 @@ namespace Tests
 				}
 			});
 
-			document.ResolveContentKey(new SampleDescription
+			document.ResolveContentKey(new ContentKeyContext
 			{
 				Bitrate = 50
 			});
-			document.ResolveContentKey(new SampleDescription
+			document.ResolveContentKey(new ContentKeyContext
 			{
 				Bitrate = 1050
 			});
 
-			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new SampleDescription
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new ContentKeyContext
 			{
 				Bitrate = 500
 			}));
@@ -277,61 +277,61 @@ namespace Tests
 			});
 
 			// Audio with unknown channel count should not match either rule.
-			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new SampleDescription
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Audio
+				Type = ContentKeyContextType.Audio
 			}));
 
 			// If we do have a channel count, however, it should match the appropriate rule.
-			Assert.Equal(lowValueAudio, document.ResolveContentKey(new SampleDescription
+			Assert.Equal(lowValueAudio, document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Audio,
+				Type = ContentKeyContextType.Audio,
 				AudioChannelCount = 1
 			}));
 
 			// Audio rules have no time range, so it should match even outside the defined periods.
-			Assert.Equal(lowValueAudio, document.ResolveContentKey(new SampleDescription
+			Assert.Equal(lowValueAudio, document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Audio,
+				Type = ContentKeyContextType.Audio,
 				AudioChannelCount = 1
 			}));
 
 			// Or, indeed, even without any known timestamp.
-			Assert.Equal(lowValueAudio, document.ResolveContentKey(new SampleDescription
+			Assert.Equal(lowValueAudio, document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Audio,
+				Type = ContentKeyContextType.Audio,
 				AudioChannelCount = 1
 			}));
 
 			// There is a rollover to a new key at 3 channels.
-			Assert.Equal(lowValueAudio, document.ResolveContentKey(new SampleDescription
+			Assert.Equal(lowValueAudio, document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Audio,
+				Type = ContentKeyContextType.Audio,
 				AudioChannelCount = 2
 			}));
-			Assert.Equal(highValueAudio, document.ResolveContentKey(new SampleDescription
+			Assert.Equal(highValueAudio, document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Audio,
+				Type = ContentKeyContextType.Audio,
 				AudioChannelCount = 3
 			}));
 
-			// Video samples without resolution should not match any rule.
-			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new SampleDescription
+			// Video without resolution should not match any rule.
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Video
+				Type = ContentKeyContextType.Video
 			}));
 
 			// Extra data should not change anything in matching.
-			Assert.Equal(highValuePeriod1, document.ResolveContentKey(new SampleDescription
+			Assert.Equal(highValuePeriod1, document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Video,
+				Type = ContentKeyContextType.Video,
 				PicturePixelCount = highValuePixelCount * 2,
 				Bitrate = 254726,
 			}));
 		}
 
 		[Fact]
-		public void ResolveContentKey_WithLabeledSamples_MatchesWithAnyMatchingLabel()
+		public void ResolveContentKey_WithLabels_MatchesWithAnyMatchingLabel()
 		{
 			var key1 = TestHelpers.GenerateContentKey();
 			var key2 = TestHelpers.GenerateContentKey();
@@ -384,18 +384,18 @@ namespace Tests
 				}
 			});
 
-			Assert.Equal(key1, document.ResolveContentKey(new SampleDescription
+			Assert.Equal(key1, document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Audio,
+				Type = ContentKeyContextType.Audio,
 				Labels = new[]
 				{
 					"label1"
 				}
 			}));
 
-			Assert.Equal(key1, document.ResolveContentKey(new SampleDescription
+			Assert.Equal(key1, document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Audio,
+				Type = ContentKeyContextType.Audio,
 				Labels = new[]
 				{
 					"label1"
@@ -403,9 +403,9 @@ namespace Tests
 			}));
 
 			// Unrelated labels should not be an obstacle to matching.
-			Assert.Equal(key1, document.ResolveContentKey(new SampleDescription
+			Assert.Equal(key1, document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Audio,
+				Type = ContentKeyContextType.Audio,
 				Labels = new[]
 				{
 					"label1",
@@ -413,9 +413,9 @@ namespace Tests
 				}
 			}));
 
-			Assert.Equal(key2, document.ResolveContentKey(new SampleDescription
+			Assert.Equal(key2, document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Video,
+				Type = ContentKeyContextType.Video,
 				Labels = new[]
 				{
 					"label1",
@@ -425,9 +425,9 @@ namespace Tests
 			}));
 
 			// Labels from otherwise nonmatching rules should have no effects.
-			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new SampleDescription
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Video,
+				Type = ContentKeyContextType.Video,
 				Labels = new[]
 				{
 					"label1",
@@ -435,9 +435,9 @@ namespace Tests
 			}));
 
 			// Multiple matches are evil and should not be accepted.
-			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new SampleDescription
+			Assert.Throws<ContentKeyResolveAmbiguityException>(() => document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Video,
+				Type = ContentKeyContextType.Video,
 				Labels = new[]
 				{
 					"label2",
@@ -446,9 +446,9 @@ namespace Tests
 			}));
 
 			// A match is a match regardless of other parameters.
-			Assert.Equal(key3, document.ResolveContentKey(new SampleDescription
+			Assert.Equal(key3, document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Audio,
+				Type = ContentKeyContextType.Audio,
 				Labels = new[]
 				{
 					"label3"
@@ -457,9 +457,9 @@ namespace Tests
 				Bitrate = 63576
 			}));
 
-			Assert.Equal(key3, document.ResolveContentKey(new SampleDescription
+			Assert.Equal(key3, document.ResolveContentKey(new ContentKeyContext
 			{
-				Type = SampleType.Video,
+				Type = ContentKeyContextType.Video,
 				Labels = new[]
 				{
 					"label3"
