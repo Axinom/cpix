@@ -14,6 +14,59 @@ namespace Tests
 	public sealed class UnusualInputTests
 	{
 		[Fact]
+		public void LoadDocument_WithUtf16EncodedInput_Succeeds()
+		{
+			// We ensure that some non-ASCII text survives the encoding/decoding/signing process intact.
+			const string canary = "滆 柦柋牬 趉軨鄇 鶊鵱, 緳廞徲 鋑鋡髬 溮煡煟 綡蒚";
+
+			var document = new CpixDocument();
+			FillDocumentWithData(document);
+
+			document.UsageRules.First().LabelFilters = new[]
+			{
+				new LabelFilter
+				{
+					Label = canary
+				}
+			};
+
+			document.Recipients.AddSignature(TestHelpers.Certificate4WithPrivateKey);
+			document.ContentKeys.AddSignature(TestHelpers.Certificate4WithPrivateKey);
+			document.UsageRules.AddSignature(TestHelpers.Certificate4WithPrivateKey);
+			document.SignedBy = TestHelpers.Certificate3WithPrivateKey;
+
+			var buffer = new MemoryStream();
+			document.Save(buffer);
+
+			// Now we have a basic UTF-8 document in the buffer. Convert to UTF-16!
+			// Using XmlDocument here to do it in a "smart" way with all the XML processing.
+			var xmlDocument = new XmlDocument();
+
+			buffer.Position = 0;
+			xmlDocument.Load(buffer);
+
+			buffer.SetLength(0);
+
+			using (var writer = XmlWriter.Create(buffer, new XmlWriterSettings
+			{
+				Encoding = Encoding.Unicode,
+				CloseOutput = false,
+			}))
+			{
+				xmlDocument.Save(writer);
+			}
+
+			buffer.Position = 0;
+
+			// Okay, does it load? It should!
+			document = CpixDocument.Load(buffer);
+
+			Assert.Equal(2, document.ContentKeys.Count);
+			Assert.Equal(2, document.Recipients.Count);
+			Assert.Equal(2, document.UsageRules.Count);
+		}
+
+		[Fact]
 		public void LoadAndWriteAndReload_DocumentWithUnusualNamespacePrefixes_WorksJustFineAndDandy()
 		{
 			const string cpixPrefix = "hagihuaa44444";
