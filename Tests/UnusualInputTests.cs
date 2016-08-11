@@ -1,4 +1,5 @@
 ﻿using Axinom.Cpix;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,70 @@ namespace Tests
 	/// </summary>
 	public sealed class UnusualInputTests
 	{
+		[Fact]
+		public void LoadDocument_WithXmlCommentsAddedAfterSigning_SuccessfullyValidatesSignature()
+		{
+			// The canonicalization we use excludes comments, so comments should have no effect on signature validity.
+
+			var document = new CpixDocument();
+			FillDocumentWithData(document);
+
+			document.Recipients.AddSignature(TestHelpers.Certificate4WithPrivateKey);
+			document.ContentKeys.AddSignature(TestHelpers.Certificate4WithPrivateKey);
+			document.UsageRules.AddSignature(TestHelpers.Certificate4WithPrivateKey);
+			document.SignedBy = TestHelpers.Certificate3WithPrivateKey;
+
+			var buffer = new MemoryStream();
+			document.Save(buffer);
+
+			// Let's now sprinkle comments all over the place.
+			var xmlDocument = new XmlDocument();
+
+			buffer.Position = 0;
+			xmlDocument.Load(buffer);
+
+			var namespaces = XmlHelpers.CreateCpixNamespaceManager(xmlDocument);
+
+			AddCommentAsChild(xmlDocument.DocumentElement);
+
+			AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:DeliveryDataList", namespaces));
+			AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyList", namespaces));
+			AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyUsageRuleList", namespaces));
+
+			AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:DeliveryDataList/cpix:DeliveryData", namespaces));
+			AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyList/cpix:ContentKey", namespaces));
+			AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyUsageRuleList/cpix:ContentKeyUsageRule", namespaces));
+
+			buffer.SetLength(0);
+
+			using (var writer = XmlWriter.Create(buffer, new XmlWriterSettings
+			{
+				Encoding = Encoding.UTF8,
+				CloseOutput = false,
+			}))
+			{
+				xmlDocument.Save(writer);
+			}
+
+			buffer.Position = 0;
+			document = CpixDocument.Load(buffer);
+
+			Assert.NotNull(document.SignedBy);
+			Assert.Equal(1, document.Recipients.SignedBy.Count());
+			Assert.Equal(1, document.ContentKeys.SignedBy.Count());
+			Assert.Equal(1, document.UsageRules.SignedBy.Count());
+
+			// And, of course, the data should still be there.
+			Assert.Equal(2, document.ContentKeys.Count);
+			Assert.Equal(2, document.Recipients.Count);
+			Assert.Equal(2, document.UsageRules.Count);
+		}
+
+		private static void AddCommentAsChild(XmlElement element)
+		{
+			element.AppendChild(element.OwnerDocument.CreateComment(Guid.NewGuid().ToString()));
+		}
+
 		[Fact]
 		public void LoadDocument_WithUtf16EncodedInput_Succeeds()
 		{
