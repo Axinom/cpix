@@ -79,7 +79,7 @@ namespace Axinom.Cpix
 				element.Data.Secret.PlainValue = entity.Value;
 			}
 
-			return XmlHelpers.AppendChildAndReuseNamespaces(element, document, container);
+			return XmlHelpers.AppendChildAndReuseNamespaces(element, container);
 		}
 
 		protected override ContentKey DeserializeEntity(XmlElement element, XmlNamespaceManager namespaces)

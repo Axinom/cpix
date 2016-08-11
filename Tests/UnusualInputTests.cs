@@ -14,6 +14,46 @@ namespace Tests
 	public sealed class UnusualInputTests
 	{
 		[Fact]
+		public void LoadAndWriteAndReload_DocumentWithUnusualNamespacePrefixes_WorksJustFineAndDandy()
+		{
+			const string cpixPrefix = "hagihuaa44444";
+			const string pskcPrefix = "se5o8jmmb7";
+			const string xmlencPrefix = "sbearbwabbbbb";
+			const string xmldsigPrefix = "h878r88919919199198919";
+			const string xsiPrefix = "qqqqqq";
+			const string xsdPrefix = "irfui";
+
+			// We create a blank document that predefines some unusual namespaces prefixes, then make sure all still works.
+			var xmlDocument = new XmlDocument();
+			xmlDocument.AppendChild(xmlDocument.CreateElement(cpixPrefix, "CPIX", Constants.CpixNamespace));
+
+			// We delcare a default namespace that will not be used for anything.
+			var attribute = xmlDocument.CreateAttribute(null, "xmlns", Constants.XmlnsNamespace);
+			attribute.Value = "http://nonsense.com.example.org";
+			xmlDocument.DocumentElement.Attributes.Append(attribute);
+
+			XmlHelpers.DeclareNamespace(xmlDocument.DocumentElement, xmldsigPrefix, Constants.XmlDigitalSignatureNamespace);
+			XmlHelpers.DeclareNamespace(xmlDocument.DocumentElement, xmlencPrefix, Constants.XmlEncryptionNamespace);
+			XmlHelpers.DeclareNamespace(xmlDocument.DocumentElement, pskcPrefix, Constants.PskcNamespace);
+			XmlHelpers.DeclareNamespace(xmlDocument.DocumentElement, xsiPrefix, "http://www.w3.org/2001/XMLSchema-instance");
+			XmlHelpers.DeclareNamespace(xmlDocument.DocumentElement, xsdPrefix, "http://www.w3.org/2001/XMLSchema");
+
+			var buffer = new MemoryStream();
+			xmlDocument.Save(buffer);
+
+			// Now we have our document. Let's add stuff to it and see what happens.
+			buffer.Position = 0;
+			var document = CpixDocument.Load(buffer);
+			FillDocumentWithData(document);
+
+			document = TestHelpers.Reload(document);
+
+			Assert.Equal(2, document.ContentKeys.Count);
+			Assert.Equal(2, document.Recipients.Count);
+			Assert.Equal(2, document.UsageRules.Count);
+		}
+
+		[Fact]
 		public void SignAndLoadAndSave_DocumentWithWhitespaceAndIndentation_DoesNotBreakSignatures()
 		{
 			// Signatures are sensitive to even whitespace changes. While this library deliberately avoids generating
@@ -76,6 +116,16 @@ namespace Tests
 			// And save/load should preserve all the niceness.
 			cpix = TestHelpers.Reload(cpix);
 
+			Assert.NotNull(cpix.SignedBy);
+			Assert.Equal(1, cpix.Recipients.SignedBy.Count());
+			Assert.Equal(1, cpix.ContentKeys.SignedBy.Count());
+			Assert.Equal(2, cpix.UsageRules.SignedBy.Count());
+
+			// And, of course, the data should still be there.
+			Assert.Equal(2, cpix.ContentKeys.Count);
+			Assert.Equal(2, cpix.Recipients.Count);
+			Assert.Equal(2, cpix.UsageRules.Count);
+
 			// No exception? Success!
 		}
 
@@ -88,12 +138,7 @@ namespace Tests
 		private static MemoryStream GenerateNontrivialCpixStream()
 		{
 			var document = new CpixDocument();
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
-			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient2));
-			TestHelpers.AddUsageRule(document);
-			TestHelpers.AddUsageRule(document);
+			FillDocumentWithData(document);
 
 			// It will be saved without whitespace or formatting. This is fine.
 			var buffer = new MemoryStream();
@@ -102,6 +147,16 @@ namespace Tests
 			buffer.Position = 0;
 
 			return buffer;
+		}
+
+		private static void FillDocumentWithData(CpixDocument document)
+		{
+			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
+			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient2));
+			TestHelpers.AddUsageRule(document);
+			TestHelpers.AddUsageRule(document);
 		}
 	}
 }

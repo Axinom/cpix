@@ -216,17 +216,9 @@ namespace Axinom.Cpix
 			// For documents we create from the start, let's incldue some useful namespace prefix delcarations right
 			// at the document root level, so we can reduce namespace spam in the document and improve human-readability.
 			// We cannot do this for external documents for fear of conflicts but for our own blank documents, is no problem.
-			var ds = document.CreateAttribute("xmlns", "ds", Constants.XmlnsNamespace);
-			ds.Value = Constants.XmlDigitalSignatureNamespace;
-			document.DocumentElement.Attributes.Append(ds);
-
-			var enc = document.CreateAttribute("xmlns", "enc", Constants.XmlnsNamespace);
-			enc.Value = Constants.XmlEncryptionNamespace;
-			document.DocumentElement.Attributes.Append(enc);
-
-			var pskc = document.CreateAttribute("xmlns", "pskc", Constants.XmlnsNamespace);
-			pskc.Value = Constants.PskcNamespace;
-			document.DocumentElement.Attributes.Append(pskc);
+			XmlHelpers.DeclareNamespace(document.DocumentElement, "ds", Constants.XmlDigitalSignatureNamespace);
+			XmlHelpers.DeclareNamespace(document.DocumentElement, "enc", Constants.XmlEncryptionNamespace);
+			XmlHelpers.DeclareNamespace(document.DocumentElement, "pskc", Constants.PskcNamespace);
 
 			// The signature generation code will still duplicate the namespace declaration because that's just what it
 			// does but at least for the majority of "normal" content, this improves readability quite a lot.
@@ -329,7 +321,7 @@ namespace Axinom.Cpix
 
 			var xmlDocument = LoadDocumentAndValidateAgainstSchema(stream);
 
-			if (xmlDocument.DocumentElement?.Name != "CPIX" || xmlDocument.DocumentElement?.NamespaceURI != Constants.CpixNamespace)
+			if (xmlDocument.DocumentElement?.LocalName != "CPIX" || xmlDocument.DocumentElement?.NamespaceURI != Constants.CpixNamespace)
 				throw new InvalidCpixDataException("The provided XML file does not appear to be a CPIX document - the name of the root element is incorrect.");
 
 			// We will fill this instance with the loaded data.

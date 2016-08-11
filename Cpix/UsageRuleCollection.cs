@@ -68,7 +68,7 @@ namespace Axinom.Cpix
 					.ToArray();
 			}
 
-			return XmlHelpers.AppendChildAndReuseNamespaces(element, document, container);
+			return XmlHelpers.AppendChildAndReuseNamespaces(element, container);
 		}
 
 		protected override UsageRule DeserializeEntity(XmlElement element, XmlNamespaceManager namespaces)

@@ -30,7 +30,7 @@ namespace Axinom.Cpix
 		/// <summary>
 		/// Appends a child element XML-serialized from an object of type T and reuses already-declared namespaces in doing so.
 		/// </summary>
-		internal static XmlElement AppendChildAndReuseNamespaces<T>(T xmlObject, XmlDocument document, XmlElement parent)
+		internal static XmlElement AppendChildAndReuseNamespaces<T>(T xmlObject, XmlElement parent)
 		{
 			// We have a little problem here. See, XmlSerializer generates full documents, which means that
 			// it will declare the namespaces on absolutely everything it genreates. This causes a lot of
@@ -42,7 +42,7 @@ namespace Axinom.Cpix
 
 			var serialized = CreateXmlElementAndReuseNamespaces(xmlObject, namespaces);
 
-			return (XmlElement)parent.AppendChild(document.ImportNode(serialized, true));
+			return (XmlElement)parent.AppendChild(parent.OwnerDocument.ImportNode(serialized, true));
 		}
 
 		/// <summary>
@@ -219,6 +219,16 @@ namespace Axinom.Cpix
 			manager.AddNamespace("ds", Constants.XmlDigitalSignatureNamespace);
 
 			return manager;
+		}
+
+		/// <summary>
+		/// Adds a namespace declaration attribute.
+		/// </summary>
+		internal static void DeclareNamespace(XmlElement onElement, string prefix, string ns)
+		{
+			var attribute = onElement.OwnerDocument.CreateAttribute("xmlns", prefix, Constants.XmlnsNamespace);
+			attribute.Value = ns;
+			onElement.Attributes.Append(attribute);
 		}
 	}
 }
