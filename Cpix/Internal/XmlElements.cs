@@ -83,14 +83,14 @@ namespace Axinom.Cpix.Internal
 		[XmlAttribute("hdr")]
 		public string HdrAsXmlString
 		{
-			get { return Hdr?.ToString(); }
+			get { return Hdr?.ToString().ToLowerInvariant(); }
 			set { Hdr = value != null ? (bool?)bool.Parse(value) : null; }
 		}
 
 		[XmlAttribute("wcg")]
 		public string WcgAsXmlString
 		{
-			get { return Wcg?.ToString(); }
+			get { return Wcg?.ToString().ToLowerInvariant(); }
 			set { Wcg = value != null ? (bool?)bool.Parse(value) : null; }
 		}
 
