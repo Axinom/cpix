@@ -98,25 +98,54 @@ namespace Tests
 		}
 
 		[Fact]
-		public void AddRecipient_WithLoadedDocumentAndWrittenContentKeys_SucceedsAndDecryptsContentKeys()
+		public void AddRecipient_WithLoadedDocumentAndWrittenContentKeys_SucceedsAndEncryptsContentKeys()
 		{
+			// We start with some clear keys.
 			var document = new CpixDocument();
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 
 			document = TestHelpers.Reload(document);
 
-			// Re-add keys to mark them for processing. They will be encrypted.
+			// Now we re-add keys to mark them for processing.
 			var keys = document.ContentKeys.ToArray();
 			document.ContentKeys.Clear();
 
 			foreach (var key in keys)
 				document.ContentKeys.Add(key);
 
+			// This marks the keys as to be encrypted.
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate3WithPublicKey));
 
 			document = TestHelpers.Reload(document, new[] { TestHelpers.Certificate3WithPrivateKey });
 
 			Assert.Equal(1, document.Recipients.Count);
+			Assert.True(document.ContentKeysAreReadable);
+		}
+
+		[Fact]
+		public void RemoveRecipients_WithLoadedDocumentAndWrittenContentKeys_SucceedsAndDecryptsContentKeys()
+		{
+			// We start with some encrypted keys.
+			var document = new CpixDocument();
+			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document.Recipients.Add(new Recipient(TestHelpers.Certificate3WithPublicKey));
+
+			// Load and decrypt keys.
+			document = TestHelpers.Reload(document, new[] { TestHelpers.Certificate3WithPrivateKey });
+
+			// Re-add keys to mark them for processing.
+			var keys = document.ContentKeys.ToArray();
+			document.ContentKeys.Clear();
+
+			foreach (var key in keys)
+				document.ContentKeys.Add(key);
+
+			// Remove recipients - we will output clear keys.
+			document.Recipients.Clear();
+
+			document = TestHelpers.Reload(document);
+
+			Assert.Equal(0, document.Recipients.Count);
 			Assert.True(document.ContentKeysAreReadable);
 		}
 	}
