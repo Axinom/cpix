@@ -64,6 +64,8 @@ namespace Tests
 			Assert.Equal(2, document.ContentKeys.Count);
 			Assert.Equal(2, document.Recipients.Count);
 			Assert.Equal(2, document.UsageRules.Count);
+
+			Assert.Equal(canary, document.UsageRules.First().LabelFilters.Single().Label);
 		}
 
 		[Fact]
