@@ -139,7 +139,7 @@ namespace Tests
 
 			var document = new CpixDocument();
 			document.ContentKeys.Add(contentKey);
-			document.ContentKeys.AddSignature(TestHelpers.PrivateAuthor1);
+			document.ContentKeys.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 

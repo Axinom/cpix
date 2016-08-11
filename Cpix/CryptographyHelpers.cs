@@ -10,21 +10,21 @@ namespace Axinom.Cpix
 		internal static void ValidateRecipientCertificateAndPublicKey(X509Certificate2 certificate)
 		{
 			if (certificate.SignatureAlgorithm.Value == Constants.Sha1Oid)
-				throw new ArgumentException("Weak certificates (signed using SHA-1) cannot be used with this library.");
+				throw new WeakCertificateException("Weak certificates (signed using SHA-1) cannot be used with this library.");
 
 			var rsaKey = certificate.GetRSAPublicKey();
 
 			if (rsaKey == null)
-				throw new ArgumentException("Only RSA keys are currently supported for recipient certificates.");
+				throw new NotSupportedException("Only RSA keys are currently supported for recipient certificates.");
 
 			if (rsaKey.KeySize < Constants.MinimumRsaKeySizeInBits)
-				throw new ArgumentException($"The RSA key must be at least {Constants.MinimumRsaKeySizeInBits} bits long.");
+				throw new WeakCertificateException($"The RSA key must be at least {Constants.MinimumRsaKeySizeInBits} bits long.");
 		}
 
 		internal static void ValidateSignerCertificate(X509Certificate2 certificate)
 		{
 			if (certificate.SignatureAlgorithm.Value == Constants.Sha1Oid)
-				throw new ArgumentException("Weak certificates (signed using SHA-1) cannot be used with this library.");
+				throw new WeakCertificateException("Weak certificates (signed using SHA-1) cannot be used with this library.");
 
 			if (!certificate.HasPrivateKey)
 				throw new ArgumentException("The private key of the supplied signer certificate is not available .");
@@ -32,16 +32,16 @@ namespace Axinom.Cpix
 			var rsaKey = certificate.GetRSAPublicKey();
 
 			if (rsaKey == null)
-				throw new ArgumentException("Only RSA keys are currently supported for signer certificates.");
+				throw new NotSupportedException("Only RSA keys are currently supported for signer certificates.");
 
 			if (rsaKey.KeySize < Constants.MinimumRsaKeySizeInBits)
-				throw new ArgumentException($"The RSA key must be at least {Constants.MinimumRsaKeySizeInBits} bits long.");
+				throw new WeakCertificateException($"The RSA key must be at least {Constants.MinimumRsaKeySizeInBits} bits long.");
 		}
 
 		internal static void ValidateRecipientCertificateAndPrivateKey(X509Certificate2 certificate)
 		{
 			if (certificate.SignatureAlgorithm.Value == Constants.Sha1Oid)
-				throw new ArgumentException("Weak certificates (signed using SHA-1) cannot be used with this library.");
+				throw new WeakCertificateException("Weak certificates (signed using SHA-1) cannot be used with this library.");
 
 			if (!certificate.HasPrivateKey)
 				throw new ArgumentException("The private key of the supplied recipient certificate is not available .");
@@ -49,10 +49,10 @@ namespace Axinom.Cpix
 			var rsaKey = certificate.GetRSAPublicKey();
 
 			if (rsaKey == null)
-				throw new ArgumentException("Only RSA keys are currently supported for recipient certificates.");
+				throw new NotSupportedException("Only RSA keys are currently supported for recipient certificates.");
 
 			if (rsaKey.KeySize < Constants.MinimumRsaKeySizeInBits)
-				throw new ArgumentException($"The RSA key must be at least {Constants.MinimumRsaKeySizeInBits} bits long.");
+				throw new WeakCertificateException($"The RSA key must be at least {Constants.MinimumRsaKeySizeInBits} bits long.");
 		}
 
 		/// <summary>

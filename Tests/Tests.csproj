@@ -70,38 +70,55 @@
     <Compile Include="SigningTests.cs" />
     <Compile Include="SmokeTests.cs" />
     <Compile Include="TestHelpers.cs" />
+    <Compile Include="WeakCertificateTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Resources\Certificates\Author1.cer">
-      <Link>Author1.cer</Link>
+    <None Include="..\Resources\Certificates\Cert1.cer">
+      <Link>Cert1.cer</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Resources\Certificates\Author1.pfx">
-      <Link>Author1.pfx</Link>
+    <None Include="..\Resources\Certificates\Cert1.pfx">
+      <Link>Cert1.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Resources\Certificates\Author2.cer">
-      <Link>Author2.cer</Link>
+    <None Include="..\Resources\Certificates\Cert2.cer">
+      <Link>Cert2.cer</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Resources\Certificates\Author2.pfx">
-      <Link>Author2.pfx</Link>
+    <None Include="..\Resources\Certificates\Cert2.pfx">
+      <Link>Cert2.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Resources\Certificates\Recipient1.cer">
-      <Link>Recipient1.cer</Link>
+    <None Include="..\Resources\Certificates\Cert3.cer">
+      <Link>Cert3.cer</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Resources\Certificates\Recipient1.pfx">
-      <Link>Recipient1.pfx</Link>
+    <None Include="..\Resources\Certificates\Cert3.pfx">
+      <Link>Cert3.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Resources\Certificates\Recipient2.cer">
-      <Link>Recipient2.cer</Link>
+    <None Include="..\Resources\Certificates\Cert4.cer">
+      <Link>Cert4.cer</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Resources\Certificates\Recipient2.pfx">
-      <Link>Recipient2.pfx</Link>
+    <None Include="..\Resources\Certificates\Cert4.pfx">
+      <Link>Cert4.pfx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Resources\Certificates\WeakCert_Sha1.cer">
+      <Link>WeakCert_Sha1.cer</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Resources\Certificates\WeakCert_Sha1.pfx">
+      <Link>WeakCert_Sha1.pfx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Resources\Certificates\WeakCert_SmallKey.cer">
+      <Link>WeakCert_SmallKey.cer</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Resources\Certificates\WeakCert_SmallKey.pfx">
+      <Link>WeakCert_SmallKey.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />

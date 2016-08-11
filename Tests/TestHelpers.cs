@@ -78,8 +78,8 @@ namespace Tests
 
 		public static void PopulateCollections(CpixDocument document)
 		{
-			document.Recipients.Add(new Recipient(PublicRecipient1));
-			document.Recipients.Add(new Recipient(PublicRecipient2));
+			document.Recipients.Add(new Recipient(Certificate3WithPublicKey));
+			document.Recipients.Add(new Recipient(Certificate4WithPublicKey));
 
 			var key1 = GenerateContentKey();
 			var key2 = GenerateContentKey();
@@ -98,14 +98,21 @@ namespace Tests
 
 		public static readonly RandomNumberGenerator Random = RandomNumberGenerator.Create();
 
-		public static readonly X509Certificate2 PublicAuthor1 = new X509Certificate2("Author1.cer");
-		public static readonly X509Certificate2 PublicAuthor2 = new X509Certificate2("Author2.cer");
-		public static readonly X509Certificate2 PublicRecipient1 = new X509Certificate2("Recipient1.cer");
-		public static readonly X509Certificate2 PublicRecipient2 = new X509Certificate2("Recipient2.cer");
+		// makecert -pe -n "CN=CPIX Example Entity 1" -sky exchange -a sha512 -len 4096 -r -ss My
+		public static readonly X509Certificate2 Certificate1WithPublicKey = new X509Certificate2("Cert1.cer");
+		public static readonly X509Certificate2 Certificate2WithPublicKey = new X509Certificate2("Cert2.cer");
+		public static readonly X509Certificate2 Certificate3WithPublicKey = new X509Certificate2("Cert3.cer");
+		public static readonly X509Certificate2 Certificate4WithPublicKey = new X509Certificate2("Cert4.cer");
 
-		public static readonly X509Certificate2 PrivateAuthor1 = new X509Certificate2("Author1.pfx", "Author1");
-		public static readonly X509Certificate2 PrivateAuthor2 = new X509Certificate2("Author2.pfx", "Author2");
-		public static readonly X509Certificate2 PrivateRecipient1 = new X509Certificate2("Recipient1.pfx", "Recipient1");
-		public static readonly X509Certificate2 PrivateRecipient2 = new X509Certificate2("Recipient2.pfx", "Recipient2");
+		public static readonly X509Certificate2 Certificate1WithPrivateKey = new X509Certificate2("Cert1.pfx", "Cert1");
+		public static readonly X509Certificate2 Certificate2WithPrivateKey = new X509Certificate2("Cert2.pfx", "Cert2");
+		public static readonly X509Certificate2 Certificate3WithPrivateKey = new X509Certificate2("Cert3.pfx", "Cert3");
+		public static readonly X509Certificate2 Certificate4WithPrivateKey = new X509Certificate2("Cert4.pfx", "Cert4");
+
+		public static readonly X509Certificate2 WeakSha1CertificateWithPublicKey = new X509Certificate2("WeakCert_Sha1.cer");
+		public static readonly X509Certificate2 WeakSha1CertificateWithPrivateKey = new X509Certificate2("WeakCert_Sha1.pfx", "WeakCert_Sha1");
+
+		public static readonly X509Certificate2 WeakSmallKeyCertificateWithPublicKey = new X509Certificate2("WeakCert_SmallKey.cer");
+		public static readonly X509Certificate2 WeakSmallKeyCertificateWithPrivateKey = new X509Certificate2("WeakCert_SmallKey.pfx", "WeakCert_SmallKey");
 	}
 }

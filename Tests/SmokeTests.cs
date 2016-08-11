@@ -68,7 +68,7 @@ namespace Tests
 				Value = keyData.Item2
 			});
 
-			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
+			document.Recipients.Add(new Recipient(TestHelpers.Certificate3WithPublicKey));
 
 			using (var buffer = new MemoryStream())
 			{
@@ -113,20 +113,20 @@ namespace Tests
 				Value = keyData.Item2
 			});
 
-			document.ContentKeys.AddSignature(TestHelpers.PrivateAuthor1);
-			document.SignedBy = TestHelpers.PrivateAuthor1;
-			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
+			document.ContentKeys.AddSignature(TestHelpers.Certificate1WithPrivateKey);
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
+			document.Recipients.Add(new Recipient(TestHelpers.Certificate3WithPublicKey));
 
-			document = TestHelpers.Reload(document, new[] { TestHelpers.PrivateRecipient1 });
+			document = TestHelpers.Reload(document, new[] { TestHelpers.Certificate3WithPrivateKey });
 
 			Assert.Equal(1, document.ContentKeys.Count);
 			Assert.NotNull(document.SignedBy);
 			Assert.Equal(1, document.ContentKeys.SignedBy.Count());
 			Assert.Equal(1, document.Recipients.Count);
 
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.SignedBy.Thumbprint);
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.ContentKeys.SignedBy.Single().Thumbprint);
-			Assert.Equal(TestHelpers.PrivateRecipient1.Thumbprint, document.Recipients.Single().Certificate.Thumbprint);
+			Assert.Equal(TestHelpers.Certificate1WithPrivateKey.Thumbprint, document.SignedBy.Thumbprint);
+			Assert.Equal(TestHelpers.Certificate1WithPrivateKey.Thumbprint, document.ContentKeys.SignedBy.Single().Thumbprint);
+			Assert.Equal(TestHelpers.Certificate3WithPrivateKey.Thumbprint, document.Recipients.Single().Certificate.Thumbprint);
 
 			var key = document.ContentKeys.Single();
 			Assert.Equal(keyData.Item1, key.Id);

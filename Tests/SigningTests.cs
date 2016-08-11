@@ -12,12 +12,12 @@ namespace Tests
 		public void AddingSignatures_ToEverythingInEmptyNewDocument_Succeeds()
 		{
 			var document = new CpixDocument();
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			foreach (var collection in document.EntityCollections)
 			{
-				collection.AddSignature(TestHelpers.PrivateAuthor1);
-				collection.AddSignature(TestHelpers.PrivateAuthor2);
+				collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
+				collection.AddSignature(TestHelpers.Certificate2WithPrivateKey);
 			}
 
 			document = TestHelpers.Reload(document);
@@ -26,11 +26,11 @@ namespace Tests
 			{
 				Assert.Equal(2, collection.SignedBy.Count());
 
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint));
 			}
 
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.SignedBy?.Thumbprint);
+			Assert.Equal(TestHelpers.Certificate1WithPrivateKey.Thumbprint, document.SignedBy?.Thumbprint);
 		}
 
 		[Fact]
@@ -39,12 +39,12 @@ namespace Tests
 			var document = new CpixDocument();
 			document = TestHelpers.Reload(document);
 
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			foreach (var collection in document.EntityCollections)
 			{
-				collection.AddSignature(TestHelpers.PrivateAuthor1);
-				collection.AddSignature(TestHelpers.PrivateAuthor2);
+				collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
+				collection.AddSignature(TestHelpers.Certificate2WithPrivateKey);
 			}
 
 			document = TestHelpers.Reload(document);
@@ -53,29 +53,29 @@ namespace Tests
 			{
 				Assert.Equal(2, collection.SignedBy.Count());
 
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint));
 			}
 
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.SignedBy?.Thumbprint);
+			Assert.Equal(TestHelpers.Certificate1WithPrivateKey.Thumbprint, document.SignedBy?.Thumbprint);
 		}
 
 		[Fact]
 		public void AddingSignature_OnEverythingInAlreadySignedEmptyDocument_Succeeds()
 		{
 			var document = new CpixDocument();
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			foreach (var collection in document.EntityCollections)
-				collection.AddSignature(TestHelpers.PrivateAuthor1);
+				collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 
 			// Mark the entire document for re-signing, making it editable.
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			foreach (var collection in document.EntityCollections)
-				collection.AddSignature(TestHelpers.PrivateAuthor2);
+				collection.AddSignature(TestHelpers.Certificate2WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 
@@ -83,8 +83,8 @@ namespace Tests
 			{
 				Assert.Equal(2, collection.SignedBy.Count());
 
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint));
 			}
 		}
 
@@ -92,19 +92,19 @@ namespace Tests
 		public void ReplacingSignature_OnEverythingInEmptyDocument_Succeeds()
 		{
 			var document = new CpixDocument();
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			foreach (var collection in document.EntityCollections)
-				collection.AddSignature(TestHelpers.PrivateAuthor1);
+				collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 
-			document.SignedBy = TestHelpers.PrivateAuthor2;
+			document.SignedBy = TestHelpers.Certificate2WithPrivateKey;
 
 			foreach (var collection in document.EntityCollections)
 			{
 				collection.RemoveAllSignatures();
-				collection.AddSignature(TestHelpers.PrivateAuthor2);
+				collection.AddSignature(TestHelpers.Certificate2WithPrivateKey);
 			}
 
 			document = TestHelpers.Reload(document);
@@ -112,10 +112,10 @@ namespace Tests
 			foreach (var collection in document.EntityCollections)
 			{
 				Assert.Equal(1, collection.SignedBy.Count());
-				Assert.Equal(TestHelpers.PrivateAuthor2.Thumbprint, collection.SignedBy.Single().Thumbprint);
+				Assert.Equal(TestHelpers.Certificate2WithPrivateKey.Thumbprint, collection.SignedBy.Single().Thumbprint);
 			}
 			
-			Assert.Equal(TestHelpers.PrivateAuthor2.Thumbprint, document.SignedBy?.Thumbprint);
+			Assert.Equal(TestHelpers.Certificate2WithPrivateKey.Thumbprint, document.SignedBy?.Thumbprint);
 		}
 
 		[Fact]
@@ -124,12 +124,12 @@ namespace Tests
 			var document = new CpixDocument();
 			TestHelpers.PopulateCollections(document);
 
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			foreach (var collection in document.EntityCollections)
 			{
-				collection.AddSignature(TestHelpers.PrivateAuthor1);
-				collection.AddSignature(TestHelpers.PrivateAuthor2);
+				collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
+				collection.AddSignature(TestHelpers.Certificate2WithPrivateKey);
 			}
 
 			document = TestHelpers.Reload(document);
@@ -138,11 +138,11 @@ namespace Tests
 			{
 				Assert.Equal(2, collection.SignedBy.Count());
 
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint));
 			}
 
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.SignedBy?.Thumbprint);
+			Assert.Equal(TestHelpers.Certificate1WithPrivateKey.Thumbprint, document.SignedBy?.Thumbprint);
 		}
 
 		[Fact]
@@ -153,12 +153,12 @@ namespace Tests
 
 			document = TestHelpers.Reload(document);
 
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			foreach (var collection in document.EntityCollections)
 			{
-				collection.AddSignature(TestHelpers.PrivateAuthor1);
-				collection.AddSignature(TestHelpers.PrivateAuthor2);
+				collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
+				collection.AddSignature(TestHelpers.Certificate2WithPrivateKey);
 			}
 
 			document = TestHelpers.Reload(document);
@@ -167,11 +167,11 @@ namespace Tests
 			{
 				Assert.Equal(2, collection.SignedBy.Count());
 
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint));
 			}
 
-			Assert.Equal(TestHelpers.PrivateAuthor1.Thumbprint, document.SignedBy?.Thumbprint);
+			Assert.Equal(TestHelpers.Certificate1WithPrivateKey.Thumbprint, document.SignedBy?.Thumbprint);
 		}
 
 		[Fact]
@@ -180,18 +180,18 @@ namespace Tests
 			var document = new CpixDocument();
 			TestHelpers.PopulateCollections(document);
 
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			foreach (var collection in document.EntityCollections)
-				collection.AddSignature(TestHelpers.PrivateAuthor1);
+				collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 
 			// Mark the entire document for re-signing, making it editable.
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			foreach (var collection in document.EntityCollections)
-				collection.AddSignature(TestHelpers.PrivateAuthor2);
+				collection.AddSignature(TestHelpers.Certificate2WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 
@@ -199,8 +199,8 @@ namespace Tests
 			{
 				Assert.Equal(2, collection.SignedBy.Count());
 
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor1.Thumbprint));
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.PrivateAuthor2.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint));
+				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint));
 			}
 		}
 
@@ -210,19 +210,19 @@ namespace Tests
 			var document = new CpixDocument();
 			TestHelpers.PopulateCollections(document);
 
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			foreach (var collection in document.EntityCollections)
-				collection.AddSignature(TestHelpers.PrivateAuthor1);
+				collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 
-			document.SignedBy = TestHelpers.PrivateAuthor2;
+			document.SignedBy = TestHelpers.Certificate2WithPrivateKey;
 
 			foreach (var collection in document.EntityCollections)
 			{
 				collection.RemoveAllSignatures();
-				collection.AddSignature(TestHelpers.PrivateAuthor2);
+				collection.AddSignature(TestHelpers.Certificate2WithPrivateKey);
 			}
 
 			document = TestHelpers.Reload(document);
@@ -230,17 +230,17 @@ namespace Tests
 			foreach (var collection in document.EntityCollections)
 			{
 				Assert.Equal(1, collection.SignedBy.Count());
-				Assert.Equal(TestHelpers.PrivateAuthor2.Thumbprint, collection.SignedBy.Single().Thumbprint);
+				Assert.Equal(TestHelpers.Certificate2WithPrivateKey.Thumbprint, collection.SignedBy.Single().Thumbprint);
 			}
 
-			Assert.Equal(TestHelpers.PrivateAuthor2.Thumbprint, document.SignedBy?.Thumbprint);
+			Assert.Equal(TestHelpers.Certificate2WithPrivateKey.Thumbprint, document.SignedBy?.Thumbprint);
 		}
 
 		[Fact]
 		public void RemovingDocumentSignature_Succeeds()
 		{
 			var document = new CpixDocument();
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			document = TestHelpers.Reload(document);
 
@@ -259,9 +259,9 @@ namespace Tests
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			TestHelpers.AddUsageRule(document);
 
-			Assert.ThrowsAny<ArgumentException>(() => document.ContentKeys.AddSignature(TestHelpers.PublicAuthor1));
-			Assert.ThrowsAny<ArgumentException>(() => document.SignedBy = TestHelpers.PublicAuthor1);
-			Assert.ThrowsAny<ArgumentException>(() => document.UsageRules.AddSignature(TestHelpers.PublicAuthor1));
+			Assert.ThrowsAny<ArgumentException>(() => document.ContentKeys.AddSignature(TestHelpers.Certificate1WithPublicKey));
+			Assert.ThrowsAny<ArgumentException>(() => document.SignedBy = TestHelpers.Certificate1WithPublicKey);
+			Assert.ThrowsAny<ArgumentException>(() => document.UsageRules.AddSignature(TestHelpers.Certificate1WithPublicKey));
 		}
 		
 		[Fact]
@@ -270,7 +270,7 @@ namespace Tests
 			var document = new CpixDocument();
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			TestHelpers.AddUsageRule(document);
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			document = TestHelpers.Reload(document);
 

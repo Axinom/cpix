@@ -44,14 +44,18 @@
     <Compile Include="SolutionAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Certificates\Author1.cer" />
-    <None Include="Certificates\Author1.pfx" />
-    <None Include="Certificates\Author2.cer" />
-    <None Include="Certificates\Author2.pfx" />
-    <None Include="Certificates\Recipient1.cer" />
-    <None Include="Certificates\Recipient1.pfx" />
-    <None Include="Certificates\Recipient2.cer" />
-    <None Include="Certificates\Recipient2.pfx" />
+    <None Include="Certificates\Cert1.cer" />
+    <None Include="Certificates\Cert1.pfx" />
+    <None Include="Certificates\Cert2.cer" />
+    <None Include="Certificates\Cert2.pfx" />
+    <None Include="Certificates\Cert3.cer" />
+    <None Include="Certificates\Cert3.pfx" />
+    <None Include="Certificates\Cert4.cer" />
+    <None Include="Certificates\Cert4.pfx" />
+    <None Include="Certificates\WeakCert_Sha1.cer" />
+    <None Include="Certificates\WeakCert_Sha1.pfx" />
+    <None Include="Certificates\WeakCert_SmallKey.cer" />
+    <None Include="Certificates\WeakCert_SmallKey.pfx" />
     <None Include="Schema\cpix.xsd">
       <SubType>Designer</SubType>
     </None>

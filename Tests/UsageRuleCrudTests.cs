@@ -165,7 +165,7 @@ namespace Tests
 			var document = new CpixDocument();
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			TestHelpers.AddUsageRule(document);
-			document.UsageRules.AddSignature(TestHelpers.PrivateAuthor1);
+			document.UsageRules.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 
@@ -178,7 +178,7 @@ namespace Tests
 			var document = new CpixDocument();
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			TestHelpers.AddUsageRule(document);
-			document.UsageRules.AddSignature(TestHelpers.PrivateAuthor1);
+			document.UsageRules.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 
@@ -245,7 +245,7 @@ namespace Tests
 			var document = new CpixDocument();
 			document.ContentKeys.Add(contentKey);
 			document.UsageRules.Add(rule);
-			document.UsageRules.AddSignature(TestHelpers.PrivateAuthor1);
+			document.UsageRules.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 

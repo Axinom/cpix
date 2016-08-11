@@ -57,8 +57,8 @@ The MAC key size must be exactly 512 bits.
 The following requirements are placed on any X.509 certificates used by the library:
 
 * Only RSA key pairs are supported.
+* RSA key size must be at least 3072 bits.
 * Signing algorithm must not be SHA-1.
-* Key size must be at least 2048 bits.
 
 Quick start: writing CPIX
 =========================

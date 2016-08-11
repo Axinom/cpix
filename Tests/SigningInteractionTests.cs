@@ -13,7 +13,7 @@ namespace Tests
 		private Func<CpixDocument, EntityCollectionBase> ContentKeysSelector = doc => doc.ContentKeys;
 		private Func<CpixDocument, EntityCollectionBase> UsageRulesSelector = doc => doc.UsageRules;
 
-		private Action<CpixDocument> AddRecipient = doc => doc.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
+		private Action<CpixDocument> AddRecipient = doc => doc.Recipients.Add(new Recipient(TestHelpers.Certificate3WithPublicKey));
 		private Action<CpixDocument> AddContentKey = doc => doc.ContentKeys.Add(TestHelpers.GenerateContentKey());
 		private Action<CpixDocument> AddUsageRule = doc =>
 		{
@@ -91,7 +91,7 @@ namespace Tests
 			var collection = collectionSelector(document);
 
 			addEntity(document);
-			collection.AddSignature(TestHelpers.PrivateAuthor1);
+			collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 			collection = collectionSelector(document);
@@ -107,13 +107,13 @@ namespace Tests
 			var collection = collectionSelector(document);
 
 			addEntity(document);
-			collection.AddSignature(TestHelpers.PrivateAuthor1);
+			collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 			collection = collectionSelector(document);
 
 			collection.RemoveAllSignatures();
-			collection.AddSignature(TestHelpers.PrivateAuthor1);
+			collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			collection.Clear();
 		}
@@ -124,7 +124,7 @@ namespace Tests
 			var collection = collectionSelector(document);
 
 			addEntity(document);
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			document = TestHelpers.Reload(document);
 			collection = collectionSelector(document);
@@ -140,12 +140,12 @@ namespace Tests
 			var collection = collectionSelector(document);
 
 			addEntity(document);
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			document = TestHelpers.Reload(document);
 			collection = collectionSelector(document);
 
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			collection.Clear();
 		}
@@ -156,15 +156,15 @@ namespace Tests
 			var collection = collectionSelector(document);
 
 			addEntity(document);
-			document.SignedBy = TestHelpers.PrivateAuthor1;
-			collection.AddSignature(TestHelpers.PrivateAuthor1);
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
+			collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 			collection = collectionSelector(document);
 
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 			collection.RemoveAllSignatures();
-			collection.AddSignature(TestHelpers.PrivateAuthor1);
+			collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			collection.Clear();
 		}
@@ -175,7 +175,7 @@ namespace Tests
 			var collection = collectionSelector(document);
 
 			addEntity(document);
-			collection.AddSignature(TestHelpers.PrivateAuthor1);
+			collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 			collection = collectionSelector(document);
@@ -189,7 +189,7 @@ namespace Tests
 			var collection = collectionSelector(document);
 
 			addEntity(document);
-			document.SignedBy = TestHelpers.PrivateAuthor1;
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			document = TestHelpers.Reload(document);
 			collection = collectionSelector(document);
@@ -203,8 +203,8 @@ namespace Tests
 			var collection = collectionSelector(document);
 
 			addEntity(document);
-			document.SignedBy = TestHelpers.PrivateAuthor1;
-			collection.AddSignature(TestHelpers.PrivateAuthor1);
+			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
+			collection.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 			collection = collectionSelector(document);

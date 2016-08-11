@@ -48,16 +48,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Resources\Certificates\Author1.pfx">
-      <Link>Author1.pfx</Link>
+    <None Include="..\Resources\Certificates\Cert1.pfx">
+      <Link>Cert1.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Resources\Certificates\Recipient1.cer">
-      <Link>Recipient1.cer</Link>
+    <None Include="..\Resources\Certificates\Cert2.cer">
+      <Link>Cert2.cer</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Resources\Certificates\Recipient1.pfx">
-      <Link>Recipient1.pfx</Link>
+    <None Include="..\Resources\Certificates\Cert2.pfx">
+      <Link>Cert2.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="App.config" />

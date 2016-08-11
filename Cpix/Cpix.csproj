@@ -72,6 +72,7 @@
     <Compile Include="UsageRule.cs" />
     <Compile Include="UsageRuleCollection.cs" />
     <Compile Include="VideoFilter.cs" />
+    <Compile Include="WeakCertificateException.cs" />
     <Compile Include="XmlHelpers.cs" />
   </ItemGroup>
   <ItemGroup>

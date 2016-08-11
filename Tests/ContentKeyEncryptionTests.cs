@@ -19,9 +19,9 @@ namespace Tests
 				Value = keyData.Item2
 			});
 
-			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
+			document.Recipients.Add(new Recipient(TestHelpers.Certificate3WithPublicKey));
 
-			document = TestHelpers.Reload(document, new[] { TestHelpers.PrivateRecipient1 });
+			document = TestHelpers.Reload(document, new[] { TestHelpers.Certificate3WithPrivateKey });
 
 			var key = document.ContentKeys.Single();
 			Assert.NotNull(key.Value);
@@ -42,7 +42,7 @@ namespace Tests
 				Value = keyData.Item2
 			});
 
-			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
+			document.Recipients.Add(new Recipient(TestHelpers.Certificate3WithPublicKey));
 
 			document = TestHelpers.Reload(document);
 
@@ -58,15 +58,15 @@ namespace Tests
 			var document = new CpixDocument();
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 
-			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
-			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient2));
+			document.Recipients.Add(new Recipient(TestHelpers.Certificate3WithPublicKey));
+			document.Recipients.Add(new Recipient(TestHelpers.Certificate4WithPublicKey));
 
 			document = TestHelpers.Reload(document);
 
 			Assert.Equal(2, document.Recipients.Count);
 
-			Assert.Equal(1, document.Recipients.Count(r => r.Certificate.Thumbprint == TestHelpers.PublicRecipient1.Thumbprint));
-			Assert.Equal(1, document.Recipients.Count(r => r.Certificate.Thumbprint == TestHelpers.PublicRecipient2.Thumbprint));
+			Assert.Equal(1, document.Recipients.Count(r => r.Certificate.Thumbprint == TestHelpers.Certificate3WithPublicKey.Thumbprint));
+			Assert.Equal(1, document.Recipients.Count(r => r.Certificate.Thumbprint == TestHelpers.Certificate4WithPublicKey.Thumbprint));
 		}
 
 		[Fact]
@@ -75,11 +75,11 @@ namespace Tests
 			var document = new CpixDocument();
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 
-			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
-			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient2));
+			document.Recipients.Add(new Recipient(TestHelpers.Certificate3WithPublicKey));
+			document.Recipients.Add(new Recipient(TestHelpers.Certificate4WithPublicKey));
 
-			var decryptedDocument1 = TestHelpers.Reload(document, new[] { TestHelpers.PrivateRecipient1 });
-			var decryptedDocument2 = TestHelpers.Reload(document, new[] { TestHelpers.PrivateRecipient2 });
+			var decryptedDocument1 = TestHelpers.Reload(document, new[] { TestHelpers.Certificate3WithPrivateKey });
+			var decryptedDocument2 = TestHelpers.Reload(document, new[] { TestHelpers.Certificate4WithPrivateKey });
 
 			Assert.True(decryptedDocument1.ContentKeysAreReadable);
 			Assert.True(decryptedDocument2.ContentKeysAreReadable);
@@ -94,7 +94,7 @@ namespace Tests
 			document = TestHelpers.Reload(document);
 
 			// The keys are read-only so they cannot be encrypted!
-			Assert.Throws<InvalidOperationException>(() => document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1)));
+			Assert.Throws<InvalidOperationException>(() => document.Recipients.Add(new Recipient(TestHelpers.Certificate3WithPublicKey)));
 		}
 
 		[Fact]
@@ -112,9 +112,9 @@ namespace Tests
 			foreach (var key in keys)
 				document.ContentKeys.Add(key);
 
-			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
+			document.Recipients.Add(new Recipient(TestHelpers.Certificate3WithPublicKey));
 
-			document = TestHelpers.Reload(document, new[] { TestHelpers.PrivateRecipient1 });
+			document = TestHelpers.Reload(document, new[] { TestHelpers.Certificate3WithPrivateKey });
 
 			Assert.Equal(1, document.Recipients.Count);
 			Assert.True(document.ContentKeysAreReadable);

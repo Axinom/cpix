@@ -85,11 +85,11 @@ namespace Tests
 			SetElementId(document, namespaces, "/cpix:CPIX/cpix:ContentKeyList", contentKeysId);
 			SetElementId(document, namespaces, "/cpix:CPIX/cpix:ContentKeyUsageRuleList", usageRulesId);
 
-			CryptographyHelpers.SignXmlElement(document, recipientsId, TestHelpers.PrivateAuthor1);
-			CryptographyHelpers.SignXmlElement(document, contentKeysId, TestHelpers.PrivateAuthor1);
-			CryptographyHelpers.SignXmlElement(document, usageRulesId, TestHelpers.PrivateAuthor1);
-			CryptographyHelpers.SignXmlElement(document, usageRulesId, TestHelpers.PrivateAuthor2);
-			CryptographyHelpers.SignXmlElement(document, "", TestHelpers.PrivateAuthor1);
+			CryptographyHelpers.SignXmlElement(document, recipientsId, TestHelpers.Certificate1WithPrivateKey);
+			CryptographyHelpers.SignXmlElement(document, contentKeysId, TestHelpers.Certificate1WithPrivateKey);
+			CryptographyHelpers.SignXmlElement(document, usageRulesId, TestHelpers.Certificate1WithPrivateKey);
+			CryptographyHelpers.SignXmlElement(document, usageRulesId, TestHelpers.Certificate2WithPrivateKey);
+			CryptographyHelpers.SignXmlElement(document, "", TestHelpers.Certificate1WithPrivateKey);
 
 			// Okay, that's fine. Save!
 			var signedCpixStream = new MemoryStream();
@@ -153,8 +153,8 @@ namespace Tests
 		{
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient1));
-			document.Recipients.Add(new Recipient(TestHelpers.PublicRecipient2));
+			document.Recipients.Add(new Recipient(TestHelpers.Certificate3WithPublicKey));
+			document.Recipients.Add(new Recipient(TestHelpers.Certificate4WithPublicKey));
 			TestHelpers.AddUsageRule(document);
 			TestHelpers.AddUsageRule(document);
 		}
