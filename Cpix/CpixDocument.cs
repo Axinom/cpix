@@ -132,6 +132,19 @@ namespace Axinom.Cpix
 		}
 
 		/// <summary>
+		/// Saves the CPIX document to a file, overwriting the existing contents.
+		/// If any exception is thrown, the document may be left in an invalid state.
+		/// </summary>
+		public void Save(string path)
+		{
+			if (path == null)
+				throw new ArgumentNullException(nameof(path));
+
+			using (var file = File.Create(path))
+				Save(file);
+		}
+
+		/// <summary>
 		/// Saves the CPIX document to a stream. If any exception is thrown, the document may be left in an invalid state.
 		/// </summary>
 		public void Save(Stream stream)
@@ -246,6 +259,39 @@ namespace Axinom.Cpix
 				document.Load(reader);
 
 			return document;
+		}
+
+		/// <summary>
+		/// Loads a CPIX document from a file, decrypting it using the key pairs
+		/// of the identity referenced by the provided certificate, if required.
+		/// </summary>
+		/// <remarks>
+		/// All digital signatures are verified. Note that a valid signature does not mean that the signer
+		/// is trusted! It is the caller's responsibility to ensure that any signers are trusted!
+		/// </remarks>
+		public static CpixDocument Load(string path, X509Certificate2 recipientCertificate)
+		{
+			if (recipientCertificate == null)
+				throw new ArgumentNullException(nameof(recipientCertificate));
+
+			return Load(path, new[] { recipientCertificate });
+		}
+
+		/// <summary>
+		/// Loads a CPIX document from a file, decrypting it using the key pairs
+		/// of the identities referenced by the provided certificates, if required.
+		/// </summary>
+		/// <remarks>
+		/// All digital signatures are verified. Note that a valid signature does not mean that the signer
+		/// is trusted! It is the caller's responsibility to ensure that any signers are trusted!
+		/// </remarks>
+		public static CpixDocument Load(string path, IReadOnlyCollection<X509Certificate2> recipientCertificates = null)
+		{
+			if (path == null)
+				throw new ArgumentNullException(nameof(path));
+
+			using (var file = File.OpenRead(path))
+				return Load(file, recipientCertificates);
 		}
 
 		/// <summary>
