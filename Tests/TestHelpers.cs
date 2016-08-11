@@ -8,7 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Tests
 {
-	static class TestHelpers
+	internal static class TestHelpers
 	{
 		public static CpixDocument Reload(CpixDocument document, IReadOnlyCollection<X509Certificate2> decryptionCertificates = null)
 		{
@@ -67,6 +67,32 @@ namespace Tests
 					{
 						MinBitrate = 5198494,
 						MaxBitrate = 100000000000000
+					}
+				},
+				LabelFilters = new[]
+				{
+					new LabelFilter("aaaaa"),
+					new LabelFilter("bbbb"),
+				},
+				VideoFilters = new[]
+				{
+					new VideoFilter
+					{
+						MinPixels = 1000,
+						MaxPixels = 1920 * 1080,
+						MinFramesPerSecond = 10,
+						MaxFramesPerSecond = 30,
+						WideColorGamut = false,
+						HighDynamicRange = true,
+					},
+					new VideoFilter
+					{
+						MinPixels = 1000,
+						MaxPixels = 4096 * 4096,
+						MinFramesPerSecond = 30,
+						MaxFramesPerSecond = 200,
+						WideColorGamut = false,
+						HighDynamicRange = false,
 					}
 				}
 			};

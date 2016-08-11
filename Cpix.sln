@@ -7,11 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cpix", "Cpix\Cpix.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resources", "Resources\Resources.csproj", "{A46001B7-E050-4859-8175-84C730BA3223}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{AB2BB39A-D2F1-4A3B-9F64-5764DE754402}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{C9D71E49-E2C1-4C2F-A56D-B5255F90C6F5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadmeQuickStartExamples", "ReadmeQuickStartExamples\ReadmeQuickStartExamples.csproj", "{D9DDFDAF-CAE6-4365-AB4A-A40B7FBFB3F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestVectorGenerator", "TestVectorGenerator\TestVectorGenerator.csproj", "{9197D869-3F1D-424F-B11B-1A4BC6D2B98E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,11 +35,12 @@ Global
 		{D9DDFDAF-CAE6-4365-AB4A-A40B7FBFB3F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D9DDFDAF-CAE6-4365-AB4A-A40B7FBFB3F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D9DDFDAF-CAE6-4365-AB4A-A40B7FBFB3F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9197D869-3F1D-424F-B11B-1A4BC6D2B98E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9197D869-3F1D-424F-B11B-1A4BC6D2B98E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9197D869-3F1D-424F-B11B-1A4BC6D2B98E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9197D869-3F1D-424F-B11B-1A4BC6D2B98E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{D9DDFDAF-CAE6-4365-AB4A-A40B7FBFB3F6} = {AB2BB39A-D2F1-4A3B-9F64-5764DE754402}
 	EndGlobalSection
 EndGlobal

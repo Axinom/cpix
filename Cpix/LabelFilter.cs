@@ -13,6 +13,15 @@
 		/// </summary>
 		public string Label { get; set; }
 
+		public LabelFilter()
+		{
+		}
+
+		public LabelFilter(string label)
+		{
+			Label = label;
+		}
+
 		/// <summary>
 		/// Validates the data in the object before it is accepted for use by this library.
 		/// </summary>

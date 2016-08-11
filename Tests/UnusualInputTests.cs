@@ -73,9 +73,9 @@ namespace Tests
 			Assert.Equal(2, document.UsageRules.Count);
 		}
 
-		private static void AddCommentAsChild(XmlElement element)
+		internal static void AddCommentAsChild(XmlElement element)
 		{
-			element.AppendChild(element.OwnerDocument.CreateComment(Guid.NewGuid().ToString()));
+			element.AppendChild(element.OwnerDocument.CreateComment("This is an arbitrary comment that should NOT interfere with XML digital signature verification."));
 		}
 
 		[Fact]
@@ -249,7 +249,7 @@ namespace Tests
 			// No exception? Success!
 		}
 
-		private static void SetElementId(XmlDocument document, XmlNamespaceManager namespaces, string xpathQuery, string id)
+		internal static void SetElementId(XmlDocument document, XmlNamespaceManager namespaces, string xpathQuery, string id)
 		{
 			var element = (XmlElement)document.SelectSingleNode(xpathQuery, namespaces);
 			element.SetAttribute("id", id);
