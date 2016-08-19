@@ -80,9 +80,9 @@ namespace Tests
 		[Fact]
 		public void Clear_WithExistingDocumentAndCollectionSignature_Fails()
 		{
-			Execute_Clear_WithExistingDocumentSignature(RecipientsSelector, AddRecipient);
-			Execute_Clear_WithExistingDocumentSignature(ContentKeysSelector, AddContentKey);
-			Execute_Clear_WithExistingDocumentSignature(UsageRulesSelector, AddUsageRule);
+			Execute_Clear_WithExistingDocumentAndCollectionSignature(RecipientsSelector, AddRecipient);
+			Execute_Clear_WithExistingDocumentAndCollectionSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithExistingDocumentAndCollectionSignature(UsageRulesSelector, AddUsageRule);
 		}
 
 		private static void Execute_Clear_WithRemovedCollectionSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity)
@@ -121,13 +121,11 @@ namespace Tests
 		private static void Execute_Clear_WithRemovedDocumentSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity)
 		{
 			var document = new CpixDocument();
-			var collection = collectionSelector(document);
-
 			addEntity(document);
 			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			document = TestHelpers.Reload(document);
-			collection = collectionSelector(document);
+			var collection = collectionSelector(document);
 
 			document.SignedBy = null;
 
@@ -137,13 +135,11 @@ namespace Tests
 		private static void Execute_Clear_WithReappliedDocumentSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity)
 		{
 			var document = new CpixDocument();
-			var collection = collectionSelector(document);
-
 			addEntity(document);
 			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			document = TestHelpers.Reload(document);
-			collection = collectionSelector(document);
+			var collection = collectionSelector(document);
 
 			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
@@ -186,13 +182,11 @@ namespace Tests
 		private static void Execute_Clear_WithExistingDocumentSignature(Func<CpixDocument, EntityCollectionBase> collectionSelector, Action<CpixDocument> addEntity)
 		{
 			var document = new CpixDocument();
-			var collection = collectionSelector(document);
-
 			addEntity(document);
 			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
 			document = TestHelpers.Reload(document);
-			collection = collectionSelector(document);
+			var collection = collectionSelector(document);
 
 			Assert.Throws<InvalidOperationException>(() => collection.Clear());
 		}
