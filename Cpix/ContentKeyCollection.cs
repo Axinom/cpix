@@ -36,7 +36,9 @@ namespace Axinom.Cpix
 
 				// Unique IV is generated for every content key.
 				var iv = new byte[128 / 8];
-				Document.Random.GetBytes(iv);
+
+				using (var random = RandomNumberGenerator.Create())
+					random.GetBytes(iv);
 
 				var aes = new AesManaged
 				{

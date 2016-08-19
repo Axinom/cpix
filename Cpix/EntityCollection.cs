@@ -143,7 +143,7 @@ namespace Axinom.Cpix
 				return; // No data.
 
 			// We assume that each child element is an item in the collection (enforced by schema).
-			foreach (XmlElement element in containerElement.ChildNodes.Cast<XmlNode>().Where(node => node.NodeType == XmlNodeType.Element))
+			foreach (XmlElement element in containerElement.ChildNodes.OfType<XmlElement>())
 			{
 				// Entities will all be validated later, when everything is loaded (to simplify reference handling).
 				var entity = DeserializeEntity(element, namespaces);

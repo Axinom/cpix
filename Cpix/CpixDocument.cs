@@ -372,11 +372,14 @@ namespace Axinom.Cpix
 		/// </summary>
 		internal void GenerateKeys()
 		{
-			DocumentKey = new byte[Constants.DocumentKeyLengthInBytes];
-			Random.GetBytes(DocumentKey);
+			using (var random = RandomNumberGenerator.Create())
+			{
+				DocumentKey = new byte[Constants.DocumentKeyLengthInBytes];
+				random.GetBytes(DocumentKey);
 
-			MacKey = new byte[Constants.MacKeyLengthInBytes];
-			Random.GetBytes(MacKey);
+				MacKey = new byte[Constants.MacKeyLengthInBytes];
+				random.GetBytes(MacKey);
+			}
 		}
 
 		internal void ImportKeys(byte[] documentKey, byte[] macKey)
@@ -417,11 +420,6 @@ namespace Axinom.Cpix
 			ContentKeys,
 			UsageRules
 		};
-
-		/// <summary>
-		/// Gets a random number generator associated with this instance of the document.
-		/// </summary>
-		internal readonly RandomNumberGenerator Random = RandomNumberGenerator.Create();
 		#endregion
 
 		#region Implementation details
