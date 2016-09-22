@@ -7,6 +7,7 @@
 		<description>Library for processing CPIX documents.</description>
 		<projectUrl>https://github.com/Axinom/cpix</projectUrl>
 		<licenseUrl>https://raw.githubusercontent.com/Axinom/cpix/master/License.txt</licenseUrl>
+		<iconUrl>https://raw.githubusercontent.com/Axinom/cpix/master/NuGetLogo.png</iconUrl>
 	</metadata>
 	<files>
 		<file src="..\..\Cpix\bin\release\Axinom.Cpix.*" target="lib\net462" />

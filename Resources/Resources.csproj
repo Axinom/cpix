@@ -56,6 +56,10 @@
     <None Include="Certificates\WeakCert_Sha1.pfx" />
     <None Include="Certificates\WeakCert_SmallKey.cer" />
     <None Include="Certificates\WeakCert_SmallKey.pfx" />
+    <None Include="NuGet\Axinom.Cpix.1.0.0-pre01.nupkg" />
+    <None Include="NuGet\Cpix.nuspec" />
+    <None Include="NuGet\Package.ps1" />
+    <None Include="NuGet\Publish.ps1" />
     <None Include="Schema\cpix.xsd">
       <SubType>Designer</SubType>
     </None>
@@ -74,6 +78,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="NuGet\NuGet.exe" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
