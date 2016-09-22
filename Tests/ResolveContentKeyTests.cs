@@ -3,8 +3,6 @@ using Xunit;
 
 namespace Axinom.Cpix.Tests
 {
-	// TODO: Test for inclusivity and exclusivity of numeric ranges.
-
 	public sealed class ResolveContentKeyTests
 	{
 		[Fact]
@@ -464,6 +462,187 @@ namespace Axinom.Cpix.Tests
 				},
 				Bitrate = 123,
 				PicturePixelCount = 46733,
+			}));
+		}
+
+		[Fact]
+		public void ResolveContentKey_WithFilterValuesOnBoundaries_MatchesAsExpected()
+		{
+			// Here we test the various inclusivity/exclusivity ranges of filter boundaries.
+
+			var key = TestHelpers.GenerateContentKey();
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(key);
+
+			// Video pixels are matched [min, max]
+			document.UsageRules.Add(new UsageRule
+			{
+				KeyId = key.Id,
+
+				VideoFilters = new[]
+				{
+					new VideoFilter
+					{
+						MinPixels = 10,
+						MaxPixels = 20
+					}
+				}
+			});
+
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Video,
+				PicturePixelCount = 9
+			}));
+			Assert.Equal(key, document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Video,
+				PicturePixelCount = 10
+			}));
+
+			Assert.Equal(key, document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Video,
+				PicturePixelCount = 15
+			}));
+
+			Assert.Equal(key, document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Video,
+				PicturePixelCount = 20
+			}));
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Video,
+				PicturePixelCount = 21
+			}));
+
+			// Video FPS is matched (min, max]
+			document.UsageRules.Clear();
+			document.UsageRules.Add(new UsageRule
+			{
+				KeyId = key.Id,
+
+				VideoFilters = new[]
+				{
+					new VideoFilter
+					{
+						MinFramesPerSecond = 15,
+						MaxFramesPerSecond = 30
+					}
+				}
+			});
+
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Video,
+				VideoFramesPerSecond = 15
+			}));
+			Assert.Equal(key, document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Video,
+				VideoFramesPerSecond = 16
+			}));
+
+			Assert.Equal(key, document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Video,
+				VideoFramesPerSecond = 25
+			}));
+
+			Assert.Equal(key, document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Video,
+				VideoFramesPerSecond = 30
+			}));
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Video,
+				VideoFramesPerSecond = 31
+			}));
+
+			// Audio channels are matched [min, max]
+			document.UsageRules.Clear();
+			document.UsageRules.Add(new UsageRule
+			{
+				KeyId = key.Id,
+
+				AudioFilters = new[]
+				{
+					new AudioFilter
+					{
+						MinChannels = 3,
+						MaxChannels = 10
+					}
+				}
+			});
+
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Audio,
+				AudioChannelCount = 2
+			}));
+			Assert.Equal(key, document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Audio,
+				AudioChannelCount = 3
+			}));
+
+			Assert.Equal(key, document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Audio,
+				AudioChannelCount = 5
+			}));
+
+			Assert.Equal(key, document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Audio,
+				AudioChannelCount = 10
+			}));
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new ContentKeyContext
+			{
+				Type = ContentKeyContextType.Audio,
+				AudioChannelCount = 11
+			}));
+
+			// Bitrate is matched [min, max]
+			document.UsageRules.Clear();
+			document.UsageRules.Add(new UsageRule
+			{
+				KeyId = key.Id,
+
+				BitrateFilters = new[]
+				{
+					new BitrateFilter
+					{
+						MinBitrate = 5000,
+						MaxBitrate = 9999
+					}
+				}
+			});
+
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new ContentKeyContext
+			{
+				Bitrate = 4999
+			}));
+			Assert.Equal(key, document.ResolveContentKey(new ContentKeyContext
+			{
+				Bitrate = 5000
+			}));
+
+			Assert.Equal(key, document.ResolveContentKey(new ContentKeyContext
+			{
+				Bitrate = 6666
+			}));
+
+			Assert.Equal(key, document.ResolveContentKey(new ContentKeyContext
+			{
+				Bitrate = 9999
+			}));
+			Assert.Throws<ContentKeyResolveException>(() => document.ResolveContentKey(new ContentKeyContext
+			{
+				Bitrate = 10000
 			}));
 		}
 	}

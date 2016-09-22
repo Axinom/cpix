@@ -556,9 +556,9 @@ namespace Axinom.Cpix
 			if (filter.MaxPixels != null && !(context.PicturePixelCount <= filter.MaxPixels))
 				return false;
 
-			if (filter.MinFramesPerSecond != null && !(context.PicturePixelCount > filter.MinFramesPerSecond))
+			if (filter.MinFramesPerSecond != null && !(context.VideoFramesPerSecond > filter.MinFramesPerSecond))
 				return false;
-			if (filter.MaxFramesPerSecond != null && !(context.PicturePixelCount <= filter.MaxFramesPerSecond))
+			if (filter.MaxFramesPerSecond != null && !(context.VideoFramesPerSecond <= filter.MaxFramesPerSecond))
 				return false;
 
 			if (filter.WideColorGamut != null && context.WideColorGamut != filter.WideColorGamut)
