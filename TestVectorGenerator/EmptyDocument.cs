@@ -1,7 +1,6 @@
-﻿using Axinom.Cpix;
-using System.IO;
+﻿using System.IO;
 
-namespace TestVectorGenerator
+namespace Axinom.Cpix.TestVectorGenerator
 {
 	sealed class EmptyDocument : ITestVector
 	{

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace TestVectorGenerator
+namespace Axinom.Cpix.TestVectorGenerator
 {
 	/// <summary>
 	/// Marker interface that must be present on all test vectors.

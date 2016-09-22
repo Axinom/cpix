@@ -1,10 +1,9 @@
-﻿using Axinom.Cpix;
+﻿using Axinom.Cpix.Tests;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Tests;
 
-namespace TestVectorGenerator
+namespace Axinom.Cpix.TestVectorGenerator
 {
 	sealed class Invalid_BadDocumentSignature : ITestVector
 	{

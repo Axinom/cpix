@@ -7,8 +7,8 @@
     <ProjectGuid>{9197D869-3F1D-424F-B11B-1A4BC6D2B98E}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TestVectorGenerator</RootNamespace>
-    <AssemblyName>TestVectorGenerator</AssemblyName>
+    <RootNamespace>Axinom.Cpix.TestVectorGenerator</RootNamespace>
+    <AssemblyName>Axinom.Cpix.TestVectorGenerator</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

@@ -1,9 +1,7 @@
-﻿using Axinom.Cpix;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using Xunit;
 
-namespace Tests
+namespace Axinom.Cpix.Tests
 {
 	// TODO: Test for inclusivity and exclusivity of numeric ranges.
 

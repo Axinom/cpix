@@ -1,9 +1,8 @@
-﻿using Axinom.Cpix;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace Tests
+namespace Axinom.Cpix.Tests
 {
 	public sealed class SmokeTests
 	{

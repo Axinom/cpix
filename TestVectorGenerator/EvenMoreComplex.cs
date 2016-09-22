@@ -1,11 +1,10 @@
-﻿using Axinom.Cpix;
+﻿using Axinom.Cpix.Tests;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using Tests;
 
-namespace TestVectorGenerator
+namespace Axinom.Cpix.TestVectorGenerator
 {
 	sealed class EvenMoreComplex : ITestVector
 	{

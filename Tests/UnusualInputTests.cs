@@ -1,12 +1,10 @@
-﻿using Axinom.Cpix;
-using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
 using Xunit;
 
-namespace Tests
+namespace Axinom.Cpix.Tests
 {
 	/// <summary>
 	/// These tests try out various cases of unusual input that is valid CPIX but not of the sort produced

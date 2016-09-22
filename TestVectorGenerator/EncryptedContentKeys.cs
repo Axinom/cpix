@@ -1,11 +1,10 @@
-﻿using Axinom.Cpix;
+﻿using Axinom.Cpix.Tests;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Tests;
 
-namespace TestVectorGenerator
+namespace Axinom.Cpix.TestVectorGenerator
 {
 	sealed class EncryptedContentKeys : ITestVector
 	{

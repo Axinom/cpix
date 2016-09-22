@@ -1,11 +1,10 @@
-﻿using Axinom.Cpix;
+﻿using Axinom.Cpix.Tests;
 using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Tests;
 
-namespace TestVectorGenerator
+namespace Axinom.Cpix.TestVectorGenerator
 {
 	class Program
 	{

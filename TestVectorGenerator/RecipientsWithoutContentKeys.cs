@@ -1,8 +1,7 @@
-﻿using Axinom.Cpix;
+﻿using Axinom.Cpix.Tests;
 using System.IO;
-using Tests;
 
-namespace TestVectorGenerator
+namespace Axinom.Cpix.TestVectorGenerator
 {
 	sealed class RecipientsWithoutContentKeys : ITestVector
 	{

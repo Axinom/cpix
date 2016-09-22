@@ -7,8 +7,8 @@
     <ProjectGuid>{D9DDFDAF-CAE6-4365-AB4A-A40B7FBFB3F6}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ReadmeQuickStartExamples</RootNamespace>
-    <AssemblyName>ReadmeQuickStartExamples</AssemblyName>
+    <RootNamespace>Axinom.Cpix.ReadmeQuickStartExamples</RootNamespace>
+    <AssemblyName>Axinom.Cpix.ReadmeQuickStartExamples</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

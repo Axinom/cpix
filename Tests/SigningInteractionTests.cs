@@ -1,8 +1,7 @@
-﻿using Axinom.Cpix;
-using System;
+﻿using System;
 using Xunit;
 
-namespace Tests
+namespace Axinom.Cpix.Tests
 {
 	/// <summary>
 	/// Here we test the interactions of digital signatures and collection modification.

@@ -1,8 +1,7 @@
-﻿using Axinom.Cpix;
-using System.IO;
+﻿using System.IO;
 using Xunit;
 
-namespace Tests
+namespace Axinom.Cpix.Tests
 {
 	/// <summary>
 	/// These tests verify that we do not accept weak certificates.

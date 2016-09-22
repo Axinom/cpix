@@ -1,10 +1,8 @@
-﻿using Axinom.Cpix;
-using System;
-using System.IO;
+﻿using System;
 using System.Linq;
 using Xunit;
 
-namespace Tests
+namespace Axinom.Cpix.Tests
 {
 	public sealed class SigningTests
 	{

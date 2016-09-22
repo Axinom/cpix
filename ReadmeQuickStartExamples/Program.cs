@@ -1,10 +1,8 @@
-﻿using Axinom.Cpix;
-using System;
-using System.IO;
+﻿using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 
-namespace ReadmeQuickStartExamples
+namespace Axinom.Cpix.ReadmeQuickStartExamples
 {
 	class Program
 	{

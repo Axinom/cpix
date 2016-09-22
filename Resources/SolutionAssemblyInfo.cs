@@ -5,5 +5,5 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyCompany("Axinom")]
 [assembly: AssemblyProduct("Axinom CPIX Library")]
 [assembly: AssemblyCopyright("Copyright © Axinom")]
-[assembly: InternalsVisibleTo("Tests")]
-[assembly: InternalsVisibleTo("TestVectorGenerator")]
+[assembly: InternalsVisibleTo("Axinom.Cpix.Tests")]
+[assembly: InternalsVisibleTo("Axinom.Cpix.TestVectorGenerator")]
