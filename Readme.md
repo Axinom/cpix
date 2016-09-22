@@ -1,14 +1,16 @@
 Axinom CPIX library
 ===================
 
-A .NET library for working with CPIX (Content Protection Information eXchange) documents.
+A .NET library for working with CPIX (Content Protection Information Exchange) documents, as defined by [DASH Industry Forum](http://dashif.org/guidelines/). This library implements CPIX version 2.0.
 
-Implemented CPIX version: 2.0 public review, with additional modifications predicted to be in 2.0 final.
+Installation
+============
 
-Platform compatibility
-======================
+The library is available from nuget.org as [Axinom.Cpix](https://www.nuget.org/packages/Axinom.Cpix/).
 
-This library is compatible with .NET Framework 4.6.2 and newer.
+Supported platforms are:
+
+* .NET Framework 4.6.2 and newer.
 
 Features
 ========
