@@ -14,7 +14,7 @@ $version = ($version -split "-")[0]
 
 Write-Host "Cleaned version is $version"
 
-$suffix = "-cb" + $(Get-Date -Format "FileDateTimeUniversal")
+$suffix = "-cb-" + $(Get-Date -Format "yyyyMMdd-HHmmss")
 
 $version = $version + $suffix
 
