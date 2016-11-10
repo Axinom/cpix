@@ -57,6 +57,7 @@
     <None Include="Certificates\WeakCert_SmallKey.cer" />
     <None Include="Certificates\WeakCert_SmallKey.pfx" />
     <None Include="NuGet\Cpix.nuspec" />
+    <None Include="NuGet\Generate-CBVersionString.ps1" />
     <None Include="NuGet\Package.ps1" />
     <None Include="NuGet\Publish.ps1" />
     <None Include="Schema\cpix.xsd">
