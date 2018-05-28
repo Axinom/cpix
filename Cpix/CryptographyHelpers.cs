@@ -101,7 +101,9 @@ namespace Axinom.Cpix
 				signedXml.AddReference(whatToSign);
 
 				// A nice strong algorithm without known weaknesses that are easily exploitable.
-				signedXml.SignedInfo.SignatureMethod = SignedXml.XmlDsigRSASHA512Url;
+				// The below URI is also contained in "SignedXml.XmlDsigRSASHA512Url", but it doesn't
+				// have public visibility in the .NET Core version of the library.
+				signedXml.SignedInfo.SignatureMethod = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512";
 
 				// Canonical XML 1.0 (omit comments); I suppose it works fine, no deep thoughts about this.
 				signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigCanonicalizationUrl;

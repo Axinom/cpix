@@ -61,9 +61,9 @@ namespace Axinom.Cpix.Tests
 			document = CpixDocument.Load(buffer);
 
 			Assert.NotNull(document.SignedBy);
-			Assert.Equal(1, document.Recipients.SignedBy.Count());
-			Assert.Equal(1, document.ContentKeys.SignedBy.Count());
-			Assert.Equal(1, document.UsageRules.SignedBy.Count());
+			Assert.Single(document.Recipients.SignedBy);
+			Assert.Single(document.ContentKeys.SignedBy);
+			Assert.Single(document.UsageRules.SignedBy);
 
 			// And, of course, the data should still be there.
 			Assert.Equal(2, document.ContentKeys.Count);
@@ -227,16 +227,16 @@ namespace Axinom.Cpix.Tests
 			var cpix = CpixDocument.Load(signedCpixStream);
 
 			Assert.NotNull(cpix.SignedBy);
-			Assert.Equal(1, cpix.Recipients.SignedBy.Count());
-			Assert.Equal(1, cpix.ContentKeys.SignedBy.Count());
+			Assert.Single(cpix.Recipients.SignedBy);
+			Assert.Single(cpix.ContentKeys.SignedBy);
 			Assert.Equal(2, cpix.UsageRules.SignedBy.Count());
 
 			// And save/load should preserve all the niceness.
 			cpix = TestHelpers.Reload(cpix);
 
 			Assert.NotNull(cpix.SignedBy);
-			Assert.Equal(1, cpix.Recipients.SignedBy.Count());
-			Assert.Equal(1, cpix.ContentKeys.SignedBy.Count());
+			Assert.Single(cpix.Recipients.SignedBy);
+			Assert.Single(cpix.ContentKeys.SignedBy);
 			Assert.Equal(2, cpix.UsageRules.SignedBy.Count());
 
 			// And, of course, the data should still be there.

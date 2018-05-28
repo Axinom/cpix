@@ -16,7 +16,7 @@ namespace Axinom.Cpix.Tests
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			document = TestHelpers.Reload(document);
 
-			Assert.Equal(1, document.ContentKeys.Count);
+			Assert.Single(document.ContentKeys);
 		}
 
 		[Fact]
@@ -142,7 +142,7 @@ namespace Axinom.Cpix.Tests
 
 			document = TestHelpers.Reload(document);
 
-			Assert.Equal(1, document.ContentKeys.Count);
+			Assert.Single(document.ContentKeys);
 		}
 	}
 }

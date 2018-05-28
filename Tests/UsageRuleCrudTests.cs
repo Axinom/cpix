@@ -19,7 +19,7 @@ namespace Axinom.Cpix.Tests
 
 			document = TestHelpers.Reload(document);
 
-			Assert.Equal(1, document.UsageRules.Count);
+			Assert.Single(document.UsageRules);
 			Assert.Equal(contentKey.Id, document.UsageRules.Single().KeyId);
 		}
 
@@ -37,7 +37,7 @@ namespace Axinom.Cpix.Tests
 
 			document = TestHelpers.Reload(document);
 
-			Assert.Equal(1, document.UsageRules.Count);
+			Assert.Single(document.UsageRules);
 			Assert.Equal(contentKey.Id, document.UsageRules.Single().KeyId);
 		}
 
@@ -248,7 +248,7 @@ namespace Axinom.Cpix.Tests
 
 			document = TestHelpers.Reload(document);
 
-			Assert.Equal(1, document.UsageRules.Count);
+			Assert.Single(document.UsageRules);
 		}
 	}
 }

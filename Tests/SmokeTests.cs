@@ -14,9 +14,9 @@ namespace Axinom.Cpix.Tests
 			Assert.True(document.ContentKeysAreReadable);
 			Assert.False(document.IsReadOnly);
 			Assert.Null(document.SignedBy);
-			Assert.Equal(0, document.Recipients.Count);
-			Assert.Equal(0, document.ContentKeys.Count);
-			Assert.Equal(0, document.UsageRules.Count);
+			Assert.Empty(document.Recipients);
+			Assert.Empty(document.ContentKeys);
+			Assert.Empty(document.UsageRules);
 		}
 
 		[Fact]
@@ -29,9 +29,9 @@ namespace Axinom.Cpix.Tests
 			Assert.True(document.ContentKeysAreReadable);
 			Assert.False(document.IsReadOnly);
 			Assert.Null(document.SignedBy);
-			Assert.Equal(0, document.Recipients.Count);
-			Assert.Equal(0, document.ContentKeys.Count);
-			Assert.Equal(0, document.UsageRules.Count);
+			Assert.Empty(document.Recipients);
+			Assert.Empty(document.ContentKeys);
+			Assert.Empty(document.UsageRules);
 		}
 
 		[Fact]
@@ -93,7 +93,7 @@ namespace Axinom.Cpix.Tests
 			document = TestHelpers.Reload(document);
 
 			Assert.NotNull(document.ContentKeys);
-			Assert.Equal(1, document.ContentKeys.Count);
+			Assert.Single(document.ContentKeys);
 
 			var key = document.ContentKeys.Single();
 			Assert.Equal(keyData.Item1, key.Id);
@@ -118,10 +118,10 @@ namespace Axinom.Cpix.Tests
 
 			document = TestHelpers.Reload(document, new[] { TestHelpers.Certificate3WithPrivateKey });
 
-			Assert.Equal(1, document.ContentKeys.Count);
+			Assert.Single(document.ContentKeys);
 			Assert.NotNull(document.SignedBy);
-			Assert.Equal(1, document.ContentKeys.SignedBy.Count());
-			Assert.Equal(1, document.Recipients.Count);
+			Assert.Single(document.ContentKeys.SignedBy);
+			Assert.Single(document.Recipients);
 
 			Assert.Equal(TestHelpers.Certificate1WithPrivateKey.Thumbprint, document.SignedBy.Thumbprint);
 			Assert.Equal(TestHelpers.Certificate1WithPrivateKey.Thumbprint, document.ContentKeys.SignedBy.Single().Thumbprint);
