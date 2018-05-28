@@ -1,108 +1,38 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8706C176-A754-4C23-A9B7-855E6B1BDDB1}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Axinom.Cpix</RootNamespace>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Axinom.Cpix</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <Company>Axinom</Company>
+    <Authors>Axinom</Authors>
+    <Product>Axinom CPIX Library</Product>
+    <Copyright></Copyright>
+    <Description>Library for processing CPIX documents.</Description>
+    <PackageProjectUrl>https://github.com/Axinom/cpix</PackageProjectUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/Axinom/cpix/master/License.txt</PackageLicenseUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/Axinom/cpix/master/NuGetLogo.png</PackageIconUrl>
+    <RootNamespace>Axinom.Cpix</RootNamespace>
+    <Version>2.0.0</Version>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.0\Axinom.Cpix.xml</DocumentationFile>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <DocumentationFile>bin\Release\Axinom.Cpix.XML</DocumentationFile>
-    <NoWarn>1591</NoWarn>
   </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Security" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <EmbeddedResource Include="..\Resources\Schema\cpix.xsd" Link="cpix.xsd" />
+    <EmbeddedResource Include="..\Resources\Schema\pskc.xsd" Link="pskc.xsd" />
+    <EmbeddedResource Include="..\Resources\Schema\xenc-schema.xsd" Link="xenc-schema.xsd" />
+    <EmbeddedResource Include="..\Resources\Schema\xmldsig-core-schema.xsd" Link="xmldsig-core-schema.xsd" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="..\Resources\SolutionAssemblyInfo.cs">
-      <Link>Properties\SolutionAssemblyInfo.cs</Link>
-    </Compile>
-    <Compile Include="AudioFilter.cs" />
-    <Compile Include="BitrateFilter.cs" />
-    <Compile Include="ContentKey.cs" />
-    <Compile Include="ContentKeyCollection.cs" />
-    <Compile Include="ContentKeyResolveAmbiguityException.cs" />
-    <Compile Include="ContentKeyResolveImpossibleException.cs" />
-    <Compile Include="CpixDocument.cs" />
-    <Compile Include="CryptographyHelpers.cs" />
-    <Compile Include="Entity.cs" />
-    <Compile Include="EntityCollection.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="ContentKeyResolveException.cs" />
-    <Compile Include="InvalidCpixDataException.cs" />
-    <Compile Include="Internal\XmlElements.cs" />
-    <Compile Include="LabelFilter.cs" />
-    <Compile Include="Recipient.cs" />
-    <Compile Include="RecipientCollection.cs" />
-    <Compile Include="ContentKeyContext.cs" />
-    <Compile Include="ContentKeyContextType.cs" />
-    <Compile Include="EntityCollectionBase.cs" />
-    <Compile Include="UsageRule.cs" />
-    <Compile Include="UsageRuleCollection.cs" />
-    <Compile Include="VideoFilter.cs" />
-    <Compile Include="WeakCertificateException.cs" />
-    <Compile Include="XmlHelpers.cs" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="4.4.2" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="..\Resources\Schema\cpix.xsd">
-      <Link>cpix.xsd</Link>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\Resources\Schema\pskc.xsd">
-      <Link>pskc.xsd</Link>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\Resources\Schema\xenc-schema.xsd">
-      <Link>xenc-schema.xsd</Link>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\Resources\Schema\xmldsig-core-schema.xsd">
-      <Link>xmldsig-core-schema.xsd</Link>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

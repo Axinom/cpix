@@ -117,7 +117,7 @@ namespace Axinom.Cpix.Tests
 
 			document = TestHelpers.Reload(document, new[] { TestHelpers.Certificate3WithPrivateKey });
 
-			Assert.Equal(1, document.Recipients.Count);
+			Assert.Single(document.Recipients);
 			Assert.True(document.ContentKeysAreReadable);
 		}
 
@@ -144,7 +144,7 @@ namespace Axinom.Cpix.Tests
 
 			document = TestHelpers.Reload(document);
 
-			Assert.Equal(0, document.Recipients.Count);
+			Assert.Empty(document.Recipients);
 			Assert.True(document.ContentKeysAreReadable);
 		}
 	}

@@ -10,7 +10,7 @@ The library is available from nuget.org as [Axinom.Cpix](https://www.nuget.org/p
 
 Supported platforms are:
 
-* .NET Framework 4.6.2 and newer.
+* Any platform that supports .NET Standard 2.0.
 
 Features
 ========

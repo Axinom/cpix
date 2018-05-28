@@ -24,8 +24,8 @@ namespace Axinom.Cpix.Tests
 			{
 				Assert.Equal(2, collection.SignedBy.Count());
 
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint));
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint));
+				Assert.Contains(collection.SignedBy, c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint);
+				Assert.Contains(collection.SignedBy, c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint);
 			}
 
 			Assert.Equal(TestHelpers.Certificate1WithPrivateKey.Thumbprint, document.SignedBy?.Thumbprint);
@@ -51,8 +51,8 @@ namespace Axinom.Cpix.Tests
 			{
 				Assert.Equal(2, collection.SignedBy.Count());
 
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint));
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint));
+				Assert.Contains(collection.SignedBy, c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint);
+				Assert.Contains(collection.SignedBy, c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint);
 			}
 
 			Assert.Equal(TestHelpers.Certificate1WithPrivateKey.Thumbprint, document.SignedBy?.Thumbprint);
@@ -81,8 +81,8 @@ namespace Axinom.Cpix.Tests
 			{
 				Assert.Equal(2, collection.SignedBy.Count());
 
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint));
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint));
+				Assert.Contains(collection.SignedBy, c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint);
+				Assert.Contains(collection.SignedBy, c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint);
 			}
 		}
 
@@ -109,7 +109,7 @@ namespace Axinom.Cpix.Tests
 
 			foreach (var collection in document.EntityCollections)
 			{
-				Assert.Equal(1, collection.SignedBy.Count());
+				Assert.Single(collection.SignedBy);
 				Assert.Equal(TestHelpers.Certificate2WithPrivateKey.Thumbprint, collection.SignedBy.Single().Thumbprint);
 			}
 			
@@ -136,8 +136,8 @@ namespace Axinom.Cpix.Tests
 			{
 				Assert.Equal(2, collection.SignedBy.Count());
 
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint));
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint));
+				Assert.Contains(collection.SignedBy, c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint);
+				Assert.Contains(collection.SignedBy, c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint);
 			}
 
 			Assert.Equal(TestHelpers.Certificate1WithPrivateKey.Thumbprint, document.SignedBy?.Thumbprint);
@@ -165,8 +165,8 @@ namespace Axinom.Cpix.Tests
 			{
 				Assert.Equal(2, collection.SignedBy.Count());
 
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint));
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint));
+				Assert.Contains(collection.SignedBy, c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint);
+				Assert.Contains(collection.SignedBy, c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint);
 			}
 
 			Assert.Equal(TestHelpers.Certificate1WithPrivateKey.Thumbprint, document.SignedBy?.Thumbprint);
@@ -197,8 +197,8 @@ namespace Axinom.Cpix.Tests
 			{
 				Assert.Equal(2, collection.SignedBy.Count());
 
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint));
-				Assert.True(collection.SignedBy.Any(c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint));
+				Assert.Contains(collection.SignedBy, c => c.Thumbprint == TestHelpers.Certificate1WithPrivateKey.Thumbprint);
+				Assert.Contains(collection.SignedBy, c => c.Thumbprint == TestHelpers.Certificate2WithPrivateKey.Thumbprint);
 			}
 		}
 
@@ -227,7 +227,7 @@ namespace Axinom.Cpix.Tests
 
 			foreach (var collection in document.EntityCollections)
 			{
-				Assert.Equal(1, collection.SignedBy.Count());
+				Assert.Single(collection.SignedBy);
 				Assert.Equal(TestHelpers.Certificate2WithPrivateKey.Thumbprint, collection.SignedBy.Single().Thumbprint);
 			}
 
