@@ -14,9 +14,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Settings", "Settings", "{34
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadmeQuickStartExamples", "ReadmeQuickStartExamples\ReadmeQuickStartExamples.csproj", "{EBBAF2D8-F96F-4744-A5A3-E4FADF06855E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReadmeQuickStartExamples", "ReadmeQuickStartExamples\ReadmeQuickStartExamples.csproj", "{EBBAF2D8-F96F-4744-A5A3-E4FADF06855E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestVectorGenerator", "TestVectorGenerator\TestVectorGenerator.csproj", "{727197E7-8742-40ED-B8D1-96659BFD7C65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestVectorGenerator", "TestVectorGenerator\TestVectorGenerator.csproj", "{727197E7-8742-40ED-B8D1-96659BFD7C65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
