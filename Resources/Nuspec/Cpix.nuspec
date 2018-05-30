@@ -2,14 +2,17 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata minClientVersion="2.8">
 		<id>Axinom.Cpix</id>
-		<version>2.0.0</version>
 		<authors>Axinom</authors>
 		<description>Library for processing CPIX documents.</description>
 		<projectUrl>https://github.com/Axinom/cpix</projectUrl>
 		<licenseUrl>https://raw.githubusercontent.com/Axinom/cpix/master/License.txt</licenseUrl>
 		<iconUrl>https://raw.githubusercontent.com/Axinom/cpix/master/NuGetLogo.png</iconUrl>
+
+		<!-- Automatically set by release automation. -->
+		<version>__NUGETPACKAGEVERSION__</version>
+
 		<dependencies>
-			<dependency id="System.Security.Cryptography.Xml" version="4.4.2" />
+			<dependency id="System.Security.Cryptography.Xml" version="4.5.0" />
 		</dependencies>
 	</metadata>
 	<files>

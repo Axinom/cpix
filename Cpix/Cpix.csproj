@@ -1,18 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Axinom.Cpix</AssemblyName>
-    <Company>Axinom</Company>
-    <Authors>Axinom</Authors>
-    <Product>Axinom CPIX Library</Product>
-    <Copyright></Copyright>
-    <Description>Library for processing CPIX documents.</Description>
-    <PackageProjectUrl>https://github.com/Axinom/cpix</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/Axinom/cpix/master/License.txt</PackageLicenseUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/Axinom/cpix/master/NuGetLogo.png</PackageIconUrl>
     <RootNamespace>Axinom.Cpix</RootNamespace>
-    <Version>2.0.0</Version>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -32,8 +24,12 @@
     <EmbeddedResource Include="..\Resources\Schema\xmldsig-core-schema.xsd" Link="xmldsig-core-schema.xsd" />
   </ItemGroup>
 
+    <ItemGroup>
+         <Compile Include="..\Resources\SolutionAssemblyInfo.cs" Link="SolutionAssemblyInfo.cs" />
+    </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="4.4.2" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="4.5.0" />
   </ItemGroup>
 
 </Project>
