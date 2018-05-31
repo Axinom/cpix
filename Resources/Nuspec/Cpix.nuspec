@@ -15,7 +15,8 @@
 			<dependency id="System.Security.Cryptography.Xml" version="4.5.0" />
 		</dependencies>
 	</metadata>
+	<!-- The input directory structure is as it exists on the release agent, not as in the solution. -->
 	<files>
-		<file src="..\..\Cpix\bin\Release\netstandard2.0\Axinom.Cpix.*" target="lib\netstandard2.0" />
+		<file src="..\Axinom.Cpix\**" target="lib\netstandard2.0" />
 	</files>
 </package>
