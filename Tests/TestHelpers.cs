@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace Axinom.Cpix.Tests
 {
@@ -114,6 +115,13 @@ namespace Axinom.Cpix.Tests
 
 			AddUsageRule(document);
 			AddUsageRule(document);
+
+			document.DrmSystems.Add(new DrmSystem
+			{
+				Id = Guid.NewGuid(),
+				KeyId = document.ContentKeys.First().Id,
+				ContentProtectionData = Convert.ToBase64String(Encoding.UTF8.GetBytes("<pssh>Imaginary content protection data XML</pssh>"))
+			});
 
 			// Sanity check.
 			foreach (var collection in document.EntityCollections)

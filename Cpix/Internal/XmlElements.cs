@@ -162,6 +162,21 @@ namespace Axinom.Cpix.Internal
 	}
 	#endregion
 
+	#region DRM systems
+	[XmlRoot("DRMSystem", Namespace = Constants.CpixNamespace)]
+	public sealed class DrmSystemElement
+	{
+		[XmlAttribute("systemId")]
+		public Guid SystemId { get; set; }
+
+		[XmlAttribute("kid")]
+		public Guid KeyId { get; set; }
+
+		[XmlElement]
+		public string ContentProtectionData { get; set; }
+	}
+	#endregion
+
 	#region Content keys
 	[XmlRoot("ContentKey", Namespace = Constants.CpixNamespace)]
 	public sealed class ContentKeyElement

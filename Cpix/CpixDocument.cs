@@ -57,6 +57,11 @@ namespace Axinom.Cpix
 		public EntityCollection<UsageRule> UsageRules { get; }
 
 		/// <summary>
+		/// Gets the set of DRM systems stored in the CPIX document.
+		/// </summary>
+		public EntityCollection<DrmSystem> DrmSystems { get; }
+
+		/// <summary>
 		/// Whether the values of content keys are readable.
 		/// If false, you can only read the metadata, not the values themselves.
 		/// 
@@ -82,7 +87,7 @@ namespace Axinom.Cpix
 		/// </summary>
 		public X509Certificate2 SignedBy
 		{
-			get { return _desiredSignedBy; }
+			get => _desiredSignedBy;
 			set
 			{
 				if (value != null)
@@ -156,6 +161,8 @@ namespace Axinom.Cpix
 			foreach (var collection in EntityCollections)
 				collection.ValidateCollectionStateBeforeSave();
 
+			ValidateConstraintsBetweenDrmSystemsAndContentKeys(DrmSystems, ContentKeys);
+
 			// Saving is a multi - phase process:
 			// 1) Create a new XML document, if needed. If we are working with a loaded document, we just use the existing one.
 			//    Note that any removed items have already been removed from the XML document - at the moment of save
@@ -165,7 +172,7 @@ namespace Axinom.Cpix
 			// 4) Serialize any new usage rules. Sign if needed.
 			// 5) Sign document if needed.
 			// 6) Treat all items as having been newly loaded from the saved document (for forward consistency).
-			// 7) Validate the document against schema to ensure that we did not accidetally generate invalid CPIX.
+			// 7) Validate the document against schema to ensure that we did not accidentally generate invalid CPIX.
 			// 8) Serialize the XML document to file (everything above happens in-memory).
 
 			if (_xmlDocument == null)
@@ -209,12 +216,18 @@ namespace Axinom.Cpix
 			}
 		}
 
+		private static void ValidateConstraintsBetweenDrmSystemsAndContentKeys(IEnumerable<DrmSystem> drmSystems, IEnumerable<ContentKey> contentKeys)
+		{
+			if (drmSystems.Select(s => s.KeyId).Except(contentKeys.Select(k => k.Id)).Any())
+				throw new InvalidCpixDataException("A content key must exist for all keys referenced by DRM systems.");
+		}
+
 		private static XmlDocument CreateNewXmlDocument()
 		{
 			var document = XmlHelpers.Serialize(new DocumentRootElement());
 			document.Schemas = _schemaSet;
 
-			// For documents we create from the start, let's incldue some useful namespace prefix delcarations right
+			// For documents we create from the start, let's include some useful namespace prefix declarations right
 			// at the document root level, so we can reduce namespace spam in the document and improve human-readability.
 			// We cannot do this for external documents for fear of conflicts but for our own blank documents, is no problem.
 			XmlHelpers.DeclareNamespace(document.DocumentElement, "ds", Constants.XmlDigitalSignatureNamespace);
@@ -340,6 +353,8 @@ namespace Axinom.Cpix
 			foreach (var collection in document.EntityCollections)
 				collection.ValidateCollectionStateAfterLoad();
 
+			ValidateConstraintsBetweenDrmSystemsAndContentKeys(document.DrmSystems, document.ContentKeys);
+
 			// Sounds good to go!
 			return document;
 		}
@@ -348,6 +363,7 @@ namespace Axinom.Cpix
 		{
 			Recipients = new RecipientCollection(this);
 			ContentKeys = new ContentKeyCollection(this);
+			DrmSystems = new DrmSystemCollection(this);
 			UsageRules = new UsageRuleCollection(this);
 		}
 
@@ -418,6 +434,7 @@ namespace Axinom.Cpix
 		{
 			Recipients,
 			ContentKeys,
+			DrmSystems,
 			UsageRules
 		};
 		#endregion
