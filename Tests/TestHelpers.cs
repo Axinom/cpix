@@ -118,9 +118,9 @@ namespace Axinom.Cpix.Tests
 
 			document.DrmSystems.Add(new DrmSystem
 			{
-				Id = Guid.NewGuid(),
+				SystemId = Guid.NewGuid(),
 				KeyId = document.ContentKeys.First().Id,
-				ContentProtectionData = Convert.ToBase64String(Encoding.UTF8.GetBytes("<pssh>Imaginary content protection data XML</pssh>"))
+				ContentProtectionData = "<pssh>Imaginary content protection data XML</pssh>"
 			});
 
 			// Sanity check.

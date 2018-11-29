@@ -1,6 +1,7 @@
 ﻿using Axinom.Cpix.Internal;
 using System;
 using System.Linq;
+using System.Text;
 using System.Xml;
 
 namespace Axinom.Cpix
@@ -19,10 +20,35 @@ namespace Axinom.Cpix
 		{
 			var drmSystemElement = new DrmSystemElement
 			{
-				SystemId = entity.Id,
+				SystemId = entity.SystemId,
 				KeyId = entity.KeyId,
-				ContentProtectionData = entity.ContentProtectionData
+				Pssh = entity.Pssh,
+				SmoothStreamingProtectionHeaderData = entity.SmoothStreamingProtectionHeaderData
 			};
+
+			if (entity.ContentProtectionData != null)
+				drmSystemElement.ContentProtectionData = Convert.ToBase64String(Encoding.UTF8.GetBytes(entity.ContentProtectionData));
+
+			if (entity.HdsSignalingData != null)
+				drmSystemElement.HdsSignalingData = Convert.ToBase64String(Encoding.UTF8.GetBytes(entity.HdsSignalingData));
+
+			if (entity.HlsSignalingData?.MasterPlaylistData != null)
+			{
+				drmSystemElement.HlsSignalingData.Add(new HlsSignalingDataElement
+				{
+					Playlist = HlsPlaylistType.Master,
+					Value = Convert.ToBase64String(Encoding.UTF8.GetBytes(entity.HlsSignalingData.MasterPlaylistData))
+				});
+			}
+
+			if (entity.HlsSignalingData?.VariantPlaylistData != null)
+			{
+				drmSystemElement.HlsSignalingData.Add(new HlsSignalingDataElement
+				{
+					Playlist = HlsPlaylistType.Variant,
+					Value = Convert.ToBase64String(Encoding.UTF8.GetBytes(entity.HlsSignalingData.VariantPlaylistData))
+				});
+			}
 
 			return XmlHelpers.AppendChildAndReuseNamespaces(drmSystemElement, container);
 		}
@@ -31,20 +57,58 @@ namespace Axinom.Cpix
 		{
 			var drmSystemElement = XmlHelpers.Deserialize<DrmSystemElement>(element);
 
-			return new DrmSystem
+			drmSystemElement.LoadTimeValidate();
+
+			var drmSystem = new DrmSystem
 			{
-				Id = drmSystemElement.SystemId,
+				SystemId = drmSystemElement.SystemId,
 				KeyId = drmSystemElement.KeyId,
-				ContentProtectionData = drmSystemElement.ContentProtectionData
+				Pssh = drmSystemElement.Pssh,
+				SmoothStreamingProtectionHeaderData = drmSystemElement.SmoothStreamingProtectionHeaderData
 			};
+
+			if (drmSystemElement.ContentProtectionData != null)
+				drmSystem.ContentProtectionData = Encoding.UTF8.GetString(Convert.FromBase64String(drmSystemElement.ContentProtectionData));
+
+			if (drmSystemElement.HdsSignalingData != null)
+				drmSystem.HdsSignalingData = Encoding.UTF8.GetString(Convert.FromBase64String(drmSystemElement.HdsSignalingData));
+
+			if (drmSystemElement.HlsSignalingData.Count > 0)
+			{
+				drmSystem.HlsSignalingData = new HlsSignalingData();
+
+				var variantPlaylistDataAsBase64 = drmSystemElement.HlsSignalingData
+					.SingleOrDefault(d => d.Playlist == null || string.Equals(d.Playlist, HlsPlaylistType.Variant, StringComparison.InvariantCulture))?.Value;
+
+				var masterPlaylistDataAsBase64 = drmSystemElement.HlsSignalingData
+					.SingleOrDefault(d => string.Equals(d.Playlist, HlsPlaylistType.Master, StringComparison.InvariantCulture))?.Value;
+
+				if (variantPlaylistDataAsBase64 != null)
+					drmSystem.HlsSignalingData.VariantPlaylistData = Encoding.UTF8.GetString(Convert.FromBase64String(variantPlaylistDataAsBase64));
+
+				if (masterPlaylistDataAsBase64 != null)
+					drmSystem.HlsSignalingData.MasterPlaylistData = Encoding.UTF8.GetString(Convert.FromBase64String(masterPlaylistDataAsBase64));
+			}
+
+			return drmSystem;
 		}
 
 		protected override void ValidateCollectionStateBeforeAdd(DrmSystem entity)
 		{
-			if (this.Any(s => s.Id == entity.Id && s.KeyId == entity.KeyId))
-				throw new InvalidOperationException("The collection already contains a DRM system with the same ID and content key ID combination.");
+			if (this.Any(i => i.SystemId == entity.SystemId && i.KeyId == entity.KeyId))
+				throw new InvalidOperationException(
+					"The collection already contains a DRM system signaling entry with the same system ID and content key ID combination.");
 
 			base.ValidateCollectionStateBeforeAdd(entity);
+		}
+
+		internal override void ValidateCollectionStateAfterLoad()
+		{
+			base.ValidateCollectionStateAfterLoad();
+
+			if (this.Select(i => new { i.SystemId, i.KeyId }).Distinct().Count() != LoadedItems.Count())
+				throw new InvalidCpixDataException(
+					"The collection contains multiple DRM system signaling entries with the same system ID and content key ID combination.");
 		}
 	}
 }

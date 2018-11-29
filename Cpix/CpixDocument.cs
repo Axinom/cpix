@@ -57,7 +57,7 @@ namespace Axinom.Cpix
 		public EntityCollection<UsageRule> UsageRules { get; }
 
 		/// <summary>
-		/// Gets the set of DRM systems stored in the CPIX document.
+		/// Gets the set of DRM system signaling entries stored in the CPIX document.
 		/// </summary>
 		public EntityCollection<DrmSystem> DrmSystems { get; }
 
@@ -218,8 +218,11 @@ namespace Axinom.Cpix
 
 		private static void ValidateConstraintsBetweenDrmSystemsAndContentKeys(IEnumerable<DrmSystem> drmSystems, IEnumerable<ContentKey> contentKeys)
 		{
-			if (drmSystems.Select(s => s.KeyId).Except(contentKeys.Select(k => k.Id)).Any())
-				throw new InvalidCpixDataException("A content key must exist for all keys referenced by DRM systems.");
+			var existingKeys = contentKeys.Select(k => k.Id);
+			var referencedKeys = drmSystems.Select(s => s.KeyId);
+
+			if (referencedKeys.Except(existingKeys).Any())
+				throw new InvalidCpixDataException("A content key must exist for all keys referenced by DRM system signaling entries.");
 		}
 
 		private static XmlDocument CreateNewXmlDocument()
