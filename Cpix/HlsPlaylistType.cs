@@ -1,6 +1,6 @@
 ﻿namespace Axinom.Cpix
 {
-	public class HlsPlaylistType
+	public sealed class HlsPlaylistType
 	{
 		public const string Master = "master";
 		public const string Media = "media";
