@@ -55,7 +55,7 @@ namespace Axinom.Cpix.Tests
 				HlsSignalingData = new HlsSignalingData
 				{
 					MasterPlaylistData = "test",
-					VariantPlaylistData = "test"
+					MediaPlaylistData = "test"
 				}
 			})));
 			Assert.Null(Record.Exception(() => document.DrmSystems.Add(new DrmSystem
@@ -160,7 +160,7 @@ namespace Axinom.Cpix.Tests
 				HlsSignalingData = new HlsSignalingData
 				{
 					MasterPlaylistData = "hlsmasterdata1",
-					VariantPlaylistData = "hlsvariantdata2"
+					MediaPlaylistData = "hlsmediadata2"
 				},
 				SmoothStreamingProtectionHeaderData = "smoothstreamingdata"
 			});
@@ -207,14 +207,14 @@ namespace Axinom.Cpix.Tests
 		}
 
 		[Fact]
-		public void Load_WithCpixContainingSingleHlsSignalingDataElementWithoutPlaylistAttribute_SucceedsWithDataInterpretedAsVariantPlaylistData()
+		public void Load_WithCpixContainingSingleHlsSignalingDataElementWithoutPlaylistAttribute_SucceedsWithDataInterpretedAsMediaPlaylistData()
 		{
 			const string CpixWithHlsSignalingDataWithoutPlaylistAttribute = "<?xml version=\"1.0\" encoding=\"utf-8\"?><CPIX xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:dashif:org:cpix\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" xmlns:enc=\"http://www.w3.org/2001/04/xmlenc#\" xmlns:pskc=\"urn:ietf:params:xml:ns:keyprov:pskc\"><ContentKeyList><ContentKey kid=\"f8c80c25-690f-4736-8132-430e5c6994ce\"><Data><pskc:Secret><pskc:PlainValue>AQIDBAUGBwgJCgECAwQFBg==</pskc:PlainValue></pskc:Secret></Data></ContentKey></ContentKeyList><DRMSystemList><DRMSystem systemId=\"edef8ba9-79d6-4ace-a3c8-27dcd51d21ed\" kid=\"f8c80c25-690f-4736-8132-430e5c6994ce\"><HLSSignalingData>YWE=</HLSSignalingData></DRMSystem></DRMSystemList></CPIX>";
 
 			var document = CpixDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(CpixWithHlsSignalingDataWithoutPlaylistAttribute)));
 			var drmSystem = document.DrmSystems.First();
 
-			Assert.NotNull(drmSystem.HlsSignalingData.VariantPlaylistData);
+			Assert.NotNull(drmSystem.HlsSignalingData.MediaPlaylistData);
 			Assert.Null(drmSystem.HlsSignalingData.MasterPlaylistData);
 		}
 
@@ -246,7 +246,7 @@ namespace Axinom.Cpix.Tests
 				HlsSignalingData = new HlsSignalingData
 				{
 					MasterPlaylistData = "hlsmasterdata1",
-					VariantPlaylistData = "hlsvariantdata2"
+					MediaPlaylistData = "hlsmediadata2"
 				},
 				SmoothStreamingProtectionHeaderData = "smoothstreamingdata"
 			};
@@ -264,7 +264,7 @@ namespace Axinom.Cpix.Tests
 			Assert.Equal(drmSystem.HdsSignalingData, document.DrmSystems.First().HdsSignalingData);
 			Assert.Equal(drmSystem.Pssh, document.DrmSystems.First().Pssh);
 			Assert.Equal(drmSystem.HlsSignalingData.MasterPlaylistData, document.DrmSystems.First().HlsSignalingData.MasterPlaylistData);
-			Assert.Equal(drmSystem.HlsSignalingData.VariantPlaylistData, document.DrmSystems.First().HlsSignalingData.VariantPlaylistData);
+			Assert.Equal(drmSystem.HlsSignalingData.MediaPlaylistData, document.DrmSystems.First().HlsSignalingData.MediaPlaylistData);
 			Assert.Equal(drmSystem.SmoothStreamingProtectionHeaderData, document.DrmSystems.First().SmoothStreamingProtectionHeaderData);
 		}
 	}

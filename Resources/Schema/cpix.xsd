@@ -72,14 +72,14 @@
 	<xs:complexType name="HLSSignalingDataType">
 		<xs:simpleContent>
 			<xs:extension base="xs:base64Binary">
-				<xs:attribute name="playlist" type="cpix:PlaylistType" default="variant" use="optional"/>
+				<xs:attribute name="playlist" type="cpix:PlaylistType" default="media" use="optional"/>
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
 	<xs:simpleType name="PlaylistType" final="restriction" >
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="master" />
-			<xs:enumeration value="variant" />
+			<xs:enumeration value="media" />
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:complexType name="DRMSystemType">

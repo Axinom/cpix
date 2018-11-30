@@ -14,11 +14,11 @@
 		public string MasterPlaylistData;
 
 		/// <summary>
-		/// Gets or sets the signaling data to be inserted into the HLS variant
+		/// Gets or sets the signaling data to be inserted into the HLS media
 		/// playlist. The data includes the EXT-X-KEY tag along with any proprietary
 		/// tags. This is UTF-8 text without a byte order mark that may contain
 		/// multiple lines.
 		/// </summary>
-		public string VariantPlaylistData;
+		public string MediaPlaylistData;
 	}
 }

@@ -3,6 +3,6 @@
 	public class HlsPlaylistType
 	{
 		public const string Master = "master";
-		public const string Variant = "variant";
+		public const string Media = "media";
 	}
 }

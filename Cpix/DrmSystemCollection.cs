@@ -41,12 +41,12 @@ namespace Axinom.Cpix
 				});
 			}
 
-			if (entity.HlsSignalingData?.VariantPlaylistData != null)
+			if (entity.HlsSignalingData?.MediaPlaylistData != null)
 			{
 				drmSystemElement.HlsSignalingData.Add(new HlsSignalingDataElement
 				{
-					Playlist = HlsPlaylistType.Variant,
-					Value = Convert.ToBase64String(Encoding.UTF8.GetBytes(entity.HlsSignalingData.VariantPlaylistData))
+					Playlist = HlsPlaylistType.Media,
+					Value = Convert.ToBase64String(Encoding.UTF8.GetBytes(entity.HlsSignalingData.MediaPlaylistData))
 				});
 			}
 
@@ -77,14 +77,14 @@ namespace Axinom.Cpix
 			{
 				drmSystem.HlsSignalingData = new HlsSignalingData();
 
-				var variantPlaylistDataAsBase64 = drmSystemElement.HlsSignalingData
-					.SingleOrDefault(d => d.Playlist == null || string.Equals(d.Playlist, HlsPlaylistType.Variant, StringComparison.InvariantCulture))?.Value;
+				var mediaPlaylistDataAsBase64 = drmSystemElement.HlsSignalingData
+					.SingleOrDefault(d => d.Playlist == null || string.Equals(d.Playlist, HlsPlaylistType.Media, StringComparison.InvariantCulture))?.Value;
 
 				var masterPlaylistDataAsBase64 = drmSystemElement.HlsSignalingData
 					.SingleOrDefault(d => string.Equals(d.Playlist, HlsPlaylistType.Master, StringComparison.InvariantCulture))?.Value;
 
-				if (variantPlaylistDataAsBase64 != null)
-					drmSystem.HlsSignalingData.VariantPlaylistData = Encoding.UTF8.GetString(Convert.FromBase64String(variantPlaylistDataAsBase64));
+				if (mediaPlaylistDataAsBase64 != null)
+					drmSystem.HlsSignalingData.MediaPlaylistData = Encoding.UTF8.GetString(Convert.FromBase64String(mediaPlaylistDataAsBase64));
 
 				if (masterPlaylistDataAsBase64 != null)
 					drmSystem.HlsSignalingData.MasterPlaylistData = Encoding.UTF8.GetString(Convert.FromBase64String(masterPlaylistDataAsBase64));

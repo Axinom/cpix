@@ -38,7 +38,7 @@ namespace Axinom.Cpix
 
 		/// <summary>
 		/// Gets or sets the HLS signaling data to be inserted in HLS master and/or
-		/// variant playlists. The data includes #EXT-X-KEY or #EXT-X-SESSION-KEY
+		/// media playlists. The data includes #EXT-X-KEY or #EXT-X-SESSION-KEY
 		/// tags (depending on the playlist), along with potential proprietary tags.
 		/// This data shall not be associated with a hierarchical leaf key.
 		/// </summary>

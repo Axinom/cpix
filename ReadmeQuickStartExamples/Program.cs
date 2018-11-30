@@ -30,7 +30,7 @@ namespace Axinom.Cpix.ReadmeQuickStartExamples
 
 			document.ContentKeys.Add(new ContentKey
 			{
-				Id = Guid.Parse("f8c80c25-690f-4736-8132-430e5c6994ce"),
+				Id = Guid.NewGuid(),
 				Value = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6 }
 			});
 			document.ContentKeys.Add(new ContentKey
@@ -42,38 +42,35 @@ namespace Axinom.Cpix.ReadmeQuickStartExamples
 			// Let's also add Widevine, PlayReady and FairPlay signaling data and
 			// associate it with the first content key.
 
-			// Widevine.
 			document.DrmSystems.Add(new DrmSystem
 			{
-				SystemId = Guid.Parse("edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"),
+				SystemId = DrmSignalingHelpers.WidevineSystemId,
 				KeyId = document.ContentKeys.First().Id,
-				ContentProtectionData = "<cenc:pssh xmlns:cenc=\"urn:mpeg:cenc:2013\">AAAANHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABQIARIQ+MgMJWkPRzaBMkMOXGmUzg==</cenc:pssh>",
+				ContentProtectionData = DrmSignalingHelpers.GenerateWidevineDashSignaling(document.ContentKeys.First().Id),
 				HlsSignalingData = new HlsSignalingData
 				{
-					MasterPlaylistData = "#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES,URI=\"data:text/plain;base64,AAAANHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABQIARIQ+MgMJWkPRzaBMkMOXGmUzg==\",KEYID=0xF8C80C25690F47368132430E5C6994CE,KEYFORMAT=\"urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed\",KEYFORMATVERSIONS=\"1\"",
-					VariantPlaylistData = "#EXT-X-KEY:METHOD=SAMPLE-AES,URI=\"data:text/plain;base64,AAAANHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABQIARIQ+MgMJWkPRzaBMkMOXGmUzg==\",KEYID=0xF8C80C25690F47368132430E5C6994CE,KEYFORMAT=\"urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed\",KEYFORMATVERSIONS=\"1\""
+					MasterPlaylistData = DrmSignalingHelpers.GenerateWidevineHlsMasterPlaylistSignaling(document.ContentKeys.First().Id),
+					MediaPlaylistData = DrmSignalingHelpers.GenerateWidevineHlsMediaPlaylistSignaling(document.ContentKeys.First().Id),
 				}
 			});
 
 			// PlayReady.
 			document.DrmSystems.Add(new DrmSystem
 			{
-				SystemId = Guid.Parse("9a04f079-9840-4286-ab92-e65be0885f95"),
+				SystemId = DrmSignalingHelpers.PlayReadySystemId,
 				KeyId = document.ContentKeys.First().Id,
-				ContentProtectionData =
-					"<cenc:pssh xmlns:cenc=\"urn:mpeg:cenc:2013\">AAAB5HBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAcTEAQAAAQABALoBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9ACIAaAB0AHQAcAA6AC8ALwBzAGMAaABlAG0AYQBzAC4AbQBpAGMAcgBvAHMAbwBmAHQALgBjAG8AbQAvAEQAUgBNAC8AMgAwADAANwAvADAAMwAvAFAAbABhAHkAUgBlAGEAZAB5AEgAZQBhAGQAZQByACIAIAB2AGUAcgBzAGkAbwBuAD0AIgA0AC4AMAAuADAALgAwACIAPgA8AEQAQQBUAEEAPgA8AFAAUgBPAFQARQBDAFQASQBOAEYATwA+ADwASwBFAFkATABFAE4APgAxADYAPAAvAEsARQBZAEwARQBOAD4APABBAEwARwBJAEQAPgBBAEUAUwBDAFQAUgA8AC8AQQBMAEcASQBEAD4APAAvAFAAUgBPAFQARQBDAFQASQBOAEYATwA+ADwASwBJAEQAPgBKAFEAegBJACsAQQA5AHAATgBrAGUAQgBNAGsATQBPAFgARwBtAFUAegBnAD0APQA8AC8ASwBJAEQAPgA8AC8ARABBAFQAQQA+ADwALwBXAFIATQBIAEUAQQBEAEUAUgA+AA==</cenc:pssh>" +
-					"<pro xmlns=\"urn:microsoft:playready\">xAEAAAEAAQC6ATwAVwBSAE0ASABFAEEARABFAFIAIAB4AG0AbABuAHMAPQAiAGgAdAB0AHAAOgAvAC8AcwBjAGgAZQBtAGEAcwAuAG0AaQBjAHIAbwBzAG8AZgB0AC4AYwBvAG0ALwBEAFIATQAvADIAMAAwADcALwAwADMALwBQAGwAYQB5AFIAZQBhAGQAeQBIAGUAYQBkAGUAcgAiACAAdgBlAHIAcwBpAG8AbgA9ACIANAAuADAALgAwAC4AMAAiAD4APABEAEEAVABBAD4APABQAFIATwBUAEUAQwBUAEkATgBGAE8APgA8AEsARQBZAEwARQBOAD4AMQA2ADwALwBLAEUAWQBMAEUATgA+ADwAQQBMAEcASQBEAD4AQQBFAFMAQwBUAFIAPAAvAEEATABHAEkARAA+ADwALwBQAFIATwBUAEUAQwBUAEkATgBGAE8APgA8AEsASQBEAD4ASgBRAHoASQArAEEAOQBwAE4AawBlAEIATQBrAE0ATwBYAEcAbQBVAHoAZwA9AD0APAAvAEsASQBEAD4APAAvAEQAQQBUAEEAPgA8AC8AVwBSAE0ASABFAEEARABFAFIAPgA=</pro>"
+				ContentProtectionData = DrmSignalingHelpers.GeneratePlayReadyDashSignaling(document.ContentKeys.First().Id)
 			});
 
 			// FairPlay.
 			document.DrmSystems.Add(new DrmSystem
 			{
-				SystemId = Guid.Parse("94ce86fb-07ff-4f43-adB8-93d2fa968ca2"),
+				SystemId = DrmSignalingHelpers.FairPlaySystemId,
 				KeyId = document.ContentKeys.First().Id,
 				HlsSignalingData = new HlsSignalingData
 				{
-					MasterPlaylistData = "#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES,URI=\"skd://f8c80c25-690f-4736-8132-430e5c6994ce:51BB4F1A7E2E835B2993884BD09ADB19\",KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\"",
-					VariantPlaylistData = "#EXT-X-KEY:METHOD=SAMPLE-AES,URI=\"skd://f8c80c25-690f-4736-8132-430e5c6994ce:51BB4F1A7E2E835B2993884BD09ADB19\",KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\""
+					MasterPlaylistData = DrmSignalingHelpers.GenerateFairPlayHlsMasterPlaylistSignaling(document.ContentKeys.First().Id),
+					MediaPlaylistData = DrmSignalingHelpers.GenerateFairPlayHlsMediaPlaylistSignaling(document.ContentKeys.First().Id)
 				}
 			});
 
