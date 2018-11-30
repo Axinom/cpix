@@ -55,6 +55,34 @@ The resulting output is still valid and all the signatures should successfully p
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 
+			document.DrmSystems.Add(new DrmSystem
+			{
+				SystemId = DrmSignalingHelpers.WidevineSystemId,
+				KeyId = document.ContentKeys.First().Id,
+				ContentProtectionData = DrmSignalingHelpers.GenerateWidevineDashSignaling(document.ContentKeys.First().Id),
+				HlsSignalingData = new HlsSignalingData
+				{
+					MasterPlaylistData = DrmSignalingHelpers.GenerateWidevineHlsMasterPlaylistSignaling(document.ContentKeys.First().Id),
+					MediaPlaylistData = DrmSignalingHelpers.GenerateWidevineHlsMediaPlaylistSignaling(document.ContentKeys.First().Id),
+				}
+			});
+			document.DrmSystems.Add(new DrmSystem
+			{
+				SystemId = DrmSignalingHelpers.PlayReadySystemId,
+				KeyId = document.ContentKeys.First().Id,
+				ContentProtectionData = DrmSignalingHelpers.GeneratePlayReadyDashSignaling(document.ContentKeys.First().Id)
+			});
+			document.DrmSystems.Add(new DrmSystem
+			{
+				SystemId = DrmSignalingHelpers.FairPlaySystemId,
+				KeyId = document.ContentKeys.First().Id,
+				HlsSignalingData = new HlsSignalingData
+				{
+					MasterPlaylistData = DrmSignalingHelpers.GenerateFairPlayHlsMasterPlaylistSignaling(document.ContentKeys.First().Id),
+					MediaPlaylistData = DrmSignalingHelpers.GenerateFairPlayHlsMediaPlaylistSignaling(document.ContentKeys.First().Id)
+				}
+			});
+
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate1WithPublicKey));
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate2WithPublicKey));
 
@@ -163,14 +191,17 @@ The resulting output is still valid and all the signatures should successfully p
 
 			const string recipientsId = "id-for-recipients----";
 			const string contentKeysId = "_id_for_content_keys";
+			const string drmSystemsId = "_id_for_drm_systems";
 			const string usageRulesId = "a.0a.0a.0a.0a.0a.a0.0a0.0404040......";
 
 			UnusualInputTests.SetElementId(xmlDocument, namespaces, "/cpix:CPIX/cpix:DeliveryDataList", recipientsId);
 			UnusualInputTests.SetElementId(xmlDocument, namespaces, "/cpix:CPIX/cpix:ContentKeyList", contentKeysId);
+			UnusualInputTests.SetElementId(xmlDocument, namespaces, "/cpix:CPIX/cpix:DRMSystemList", drmSystemsId);
 			UnusualInputTests.SetElementId(xmlDocument, namespaces, "/cpix:CPIX/cpix:ContentKeyUsageRuleList", usageRulesId);
 
 			CryptographyHelpers.SignXmlElement(xmlDocument, recipientsId, TestHelpers.Certificate1WithPrivateKey);
 			CryptographyHelpers.SignXmlElement(xmlDocument, contentKeysId, TestHelpers.Certificate1WithPrivateKey);
+			CryptographyHelpers.SignXmlElement(xmlDocument, drmSystemsId, TestHelpers.Certificate1WithPrivateKey);
 			CryptographyHelpers.SignXmlElement(xmlDocument, usageRulesId, TestHelpers.Certificate1WithPrivateKey);
 			CryptographyHelpers.SignXmlElement(xmlDocument, usageRulesId, TestHelpers.Certificate2WithPrivateKey);
 			CryptographyHelpers.SignXmlElement(xmlDocument, "", TestHelpers.Certificate1WithPrivateKey);
@@ -182,10 +213,12 @@ The resulting output is still valid and all the signatures should successfully p
 
 			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:DeliveryDataList", namespaces));
 			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyList", namespaces));
+			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:DRMSystemList", namespaces));
 			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyUsageRuleList", namespaces));
 
 			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:DeliveryDataList/cpix:DeliveryData", namespaces));
 			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyList/cpix:ContentKey", namespaces));
+			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:DRMSystemList/cpix:DRMSystem", namespaces));
 			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyUsageRuleList/cpix:ContentKeyUsageRule", namespaces));
 
 			// Save the signed document as UTF-16.

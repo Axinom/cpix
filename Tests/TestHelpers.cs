@@ -115,6 +115,13 @@ namespace Axinom.Cpix.Tests
 			AddUsageRule(document);
 			AddUsageRule(document);
 
+			document.DrmSystems.Add(new DrmSystem
+			{
+				SystemId = Guid.NewGuid(),
+				KeyId = document.ContentKeys.First().Id,
+				ContentProtectionData = "<pssh>Imaginary content protection data XML</pssh>"
+			});
+
 			// Sanity check.
 			foreach (var collection in document.EntityCollections)
 				if (collection.Count == 0)

@@ -20,6 +20,8 @@ namespace Axinom.Cpix.TestVectorGenerator
 			document.Recipients.AddSignature(TestHelpers.Certificate4WithPrivateKey);
 			document.ContentKeys.AddSignature(TestHelpers.Certificate3WithPrivateKey);
 			document.ContentKeys.AddSignature(TestHelpers.Certificate4WithPrivateKey);
+			document.DrmSystems.AddSignature(TestHelpers.Certificate3WithPrivateKey);
+			document.DrmSystems.AddSignature(TestHelpers.Certificate4WithPrivateKey);
 			document.UsageRules.AddSignature(TestHelpers.Certificate3WithPrivateKey);
 			document.UsageRules.AddSignature(TestHelpers.Certificate4WithPrivateKey);
 
@@ -27,6 +29,34 @@ namespace Axinom.Cpix.TestVectorGenerator
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+
+			document.DrmSystems.Add(new DrmSystem
+			{
+				SystemId = DrmSignalingHelpers.WidevineSystemId,
+				KeyId = document.ContentKeys.First().Id,
+				ContentProtectionData = DrmSignalingHelpers.GenerateWidevineDashSignaling(document.ContentKeys.First().Id),
+				HlsSignalingData = new HlsSignalingData
+				{
+					MasterPlaylistData = DrmSignalingHelpers.GenerateWidevineHlsMasterPlaylistSignaling(document.ContentKeys.First().Id),
+					MediaPlaylistData = DrmSignalingHelpers.GenerateWidevineHlsMediaPlaylistSignaling(document.ContentKeys.First().Id),
+				}
+			});
+			document.DrmSystems.Add(new DrmSystem
+			{
+				SystemId = DrmSignalingHelpers.PlayReadySystemId,
+				KeyId = document.ContentKeys.First().Id,
+				ContentProtectionData = DrmSignalingHelpers.GeneratePlayReadyDashSignaling(document.ContentKeys.First().Id)
+			});
+			document.DrmSystems.Add(new DrmSystem
+			{
+				SystemId = DrmSignalingHelpers.FairPlaySystemId,
+				KeyId = document.ContentKeys.First().Id,
+				HlsSignalingData = new HlsSignalingData
+				{
+					MasterPlaylistData = DrmSignalingHelpers.GenerateFairPlayHlsMasterPlaylistSignaling(document.ContentKeys.First().Id),
+					MediaPlaylistData = DrmSignalingHelpers.GenerateFairPlayHlsMediaPlaylistSignaling(document.ContentKeys.First().Id)
+				}
+			});
 
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate1WithPublicKey));
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate2WithPublicKey));

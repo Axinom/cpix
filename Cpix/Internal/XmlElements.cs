@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -159,6 +161,55 @@ namespace Axinom.Cpix.Internal
 			get { return MaxBitrate?.ToString(); }
 			set { MaxBitrate = value != null ? (long?)long.Parse(value) : null; }
 		}
+	}
+	#endregion
+
+	#region DRM systems
+	[XmlRoot("DRMSystem", Namespace = Constants.CpixNamespace)]
+	public sealed class DrmSystemElement
+	{
+		[XmlAttribute("systemId")]
+		public Guid SystemId { get; set; }
+
+		[XmlAttribute("kid")]
+		public Guid KeyId { get; set; }
+
+		[XmlElement("PSSH")]
+		public string Pssh { get; set; }
+
+		[XmlElement]
+		public string ContentProtectionData { get; set; }
+
+		[XmlElement("HLSSignalingData")]
+		public List<HlsSignalingDataElement> HlsSignalingData { get; set; } = new List<HlsSignalingDataElement>();
+
+		[XmlElement]
+		public string SmoothStreamingProtectionHeaderData { get; set; }
+
+		[XmlElement("HDSSignalingData")]
+		public string HdsSignalingData { get; set; }
+
+		/// <summary>
+		/// Performs basic sanity check to ensure that all required fields are filled.
+		/// </summary>
+		internal void LoadTimeValidate()
+		{
+			if (HlsSignalingData.Any(d => d.Playlist == null) && HlsSignalingData.Count > 1)
+			{
+				throw new InvalidCpixDataException(
+					"There can be only one HLSSignalingData element when the playlist attribute is not present for any such element.");
+			}
+		}
+	}
+
+	[XmlRoot("DRMSystem", Namespace = Constants.CpixNamespace)]
+	public sealed class HlsSignalingDataElement
+	{
+		[XmlAttribute("playlist")]
+		public string Playlist { get; set; }
+
+		[XmlText]
+		public string Value { get; set; } = string.Empty;
 	}
 	#endregion
 
