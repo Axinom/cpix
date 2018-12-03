@@ -31,11 +31,11 @@ The following features are implemented:
 * Modification of existing document without invalidating signatures
 * Automatic document validation against CPIX XML schema
 * Delivery key identification based on X.509 certificates.
+* DRM system metadata
 
 The following features are NOT implemented:
 
 * Key periods and key period filters
-* DRM system metadata
 * Document update history
 * Minor metadata attributes (names/IDs/etc)
 
