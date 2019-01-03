@@ -38,6 +38,7 @@ The following features are NOT implemented:
 * Key periods and key period filters
 * Document update history
 * Minor metadata attributes (names/IDs/etc)
+* Hierarchical content keys
 
 Documents containing unimplemented features can still be processed - the unknown elements will simply be ignored on load and passed through without modification on save.
 
