@@ -39,41 +39,6 @@ namespace Axinom.Cpix.ReadmeQuickStartExamples
 				Value = new byte[] { 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5 }
 			});
 
-			// Let's also add Widevine, PlayReady and FairPlay signaling data and
-			// associate it with the first content key.
-
-			document.DrmSystems.Add(new DrmSystem
-			{
-				SystemId = DrmSignalingHelpers.WidevineSystemId,
-				KeyId = document.ContentKeys.First().Id,
-				ContentProtectionData = DrmSignalingHelpers.GenerateWidevineDashSignaling(document.ContentKeys.First().Id),
-				HlsSignalingData = new HlsSignalingData
-				{
-					MasterPlaylistData = DrmSignalingHelpers.GenerateWidevineHlsMasterPlaylistSignaling(document.ContentKeys.First().Id),
-					MediaPlaylistData = DrmSignalingHelpers.GenerateWidevineHlsMediaPlaylistSignaling(document.ContentKeys.First().Id),
-				}
-			});
-
-			// PlayReady.
-			document.DrmSystems.Add(new DrmSystem
-			{
-				SystemId = DrmSignalingHelpers.PlayReadySystemId,
-				KeyId = document.ContentKeys.First().Id,
-				ContentProtectionData = DrmSignalingHelpers.GeneratePlayReadyDashSignaling(document.ContentKeys.First().Id)
-			});
-
-			// FairPlay.
-			document.DrmSystems.Add(new DrmSystem
-			{
-				SystemId = DrmSignalingHelpers.FairPlaySystemId,
-				KeyId = document.ContentKeys.First().Id,
-				HlsSignalingData = new HlsSignalingData
-				{
-					MasterPlaylistData = DrmSignalingHelpers.GenerateFairPlayHlsMasterPlaylistSignaling(document.ContentKeys.First().Id),
-					MediaPlaylistData = DrmSignalingHelpers.GenerateFairPlayHlsMediaPlaylistSignaling(document.ContentKeys.First().Id)
-				}
-			});
-
 			using (var myCertificateAndPrivateKey = new X509Certificate2("Cert1.pfx", "Cert1"))
 			using (var recipientCertificate = new X509Certificate2("Cert2.cer"))
 			{
