@@ -7,11 +7,59 @@ using shaka.media;
 
 namespace Axinom.Cpix
 {
+	/// <summary>
+	/// Helpers for generating DRM signaling data in common scenarios. These are primarily meant for generating
+	/// realistic example data but may also be suitable for production scenarios. The flexibility can be rather limited,
+	/// though.
+	/// 
+	/// You can use the decoders at https://tools.axinom.com/ to verify the generated structures are valid.
+	/// 
+	/// No guarantees are made about API compatibility here - this is left public mostly because it is annoying
+	/// code to write and if we can help someone out by having them use this tested implementation, so be it.
+	/// </summary>
 	public static class DrmSignalingHelpers
 	{
 		public static readonly Guid FairPlaySystemId = new Guid("94ce86fb-07ff-4f43-adB8-93d2fa968ca2");
 		public static readonly Guid PlayReadySystemId = new Guid("9a04f079-9840-4286-ab92-e65be0885f95");
 		public static readonly Guid WidevineSystemId = new Guid("edef8ba9-79d6-4ace-a3c8-27dcd51d21ed");
+
+		/// <summary>
+		/// Adds default DRM system signaling entries for all keys.
+		/// </summary>
+		public static void AddDefaultSignalingForAllKeys(CpixDocument document)
+		{
+			foreach (var key in document.ContentKeys)
+			{
+				document.DrmSystems.Add(new DrmSystem
+				{
+					SystemId = WidevineSystemId,
+					KeyId = key.Id,
+					ContentProtectionData = GenerateWidevineDashSignaling(key.Id),
+					HlsSignalingData = new HlsSignalingData
+					{
+						MasterPlaylistData = GenerateWidevineHlsMasterPlaylistSignaling(key.Id),
+						MediaPlaylistData = GenerateWidevineHlsMediaPlaylistSignaling(key.Id),
+					}
+				});
+				document.DrmSystems.Add(new DrmSystem
+				{
+					SystemId = PlayReadySystemId,
+					KeyId = key.Id,
+					ContentProtectionData = GeneratePlayReadyDashSignaling(key.Id),
+					SmoothStreamingProtectionHeaderData = GeneratePlayReadyMssSignaling(key.Id)
+				});
+				document.DrmSystems.Add(new DrmSystem
+				{
+					SystemId = FairPlaySystemId,
+					KeyId = key.Id,
+					HlsSignalingData = new HlsSignalingData
+					{
+						MasterPlaylistData = GenerateFairPlayHlsMasterPlaylistSignaling(key.Id),
+						MediaPlaylistData = GenerateFairPlayHlsMediaPlaylistSignaling(key.Id)
+					}
+				});
+			}
+		}
 
 		public static string GeneratePlayReadyDashSignaling(Guid keyId)
 		{
@@ -31,6 +79,14 @@ namespace Axinom.Cpix
 			var psshElement = new XElement(DashConstants.PsshName, Convert.ToBase64String(psshBox));
 
 			return psshElement.ToString();
+		}
+
+		public static string GeneratePlayReadyMssSignaling(Guid keyId)
+		{
+			// For MSS the signaling is the base64-encoded PRO.
+
+			var psshBoxContents = GeneratePlayReadyHeader(keyId);
+			return Convert.ToBase64String(psshBoxContents);
 		}
 
 		public static string GenerateWidevineHlsMasterPlaylistSignaling(Guid keyId)
