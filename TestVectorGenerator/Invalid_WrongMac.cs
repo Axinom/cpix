@@ -1,4 +1,5 @@
 ﻿using Axinom.Cpix.Tests;
+using System;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -17,7 +18,12 @@ namespace Axinom.Cpix.TestVectorGenerator
 		{
 			var document = new CpixDocument();
 
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document.ContentKeys.Add(new ContentKey
+			{
+				Id = new Guid("5ad2b739-4f46-48df-9a44-aab8c35abf71"),
+				Value = Convert.FromBase64String("QsCLorCoPAmTd2IHz2pogg==")
+			});
+
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate1WithPublicKey));
 
 			var buffer = new MemoryStream();

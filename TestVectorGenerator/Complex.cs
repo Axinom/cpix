@@ -1,4 +1,5 @@
 ﻿using Axinom.Cpix.Tests;
+using System;
 using System.IO;
 using System.Linq;
 
@@ -25,10 +26,26 @@ namespace Axinom.Cpix.TestVectorGenerator
 			document.UsageRules.AddSignature(TestHelpers.Certificate3WithPrivateKey);
 			document.UsageRules.AddSignature(TestHelpers.Certificate4WithPrivateKey);
 
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document.ContentKeys.Add(new ContentKey
+			{
+				Id = new Guid("b4c3188b-eddd-453d-9bc2-1cbca7566239"),
+				Value = Convert.FromBase64String("b1pkxdNYqPxljV68gohWcw==")
+			});
+			document.ContentKeys.Add(new ContentKey
+			{
+				Id = new Guid("c6294999-5f48-445f-bcce-f7e5f736d7c6"),
+				Value = Convert.FromBase64String("moOVrJvuhUUQ4LpPusAd5g==")
+			});
+			document.ContentKeys.Add(new ContentKey
+			{
+				Id = new Guid("b181a4df-2c38-41a4-993f-90b2f21343f6"),
+				Value = Convert.FromBase64String("67gabJtKDWd2crHr+JQT1A==")
+			});
+			document.ContentKeys.Add(new ContentKey
+			{
+				Id = new Guid("a466cdfd-e556-4b1d-8098-c1a4aa78997a"),
+				Value = Convert.FromBase64String("rRuRUWAibaUtai0qQnb71g==")
+			});
 
 			document.DrmSystems.Add(new DrmSystem
 			{

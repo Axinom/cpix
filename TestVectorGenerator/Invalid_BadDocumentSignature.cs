@@ -1,4 +1,5 @@
 ﻿using Axinom.Cpix.Tests;
+using System;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -14,7 +15,12 @@ namespace Axinom.Cpix.TestVectorGenerator
 		{
 			var document = new CpixDocument();
 
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document.ContentKeys.Add(new ContentKey
+			{
+				Id = new Guid("bbe06060-1c26-4ed5-8ccd-ee03ddb2ffd9"),
+				Value = Convert.FromBase64String("aTqer0SFxijnIoQLXGHYJg==")
+			});
+
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate1WithPublicKey));
 			document.SignedBy = TestHelpers.Certificate2WithPrivateKey;
 

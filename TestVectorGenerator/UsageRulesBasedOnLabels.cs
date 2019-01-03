@@ -1,4 +1,5 @@
 ﻿using Axinom.Cpix.Tests;
+using System;
 using System.IO;
 using System.Linq;
 
@@ -13,11 +14,26 @@ namespace Axinom.Cpix.TestVectorGenerator
 		{
 			var document = new CpixDocument();
 
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
-			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document.ContentKeys.Add(new ContentKey
+			{
+				Id = new Guid("ba6c62d6-4a49-4aa4-8869-ce4d2727a2b5"),
+				Value = Convert.FromBase64String("sLVGDIuvogAUW+Ay0mE9ZA==")
+			});
+			document.ContentKeys.Add(new ContentKey
+			{
+				Id = new Guid("37e3de05-9a3b-4c69-8970-63c17a95e0b7"),
+				Value = Convert.FromBase64String("UvL2JdZiEX2exVMwn796Tg==")
+			});
+			document.ContentKeys.Add(new ContentKey
+			{
+				Id = new Guid("53abdba2-f210-43cb-bc90-f18f9a890a02"),
+				Value = Convert.FromBase64String("lOgzNKBnPZlGSns+WqO8zw==")
+			});
+			document.ContentKeys.Add(new ContentKey
+			{
+				Id = new Guid("7ae8e96f-309e-42c3-a510-24023d923373"),
+				Value = Convert.FromBase64String("K9uQ8+GgwrNx4keBHnI4Xw==")
+			});
 
 			document.UsageRules.Add(new UsageRule
 			{
