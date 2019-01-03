@@ -1,5 +1,6 @@
 ﻿using Axinom.Cpix.Tests;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -31,7 +32,7 @@ namespace Axinom.Cpix.TestVectorGenerator
 				readme.WriteLine($@"CPIX Test Vectors
 =================
 
-Generated {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd")} using Axinom.Cpix v{Assembly.GetExecutingAssembly().GetName().Version.ToString(3)}
+Generated {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd")} using Axinom.Cpix v{FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion}
 
 Included test certificates generated as follows: `makecert.exe -pe -n ""CN=CPIX Example Entity 1"" -sky exchange -a sha512 -len 4096 -r -ss My`. The password for any included PFX files is the filename, without extension, case-sensitive.
 

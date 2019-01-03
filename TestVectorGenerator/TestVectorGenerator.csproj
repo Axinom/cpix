@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,7 +7,12 @@
     <RootNamespace>Axinom.Cpix.TestVectorGenerator</RootNamespace>
     <Authors>Axinom</Authors>
     <Company>Axinom</Company>
-  </PropertyGroup>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	</PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Resources\SolutionAssemblyInfo.cs" Link="SolutionAssemblyInfo.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\Resources\Certificates\Cert1.cer" Link="Cert1.cer">
