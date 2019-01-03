@@ -86,8 +86,6 @@ namespace Axinom.Cpix.ReadmeQuickStartExamples
 
 				document.Save("cpix.xml");
 			}
-
-			document.Save("cpix.xml");
 		}
 
 		private static void ReadingCpixExample()
