@@ -55,33 +55,7 @@ The resulting output is still valid and all the signatures should successfully p
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 
-			document.DrmSystems.Add(new DrmSystem
-			{
-				SystemId = DrmSignalingHelpers.WidevineSystemId,
-				KeyId = document.ContentKeys.First().Id,
-				ContentProtectionData = DrmSignalingHelpers.GenerateWidevineDashSignaling(document.ContentKeys.First().Id),
-				HlsSignalingData = new HlsSignalingData
-				{
-					MasterPlaylistData = DrmSignalingHelpers.GenerateWidevineHlsMasterPlaylistSignaling(document.ContentKeys.First().Id),
-					MediaPlaylistData = DrmSignalingHelpers.GenerateWidevineHlsMediaPlaylistSignaling(document.ContentKeys.First().Id),
-				}
-			});
-			document.DrmSystems.Add(new DrmSystem
-			{
-				SystemId = DrmSignalingHelpers.PlayReadySystemId,
-				KeyId = document.ContentKeys.First().Id,
-				ContentProtectionData = DrmSignalingHelpers.GeneratePlayReadyDashSignaling(document.ContentKeys.First().Id)
-			});
-			document.DrmSystems.Add(new DrmSystem
-			{
-				SystemId = DrmSignalingHelpers.FairPlaySystemId,
-				KeyId = document.ContentKeys.First().Id,
-				HlsSignalingData = new HlsSignalingData
-				{
-					MasterPlaylistData = DrmSignalingHelpers.GenerateFairPlayHlsMasterPlaylistSignaling(document.ContentKeys.First().Id),
-					MediaPlaylistData = DrmSignalingHelpers.GenerateFairPlayHlsMediaPlaylistSignaling(document.ContentKeys.First().Id)
-				}
-			});
+			DrmSignalingHelpers.AddDefaultSignalingForAllKeys(document);
 
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate1WithPublicKey));
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate2WithPublicKey));
