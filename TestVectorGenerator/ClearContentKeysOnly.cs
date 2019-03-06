@@ -1,5 +1,4 @@
-﻿using Axinom.Cpix.Tests;
-using System;
+﻿using System;
 using System.IO;
 
 namespace Axinom.Cpix.TestVectorGenerator

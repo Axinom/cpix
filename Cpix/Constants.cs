@@ -23,6 +23,7 @@ namespace Axinom.Cpix
 		public const string Sha512Algorithm = "http://www.w3.org/2001/04/xmlenc#sha512";
 
 		public const int ContentKeyLengthInBytes = 16;
+		public const int ContentKeyExplicitIvLengthInBytes = 16;
 
 		/// <summary>
 		/// AES-256, so 256-bit key.

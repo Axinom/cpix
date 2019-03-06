@@ -16,6 +16,16 @@ namespace Axinom.Cpix
 		public byte[] Value { get; set; }
 
 		/// <summary>
+		/// Get or sets the optional IV that is to be explicitly associated with the
+		/// content key. The IV must be 128 bits (16 bytes) long. A common use case
+		/// involves FairPlay DRM, where the IV is expected to be transported
+		/// together with the content key, instead of being extracted from the
+		/// content. Otherwise, the use of this IV is not recommended and it should
+		/// be ignored even if set.
+		/// </summary>
+		public byte[] ExplicitIv { get; set; }
+
+		/// <summary>
 		/// Gets whether the content key is a loaded encrypted content key.
 		/// </summary>
 		internal bool IsLoadedEncryptedKey { get; set; }
@@ -28,6 +38,9 @@ namespace Axinom.Cpix
 			// We skip length check if we do not have a value for an encrypted key (it will be read-only).
 			if (IsLoadedEncryptedKey && Value != null && Value.Length != Constants.ContentKeyLengthInBytes)
 				throw new InvalidCpixDataException($"A {Constants.ContentKeyLengthInBytes}-byte value must be provided for each new content key.");
+
+			if (ExplicitIv != null && ExplicitIv.Length != Constants.ContentKeyExplicitIvLengthInBytes)
+				throw new InvalidCpixDataException($"The explicit IVs associated with content keys must be {Constants.ContentKeyExplicitIvLengthInBytes} byte long.");
 		}
 
 		internal override void ValidateNewEntity(CpixDocument document)
@@ -37,6 +50,9 @@ namespace Axinom.Cpix
 
 			if (Value == null || Value.Length != Constants.ContentKeyLengthInBytes)
 				throw new InvalidCpixDataException($"A {Constants.ContentKeyLengthInBytes}-byte value must be provided for each new content key.");
+
+			if (ExplicitIv != null && ExplicitIv.Length != Constants.ContentKeyExplicitIvLengthInBytes)
+				throw new InvalidCpixDataException($"The explicit IVs associated with content keys must be {Constants.ContentKeyExplicitIvLengthInBytes} byte long.");
 		}
 	}
 }

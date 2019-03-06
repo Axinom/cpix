@@ -22,6 +22,7 @@ namespace Axinom.Cpix
 			var element = new ContentKeyElement
 			{
 				KeyId = entity.Id,
+				ExplicitIv = entity.ExplicitIv,
 				Data = new DataElement
 				{
 					Secret = new SecretDataElement()
@@ -127,12 +128,13 @@ namespace Axinom.Cpix
 			}
 			else
 			{
-				// Value is encrpyted and we cannot read it. Nothing to do here.
+				// Value is encrypted and we cannot read it. Nothing to do here.
 			}
 
 			return new ContentKey
 			{
 				Id = contentKey.KeyId,
+				ExplicitIv = contentKey.ExplicitIv,
 				Value = value,
 				IsLoadedEncryptedKey = contentKey.HasEncryptedValue
 			};

@@ -220,6 +220,9 @@ namespace Axinom.Cpix.Internal
 		[XmlAttribute("kid")]
 		public Guid KeyId { get; set; }
 
+		[XmlAttribute("explicitIV")]
+		public byte[] ExplicitIv { get; set; }
+
 		[XmlElement]
 		public DataElement Data { get; set; }
 

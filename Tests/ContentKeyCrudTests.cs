@@ -33,6 +33,30 @@ namespace Axinom.Cpix.Tests
 		}
 
 		[Fact]
+		public void AddContentKey_WithVariousValidData_Succeeds()
+		{
+			var document = new CpixDocument();
+
+			Assert.Null(Record.Exception(() => document.ContentKeys.Add(new ContentKey
+			{
+				Id = Guid.NewGuid(),
+				Value = new byte[Constants.ContentKeyLengthInBytes],
+			})));
+			Assert.Null(Record.Exception(() => document.ContentKeys.Add(new ContentKey
+			{
+				Id = Guid.NewGuid(),
+				Value = new byte[Constants.ContentKeyLengthInBytes],
+				ExplicitIv = new byte[Constants.ContentKeyExplicitIvLengthInBytes]
+			})));
+			Assert.Null(Record.Exception(() => document.ContentKeys.Add(new ContentKey
+			{
+				Id = Guid.NewGuid(),
+				Value = new byte[Constants.ContentKeyLengthInBytes],
+				ExplicitIv = null
+			})));
+		}
+
+		[Fact]
 		public void AddContentKey_WithVariousInvalidData_Fails()
 		{
 			var document = new CpixDocument();
@@ -61,6 +85,18 @@ namespace Axinom.Cpix.Tests
 			{
 				Id = Guid.NewGuid(),
 				Value = null
+			}));
+			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeys.Add(new ContentKey
+			{
+				Id = Guid.NewGuid(),
+				Value = new byte[Constants.ContentKeyLengthInBytes],
+				ExplicitIv = new byte[Constants.ContentKeyExplicitIvLengthInBytes + 1]
+			}));
+			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeys.Add(new ContentKey
+			{
+				Id = Guid.NewGuid(),
+				Value = new byte[Constants.ContentKeyLengthInBytes],
+				ExplicitIv = new byte[0]
 			}));
 		}
 
@@ -143,6 +179,51 @@ namespace Axinom.Cpix.Tests
 			document = TestHelpers.Reload(document);
 
 			Assert.Single(document.ContentKeys);
+		}
+
+		[Fact]
+		public void RoundTrip_WithSpecifyingOptionalData_LoadsExpectedKey()
+		{
+			var contentKey = new ContentKey
+			{
+				Id = Guid.NewGuid(),
+				Value = new byte[] { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 },
+				ExplicitIv = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 }
+			};
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(contentKey);
+
+			document = TestHelpers.Reload(document);
+
+			var loadedKey = document.ContentKeys.Single();
+
+			Assert.Single(document.ContentKeys);
+			Assert.Equal(contentKey.Id, loadedKey.Id);
+			Assert.Equal(contentKey.Value, loadedKey.Value);
+			Assert.Equal(contentKey.ExplicitIv, loadedKey.ExplicitIv);
+		}
+
+		[Fact]
+		public void RoundTrip_WithoutSpecifyingOptionalData_LoadsExpectedKey()
+		{
+			var contentKey = new ContentKey
+			{
+				Id = Guid.NewGuid(),
+				Value = new byte[] { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 }
+			};
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(contentKey);
+
+			document = TestHelpers.Reload(document);
+
+			var loadedKey = document.ContentKeys.Single();
+
+			Assert.Single(document.ContentKeys);
+			Assert.Equal(contentKey.Id, loadedKey.Id);
+			Assert.Equal(contentKey.Value, loadedKey.Value);
+			Assert.Null(loadedKey.ExplicitIv);
 		}
 	}
 }
