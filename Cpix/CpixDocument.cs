@@ -199,7 +199,7 @@ namespace Axinom.Cpix
 				{
 					// NB! Do not apply any formatting here, as digital signatures have already been generated
 					// and any formatting will invalidate the signatures!
-					Encoding = Encoding.UTF8,
+					Encoding = new UTF8Encoding(false),
 					CloseOutput = false
 				}))
 				{

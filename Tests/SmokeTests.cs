@@ -79,6 +79,25 @@ namespace Axinom.Cpix.Tests
 		}
 
 		[Fact]
+		public void Save_DoesNotAddBomToStream()
+		{
+			var expectedFirstFiveBytes = new [] { (byte)'<', (byte)'?', (byte)'x', (byte)'m', (byte)'l' } ;
+
+			var document = new CpixDocument();
+
+			using (var buffer = new MemoryStream())
+			{
+				document.Save(buffer);
+				
+				buffer.Position = 0;
+				var firstFiveBytes = new byte[5];
+				buffer.Read(firstFiveBytes, 0, 5);
+
+				Assert.Equal(expectedFirstFiveBytes, firstFiveBytes);
+			}
+		}
+
+		[Fact]
 		public void RoundTrip_WithOneClearKey_LoadsExpectedKey()
 		{
 			var keyData = TestHelpers.GenerateKeyData();
