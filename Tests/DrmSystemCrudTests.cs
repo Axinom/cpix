@@ -40,6 +40,12 @@ namespace Axinom.Cpix.Tests
 			{
 				SystemId = Guid.NewGuid(),
 				KeyId = Guid.NewGuid(),
+				UriExtXKey = "anything is valid"
+			})));
+			Assert.Null(Record.Exception(() => document.DrmSystems.Add(new DrmSystem
+			{
+				SystemId = Guid.NewGuid(),
+				KeyId = Guid.NewGuid(),
 				Pssh = Convert.ToBase64String(new byte[] { 0x11, 0x22, 0xFF })
 			})));
 			Assert.Null(Record.Exception(() => document.DrmSystems.Add(new DrmSystem
@@ -98,6 +104,13 @@ namespace Axinom.Cpix.Tests
 				SystemId = Guid.NewGuid(),
 				KeyId = Guid.NewGuid(),
 				ContentProtectionData = "<undeclaredprefix:test></undeclaredprefix:test>"
+			}));
+			Assert.Throws<InvalidCpixDataException>(() => document.DrmSystems.Add(new DrmSystem
+			{
+				SystemId = Guid.NewGuid(),
+				KeyId = Guid.NewGuid(),
+				UriExtXKey = "mutually exclusive with HLSSignalingData when adding new data",
+				HlsSignalingData = new HlsSignalingData()
 			}));
 			Assert.Throws<InvalidCpixDataException>(() => document.DrmSystems.Add(new DrmSystem
 			{
@@ -230,6 +243,19 @@ namespace Axinom.Cpix.Tests
 		}
 
 		[Fact]
+		public void Load_WithCpixContainingDrmSystemWithBothHlsSignalingDataAndUriExtXKey_Succeeds()
+		{
+			// Add doesn't allow both, but we're more lenient in loading pre-existing documents.
+			const string CpixContainingDrmSystemWithBothHlsSignalingDataAndUriExtXKey = "<?xml version=\"1.0\" encoding=\"utf-8\"?><CPIX xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:dashif:org:cpix\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" xmlns:enc=\"http://www.w3.org/2001/04/xmlenc#\" xmlns:pskc=\"urn:ietf:params:xml:ns:keyprov:pskc\"><ContentKeyList><ContentKey kid=\"f09e2753-9ea1-4621-a037-653eb09cb2e7\"><Data><pskc:Secret><pskc:PlainValue>AQIDBAUGBwgJCgECAwQFBg==</pskc:PlainValue></pskc:Secret></Data></ContentKey></ContentKeyList><DRMSystemList><DRMSystem systemId=\"94ce86fb-07ff-4f43-adb8-93d2fa968ca2\" kid=\"f09e2753-9ea1-4621-a037-653eb09cb2e7\"><URIExtXKey>YmxhaA==</URIExtXKey><HLSSignalingData playlist=\"master\">YmxhaA==</HLSSignalingData><HLSSignalingData playlist=\"media\">b2Vo</HLSSignalingData></DRMSystem></DRMSystemList></CPIX>";
+
+			var document = CpixDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(CpixContainingDrmSystemWithBothHlsSignalingDataAndUriExtXKey)));
+			var drmSystem = document.DrmSystems.First();
+
+			Assert.NotNull(drmSystem.UriExtXKey);
+			Assert.NotNull(drmSystem.HlsSignalingData);
+		}
+
+		[Fact]
 		public void RoundTrip_WithSignedDrmSystemCollection_Succeeds()
 		{
 			var document = new CpixDocument();
@@ -266,6 +292,27 @@ namespace Axinom.Cpix.Tests
 			Assert.Equal(drmSystem.HlsSignalingData.MasterPlaylistData, document.DrmSystems.First().HlsSignalingData.MasterPlaylistData);
 			Assert.Equal(drmSystem.HlsSignalingData.MediaPlaylistData, document.DrmSystems.First().HlsSignalingData.MediaPlaylistData);
 			Assert.Equal(drmSystem.SmoothStreamingProtectionHeaderData, document.DrmSystems.First().SmoothStreamingProtectionHeaderData);
+		}
+
+		[Fact]
+		public void RoundTrip_WithUriExtXKey_Succeeds()
+		{
+			var document = new CpixDocument();
+			var contentKey = TestHelpers.GenerateContentKey();
+			var drmSystem = new DrmSystem
+			{
+				SystemId = Guid.NewGuid(),
+				KeyId = contentKey.Id,
+				UriExtXKey = "uridata"
+			};
+
+			document.ContentKeys.Add(contentKey);
+			document.DrmSystems.Add(drmSystem);
+			document = TestHelpers.Reload(document);
+
+			Assert.Single(document.ContentKeys);
+			Assert.Single(document.DrmSystems);
+			Assert.Equal(drmSystem.UriExtXKey, document.DrmSystems.First().UriExtXKey);
 		}
 	}
 }

@@ -180,6 +180,9 @@ namespace Axinom.Cpix.Internal
 		[XmlElement]
 		public string ContentProtectionData { get; set; }
 
+		[XmlElement("URIExtXKey")]
+		public string UriExtXKey { get; set; }
+
 		[XmlElement("HLSSignalingData")]
 		public List<HlsSignalingDataElement> HlsSignalingData { get; set; } = new List<HlsSignalingDataElement>();
 
