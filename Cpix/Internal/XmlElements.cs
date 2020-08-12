@@ -268,7 +268,26 @@ namespace Axinom.Cpix.Internal
 			}
 			else
 			{
-				throw new InvalidCpixDataException("Must have either ContentKey/Data/Secret/EncryptedValue or ContentKey/Data/Secret/PlainValue.");
+				// Note: This library originally considered the content key element not having any
+				// key data an error and this case threw an error ("Must have either
+				// ContentKey/Data/Secret/EncryptedValue or ContentKey/Data/Secret/PlainValue.").
+				// The 'data' element was also required at the schema level. However, according to
+				// official spec and schema content key data is optional. And in practice there's a
+				// demand for using CPIX for key request purposes where content key IDs may need to
+				// be present, but data yet really cannot be.
+				//
+				// Counter-argument from at least one of the CPIX authors (the same who created this
+				// library; see https://github.com/Dash-Industry-Forum/CPIX/issues/88) is that CPIX
+				// should only be used for key transportation and not for key requests, which would
+				// make key elements without data meaningless. Since the library likely was developed
+				// with this requirement in mind, there's some danger that the removal of this
+				// requirement may "destabilize" some flows. However, running automatic and brief
+				// manual tests revealed no problems when removing just the on-load validation.
+				//
+				// Therefore, let's not require content key data on-load, but keep the requirement
+				// when adding new content keys to avoid compromising some of the existing
+				// functionality. This is also more in line with the library's philosophy: be strict
+				// when creating a new document, but more lenient when loading existing documents.
 			}
 		}
 	}
