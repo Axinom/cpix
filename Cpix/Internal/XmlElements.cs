@@ -12,11 +12,16 @@ namespace Axinom.Cpix.Internal
 	// to/from the string-form of the data. XmlSerializer just converts between XML strings and string objects there.
 
 	/// <summary>
-	/// Just for creating a new blank document. The contents are serialized independently.
+	/// Just for creating a new blank document and handling root attributes. Other
+	/// serialization is performed independently.
 	/// </summary>
 	[XmlRoot("CPIX", Namespace = Constants.CpixNamespace)]
 	public sealed class DocumentRootElement
 	{
+		public const string ContentIdAttributeName = "contentId";
+
+		[XmlAttribute(ContentIdAttributeName)]
+		public string ContentId { get; set; }
 	}
 
 	#region Usage rules

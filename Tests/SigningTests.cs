@@ -121,6 +121,7 @@ namespace Axinom.Cpix.Tests
 		{
 			var document = new CpixDocument();
 			TestHelpers.PopulateCollections(document);
+			document.ContentId = "test";
 
 			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
@@ -148,6 +149,7 @@ namespace Axinom.Cpix.Tests
 		{
 			var document = new CpixDocument();
 			TestHelpers.PopulateCollections(document);
+			document.ContentId = "test";
 
 			document = TestHelpers.Reload(document);
 
@@ -177,6 +179,7 @@ namespace Axinom.Cpix.Tests
 		{
 			var document = new CpixDocument();
 			TestHelpers.PopulateCollections(document);
+			document.ContentId = "test";
 
 			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
@@ -207,6 +210,7 @@ namespace Axinom.Cpix.Tests
 		{
 			var document = new CpixDocument();
 			TestHelpers.PopulateCollections(document);
+			document.ContentId = "test";
 
 			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 
