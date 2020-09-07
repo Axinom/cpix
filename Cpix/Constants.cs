@@ -44,12 +44,12 @@ namespace Axinom.Cpix
 		/// 
 		/// Values are name-namespace pairs.
 		/// </summary>
-		public static readonly Tuple<string, string>[] TopLevelXmlElementOrder = new Tuple<string, string>[]
+		public static readonly Tuple<string, string>[] TopLevelXmlElementOrder =
 		{
 			new Tuple<string, string>(RecipientCollection.ContainerXmlElementName, CpixNamespace),
 			new Tuple<string, string>(ContentKeyCollection.ContainerXmlElementName, CpixNamespace),
 			new Tuple<string, string>(DrmSystemCollection.ContainerXmlElementName, CpixNamespace),
-			new Tuple<string, string>("ContentKeyPeriodList", CpixNamespace),
+			new Tuple<string, string>(ContentKeyPeriodCollection.ContainerXmlElementName, CpixNamespace),
 			new Tuple<string, string>(UsageRuleCollection.ContainerXmlElementName, CpixNamespace),
 			new Tuple<string, string>("UpdateHistoryItemList", CpixNamespace),
 			new Tuple<string, string>("Signature", XmlDigitalSignatureNamespace),

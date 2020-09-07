@@ -78,6 +78,18 @@ The resulting output is still valid and all the signatures should successfully p
 
 			DrmSignalingHelpers.AddDefaultSignalingForAllKeys(document);
 
+			document.ContentKeyPeriods.Add(new ContentKeyPeriod
+			{
+				Id = "keyperiod_1",
+				Index = 1
+			});
+			document.ContentKeyPeriods.Add(new ContentKeyPeriod
+			{
+				Id = "keyperiod_2",
+				Start = new DateTime(2020, 9, 4, 1, 1, 1),
+				End = new DateTime(2020, 9, 4, 2, 1, 1)
+			});
+
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate1WithPublicKey));
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate2WithPublicKey));
 
@@ -187,16 +199,19 @@ The resulting output is still valid and all the signatures should successfully p
 			const string recipientsId = "id-for-recipients----";
 			const string contentKeysId = "_id_for_content_keys";
 			const string drmSystemsId = "_id_for_drm_systems";
+			const string contentKeyPeriodsId = "_id_for_content_key_periods";
 			const string usageRulesId = "a.0a.0a.0a.0a.0a.a0.0a0.0404040......";
 
 			UnusualInputTests.SetElementId(xmlDocument, namespaces, "/cpix:CPIX/cpix:DeliveryDataList", recipientsId);
 			UnusualInputTests.SetElementId(xmlDocument, namespaces, "/cpix:CPIX/cpix:ContentKeyList", contentKeysId);
 			UnusualInputTests.SetElementId(xmlDocument, namespaces, "/cpix:CPIX/cpix:DRMSystemList", drmSystemsId);
+			UnusualInputTests.SetElementId(xmlDocument, namespaces, "/cpix:CPIX/cpix:ContentKeyPeriodList", contentKeyPeriodsId);
 			UnusualInputTests.SetElementId(xmlDocument, namespaces, "/cpix:CPIX/cpix:ContentKeyUsageRuleList", usageRulesId);
 
 			CryptographyHelpers.SignXmlElement(xmlDocument, recipientsId, TestHelpers.Certificate1WithPrivateKey);
 			CryptographyHelpers.SignXmlElement(xmlDocument, contentKeysId, TestHelpers.Certificate1WithPrivateKey);
 			CryptographyHelpers.SignXmlElement(xmlDocument, drmSystemsId, TestHelpers.Certificate1WithPrivateKey);
+			CryptographyHelpers.SignXmlElement(xmlDocument, contentKeyPeriodsId, TestHelpers.Certificate1WithPrivateKey);
 			CryptographyHelpers.SignXmlElement(xmlDocument, usageRulesId, TestHelpers.Certificate1WithPrivateKey);
 			CryptographyHelpers.SignXmlElement(xmlDocument, usageRulesId, TestHelpers.Certificate2WithPrivateKey);
 			CryptographyHelpers.SignXmlElement(xmlDocument, "", TestHelpers.Certificate1WithPrivateKey);
@@ -209,11 +224,13 @@ The resulting output is still valid and all the signatures should successfully p
 			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:DeliveryDataList", namespaces));
 			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyList", namespaces));
 			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:DRMSystemList", namespaces));
+			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyPeriodList", namespaces));
 			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyUsageRuleList", namespaces));
 
 			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:DeliveryDataList/cpix:DeliveryData", namespaces));
 			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyList/cpix:ContentKey", namespaces));
 			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:DRMSystemList/cpix:DRMSystem", namespaces));
+			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyPeriodList/cpix:ContentKeyPeriod", namespaces));
 			UnusualInputTests.AddCommentAsChild((XmlElement)xmlDocument.SelectSingleNode("/cpix:CPIX/cpix:ContentKeyUsageRuleList/cpix:ContentKeyUsageRule", namespaces));
 
 			// Save the signed document as UTF-16.

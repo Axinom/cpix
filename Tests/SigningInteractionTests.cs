@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Xunit;
 
 namespace Axinom.Cpix.Tests
@@ -10,21 +11,41 @@ namespace Axinom.Cpix.Tests
 	{
 		private Func<CpixDocument, EntityCollectionBase> RecipientsSelector = doc => doc.Recipients;
 		private Func<CpixDocument, EntityCollectionBase> ContentKeysSelector = doc => doc.ContentKeys;
+		private Func<CpixDocument, EntityCollectionBase> DrmSystemsSelector = doc => doc.DrmSystems;
+		private Func<CpixDocument, EntityCollectionBase> ContentKeyPeriodsSelector = doc => doc.ContentKeyPeriods;
 		private Func<CpixDocument, EntityCollectionBase> UsageRulesSelector = doc => doc.UsageRules;
 
 		private Action<CpixDocument> AddRecipient = doc => doc.Recipients.Add(new Recipient(TestHelpers.Certificate3WithPublicKey));
 		private Action<CpixDocument> AddContentKey = doc => doc.ContentKeys.Add(TestHelpers.GenerateContentKey());
+		private Action<CpixDocument> AddDrmSystem = doc =>
+		{
+			doc.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			doc.DrmSystems.Add(new DrmSystem
+			{
+				SystemId = DrmSignalingHelpers.PlayReadySystemId,
+				KeyId = doc.ContentKeys.First().Id,
+				ContentProtectionData = DrmSignalingHelpers.GeneratePlayReadyDashSignaling(doc.ContentKeys.First().Id),
+
+			});
+		};
+		private Action<CpixDocument> AddContentKeyPeriod = doc =>
+		{
+			doc.ContentKeyPeriods.Add(new ContentKeyPeriod { Index = 1 });
+		};
 		private Action<CpixDocument> AddUsageRule = doc =>
 		{
 			doc.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			TestHelpers.AddUsageRule(doc);
 		};
 
+
 		[Fact]
 		public void Clear_WithRemovedCollectionSignature_Succeeds()
 		{
 			Execute_Clear_WithRemovedCollectionSignature(RecipientsSelector, AddRecipient);
 			Execute_Clear_WithRemovedCollectionSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithRemovedCollectionSignature(DrmSystemsSelector, AddDrmSystem);
+			Execute_Clear_WithRemovedCollectionSignature(ContentKeyPeriodsSelector, AddContentKeyPeriod);
 			Execute_Clear_WithRemovedCollectionSignature(UsageRulesSelector, AddUsageRule);
 		}
 
@@ -33,6 +54,8 @@ namespace Axinom.Cpix.Tests
 		{
 			Execute_Clear_WithReappliedCollectionSignature(RecipientsSelector, AddRecipient);
 			Execute_Clear_WithReappliedCollectionSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithReappliedCollectionSignature(DrmSystemsSelector, AddDrmSystem);
+			Execute_Clear_WithReappliedCollectionSignature(ContentKeyPeriodsSelector, AddContentKeyPeriod);
 			Execute_Clear_WithReappliedCollectionSignature(UsageRulesSelector, AddUsageRule);
 		}
 
@@ -41,6 +64,8 @@ namespace Axinom.Cpix.Tests
 		{
 			Execute_Clear_WithRemovedDocumentSignature(RecipientsSelector, AddRecipient);
 			Execute_Clear_WithRemovedDocumentSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithRemovedDocumentSignature(DrmSystemsSelector, AddDrmSystem);
+			Execute_Clear_WithRemovedDocumentSignature(ContentKeyPeriodsSelector, AddContentKeyPeriod);
 			Execute_Clear_WithRemovedDocumentSignature(UsageRulesSelector, AddUsageRule);
 		}
 
@@ -49,6 +74,8 @@ namespace Axinom.Cpix.Tests
 		{
 			Execute_Clear_WithReappliedDocumentSignature(RecipientsSelector, AddRecipient);
 			Execute_Clear_WithReappliedDocumentSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithReappliedDocumentSignature(DrmSystemsSelector, AddDrmSystem);
+			Execute_Clear_WithReappliedDocumentSignature(ContentKeyPeriodsSelector, AddContentKeyPeriod);
 			Execute_Clear_WithReappliedDocumentSignature(UsageRulesSelector, AddUsageRule);
 		}
 
@@ -57,6 +84,8 @@ namespace Axinom.Cpix.Tests
 		{
 			Execute_Clear_WithReappliedDocumentAndCollectionSignature(RecipientsSelector, AddRecipient);
 			Execute_Clear_WithReappliedDocumentAndCollectionSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithReappliedDocumentAndCollectionSignature(DrmSystemsSelector, AddDrmSystem);
+			Execute_Clear_WithReappliedDocumentAndCollectionSignature(ContentKeyPeriodsSelector, AddContentKeyPeriod);
 			Execute_Clear_WithReappliedDocumentAndCollectionSignature(UsageRulesSelector, AddUsageRule);
 		}
 
@@ -65,6 +94,8 @@ namespace Axinom.Cpix.Tests
 		{
 			Execute_Clear_WithExistingCollectionSignature(RecipientsSelector, AddRecipient);
 			Execute_Clear_WithExistingCollectionSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithExistingCollectionSignature(DrmSystemsSelector, AddDrmSystem);
+			Execute_Clear_WithExistingCollectionSignature(ContentKeyPeriodsSelector, AddContentKeyPeriod);
 			Execute_Clear_WithExistingCollectionSignature(UsageRulesSelector, AddUsageRule);
 		}
 
@@ -73,6 +104,8 @@ namespace Axinom.Cpix.Tests
 		{
 			Execute_Clear_WithExistingDocumentSignature(RecipientsSelector, AddRecipient);
 			Execute_Clear_WithExistingDocumentSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithExistingDocumentSignature(DrmSystemsSelector, AddDrmSystem);
+			Execute_Clear_WithExistingDocumentSignature(ContentKeyPeriodsSelector, AddContentKeyPeriod);
 			Execute_Clear_WithExistingDocumentSignature(UsageRulesSelector, AddUsageRule);
 		}
 
@@ -81,6 +114,8 @@ namespace Axinom.Cpix.Tests
 		{
 			Execute_Clear_WithExistingDocumentAndCollectionSignature(RecipientsSelector, AddRecipient);
 			Execute_Clear_WithExistingDocumentAndCollectionSignature(ContentKeysSelector, AddContentKey);
+			Execute_Clear_WithExistingDocumentAndCollectionSignature(DrmSystemsSelector, AddDrmSystem);
+			Execute_Clear_WithExistingDocumentAndCollectionSignature(ContentKeyPeriodsSelector, AddContentKeyPeriod);
 			Execute_Clear_WithExistingDocumentAndCollectionSignature(UsageRulesSelector, AddUsageRule);
 		}
 

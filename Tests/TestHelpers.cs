@@ -122,6 +122,13 @@ namespace Axinom.Cpix.Tests
 				ContentProtectionData = "<pssh>Imaginary content protection data XML</pssh>"
 			});
 
+			document.ContentKeyPeriods.Add(new ContentKeyPeriod
+			{
+				Id = "keyperiod_1",
+				Start = DateTime.Now,
+				End = DateTime.Now.AddHours(1)
+			});
+
 			// Sanity check.
 			foreach (var collection in document.EntityCollections)
 				if (collection.Count == 0)

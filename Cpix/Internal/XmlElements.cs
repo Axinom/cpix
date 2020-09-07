@@ -221,6 +221,46 @@ namespace Axinom.Cpix.Internal
 	}
 	#endregion
 
+	#region Content key periods
+	[XmlRoot("ContentKeyPeriod", Namespace = Constants.CpixNamespace)]
+	public sealed class ContentKeyPeriodElement
+	{
+		[XmlAttribute("id")]
+		public string Id { get; set; }
+
+		[XmlIgnore]
+		public int? Index { get; set; }
+
+		[XmlAttribute("index")]
+		public string IndexAsXmlString
+		{
+			get => Index?.ToString();
+			set => Index = value != null ? (int?)int.Parse(value) : null;
+		}
+
+		[XmlIgnore]
+		public DateTime? Start { get; set; }
+
+		[XmlAttribute("start")]
+		public string StartAsXmlString
+		{
+			get => Start?.ToString("o"); 
+			set => Start = value != null ? (DateTime?)DateTime.Parse(value) : null;
+		}
+
+		[XmlIgnore]
+		public DateTime? End { get; set; }
+
+		[XmlAttribute("end")]
+		public string EndAsXmlString
+		{
+			get => End?.ToString("o");
+			set => End = value != null ? (DateTime?)DateTime.Parse(value) : null;
+		}
+	}
+
+	#endregion
+
 	#region Content keys
 	[XmlRoot("ContentKey", Namespace = Constants.CpixNamespace)]
 	public sealed class ContentKeyElement

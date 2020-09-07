@@ -78,6 +78,11 @@ namespace Axinom.Cpix
 		public EntityCollection<DrmSystem> DrmSystems { get; }
 
 		/// <summary>
+		/// Gets the set of content key period entries stored in the CPIX document.
+		/// </summary>
+		public EntityCollection<ContentKeyPeriod> ContentKeyPeriods { get; }
+
+		/// <summary>
 		/// Whether the values of content keys are readable.
 		/// If false, you can only read the metadata, not the values themselves.
 		/// 
@@ -404,6 +409,7 @@ namespace Axinom.Cpix
 			Recipients = new RecipientCollection(this);
 			ContentKeys = new ContentKeyCollection(this);
 			DrmSystems = new DrmSystemCollection(this);
+			ContentKeyPeriods = new ContentKeyPeriodCollection(this);
 			UsageRules = new UsageRuleCollection(this);
 		}
 
@@ -475,6 +481,7 @@ namespace Axinom.Cpix
 			Recipients,
 			ContentKeys,
 			DrmSystems,
+			ContentKeyPeriods,
 			UsageRules
 		};
 		#endregion
