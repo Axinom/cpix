@@ -1,7 +1,7 @@
 Axinom CPIX library
 ===================
 
-A .NET library for working with CPIX (Content Protection Information Exchange) documents, as defined by [DASH Industry Forum](http://dashif.org/guidelines/). This library implements CPIX version 2.1.
+A .NET library for working with CPIX (Content Protection Information Exchange) documents, as defined by [DASH Industry Forum](http://dashif.org/guidelines/). This library implements CPIX version 2.2.
 
 Installation
 ============
@@ -33,9 +33,13 @@ The following features are implemented:
 * Delivery key identification based on X.509 certificates.
 * DRM system metadata
 
+The following features are partially implemented:
+
+* Key periods and key period filters 
+	* Read/write and basic validation. Content key resolution not implemented.
+
 The following features are NOT implemented:
 
-* Key periods and key period filters
 * Document update history
 * Minor metadata attributes (names/IDs/etc)
 * Hierarchical content keys
