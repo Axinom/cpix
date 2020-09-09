@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Xml.Schema;
 using Xunit;
 
 namespace Axinom.Cpix.Tests
@@ -14,6 +16,7 @@ namespace Axinom.Cpix.Tests
 
 			var document = new CpixDocument();
 			document.ContentKeys.Add(contentKey);
+			document.ContentKeyPeriods.Add(new ContentKeyPeriod { Id = "period1", Index = 1 });
 
 			TestHelpers.AddUsageRule(document);
 
@@ -30,6 +33,7 @@ namespace Axinom.Cpix.Tests
 
 			var document = new CpixDocument();
 			document.ContentKeys.Add(contentKey);
+			document.ContentKeyPeriods.Add(new ContentKeyPeriod { Id = "period1", Index = 1 });
 
 			document = TestHelpers.Reload(document);
 
@@ -48,6 +52,7 @@ namespace Axinom.Cpix.Tests
 
 			var document = new CpixDocument();
 			document.ContentKeys.Add(contentKey);
+			document.ContentKeyPeriods.Add(new ContentKeyPeriod { Id = "period1", Index = 1 });
 
 			document = TestHelpers.Reload(document);
 
@@ -140,6 +145,28 @@ namespace Axinom.Cpix.Tests
 					}
 				}
 			}));
+			Assert.Throws<InvalidCpixDataException>(() => document.UsageRules.Add(new UsageRule
+			{
+				KeyId = contentKey.Id,
+				KeyPeriodFilters = new[]
+				{
+					new KeyPeriodFilter
+					{
+						PeriodId = null
+					}
+				}
+			}));
+			Assert.Throws<InvalidCpixDataException>(() => document.UsageRules.Add(new UsageRule
+			{
+				KeyId = contentKey.Id,
+				KeyPeriodFilters = new[]
+				{
+					new KeyPeriodFilter
+					{
+						PeriodId = "unknownID"
+					}
+				}
+			}));
 		}
 
 		[Fact]
@@ -147,6 +174,7 @@ namespace Axinom.Cpix.Tests
 		{
 			var document = new CpixDocument();
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document.ContentKeyPeriods.Add(new ContentKeyPeriod { Id = "period1", Index = 1 });
 
 			// It will be validated here.
 			var rule = TestHelpers.AddUsageRule(document);
@@ -163,6 +191,8 @@ namespace Axinom.Cpix.Tests
 		{
 			var document = new CpixDocument();
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document.ContentKeyPeriods.Add(new ContentKeyPeriod { Id = "period1", Index = 1 });
+			
 			TestHelpers.AddUsageRule(document);
 			document.UsageRules.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
@@ -176,6 +206,8 @@ namespace Axinom.Cpix.Tests
 		{
 			var document = new CpixDocument();
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document.ContentKeyPeriods.Add(new ContentKeyPeriod { Id = "period1", Index = 1 });
+			
 			TestHelpers.AddUsageRule(document);
 			document.UsageRules.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
@@ -236,19 +268,38 @@ namespace Axinom.Cpix.Tests
 		public void RoundTrip_WithSignedCollection_Succeeds()
 		{
 			var contentKey = TestHelpers.GenerateContentKey();
+			var contentKeyPeriod = new ContentKeyPeriod { Id = "period1", Index = 1 };
+
 			var rule = new UsageRule
 			{
-				KeyId = contentKey.Id
+				KeyId = contentKey.Id,
+				KeyPeriodFilters = new [] { new KeyPeriodFilter { PeriodId = contentKeyPeriod.Id} }
 			};
 
 			var document = new CpixDocument();
 			document.ContentKeys.Add(contentKey);
+			document.ContentKeyPeriods.Add(contentKeyPeriod);
 			document.UsageRules.Add(rule);
 			document.UsageRules.AddSignature(TestHelpers.Certificate1WithPrivateKey);
 
 			document = TestHelpers.Reload(document);
 
 			Assert.Single(document.UsageRules);
+			Assert.Single(document.UsageRules.First().KeyPeriodFilters);
+			Assert.Equal(rule.KeyPeriodFilters.First().PeriodId, document.UsageRules.First().KeyPeriodFilters.First().PeriodId);
+		}
+
+		[Theory]
+		[InlineData(null, "is missing")]
+		[InlineData("periodId =\"1_cannot_start_with_a_number\"", "invalid according to its datatype")]
+		[InlineData("periodId =\"I_reference_an_unknown_ID\"", "Reference to undeclared ID")]
+		public void Load_WithUsageRuleContainingKeyPeriodFilterWithNonSchemaCompliantPeriodId_Fails(string invalidPeriodIdAttribute, string expectedErrorMessage)
+		{
+			const string cpixTemplate = "<?xml version=\"1.0\" encoding=\"utf-8\"?><CPIX xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:dashif:org:cpix\"><ContentKeyList><ContentKey kid=\"64f586c4-a57a-40cf-b603-7f4196a75219\"></ContentKey></ContentKeyList><ContentKeyPeriodList><ContentKeyPeriod id=\"period1\" index=\"1\" /></ContentKeyPeriodList><ContentKeyUsageRuleList><ContentKeyUsageRule kid=\"64f586c4-a57a-40cf-b603-7f4196a75219\"><KeyPeriodFilter {0} /></ContentKeyUsageRule></ContentKeyUsageRuleList></CPIX>";
+			var cpix = string.Format(cpixTemplate, invalidPeriodIdAttribute);
+
+			var ex = Assert.Throws<XmlSchemaValidationException>(() => CpixDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(cpix))));
+			Assert.Contains(expectedErrorMessage, ex.Message);
 		}
 	}
 }

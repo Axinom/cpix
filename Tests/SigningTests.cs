@@ -259,6 +259,7 @@ namespace Axinom.Cpix.Tests
 		{
 			var document = new CpixDocument();
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document.ContentKeyPeriods.Add(new ContentKeyPeriod { Id = "period_1", Index = 1});
 			TestHelpers.AddUsageRule(document);
 
 			Assert.ThrowsAny<ArgumentException>(() => document.ContentKeys.AddSignature(TestHelpers.Certificate1WithPublicKey));
@@ -271,6 +272,7 @@ namespace Axinom.Cpix.Tests
 		{
 			var document = new CpixDocument();
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document.ContentKeyPeriods.Add(new ContentKeyPeriod { Id = "period_1", Index = 1 });
 			TestHelpers.AddUsageRule(document);
 			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 

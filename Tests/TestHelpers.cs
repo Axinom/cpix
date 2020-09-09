@@ -41,6 +41,7 @@ namespace Axinom.Cpix.Tests
 		public static UsageRule AddUsageRule(CpixDocument document)
 		{
 			var contentKey = document.ContentKeys.First();
+			var contentKeyPeriod = document.ContentKeyPeriods.First();
 
 			var rule = new UsageRule
 			{
@@ -93,6 +94,13 @@ namespace Axinom.Cpix.Tests
 						WideColorGamut = false,
 						HighDynamicRange = false,
 					}
+				},
+				KeyPeriodFilters = new[]
+				{
+					new KeyPeriodFilter
+					{
+						PeriodId = contentKeyPeriod.Id
+					}
 				}
 			};
 
@@ -112,9 +120,6 @@ namespace Axinom.Cpix.Tests
 			document.ContentKeys.Add(key1);
 			document.ContentKeys.Add(key2);
 
-			AddUsageRule(document);
-			AddUsageRule(document);
-
 			document.DrmSystems.Add(new DrmSystem
 			{
 				SystemId = Guid.NewGuid(),
@@ -128,6 +133,9 @@ namespace Axinom.Cpix.Tests
 				Start = DateTime.Now,
 				End = DateTime.Now.AddHours(1)
 			});
+
+			AddUsageRule(document);
+			AddUsageRule(document);
 
 			// Sanity check.
 			foreach (var collection in document.EntityCollections)

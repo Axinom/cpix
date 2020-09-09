@@ -17,6 +17,7 @@ namespace Axinom.Cpix
 		/// </summary>
 		public bool ContainsUnsupportedFilters { get; internal set; }
 
+		public ICollection<KeyPeriodFilter> KeyPeriodFilters { get; set; } = new List<KeyPeriodFilter>();
 		public ICollection<VideoFilter> VideoFilters { get; set; } = new List<VideoFilter>();
 		public ICollection<AudioFilter> AudioFilters { get; set; } = new List<AudioFilter>();
 		public ICollection<LabelFilter> LabelFilters { get; set; } = new List<LabelFilter>();
@@ -35,6 +36,14 @@ namespace Axinom.Cpix
 		{
 			if (!document.ContentKeys.Any(ck => ck.Id == KeyId))
 				throw new InvalidCpixDataException("Content key usage rule references a content key that is not present in the CPIX document.");
+
+			foreach (var keyPeriodFilter in KeyPeriodFilters)
+			{
+				keyPeriodFilter.Validate();
+
+				if (!document.ContentKeyPeriods.Any(ckp => ckp.Id == keyPeriodFilter.PeriodId))
+					throw new InvalidCpixDataException("Content key usage rule key period filter references a content key period that is not present in the CPIX document.");
+			}
 
 			foreach (var videoFilter in VideoFilters)
 				videoFilter.Validate();

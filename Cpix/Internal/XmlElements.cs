@@ -31,6 +31,9 @@ namespace Axinom.Cpix.Internal
 		[XmlAttribute("kid")]
 		public Guid KeyId { get; set; }
 
+		[XmlElement("KeyPeriodFilter")]
+		public KeyPeriodElement[] KeyPeriodFilters { get; set; }
+
 		[XmlElement("LabelFilter")]
 		public LabelFilterElement[] LabelFilters { get; set; }
 
@@ -51,6 +54,12 @@ namespace Axinom.Cpix.Internal
 			// Malformed rules will not work right for resolving but who are we to say what is malformed or not.
 			// Nothing to really validate here, in essence. Go wild!
 		}
+	}
+
+	public sealed class KeyPeriodElement
+	{
+		[XmlAttribute("periodId")]
+		public string PeriodId { get; set; }
 	}
 
 	public sealed class LabelFilterElement

@@ -35,6 +35,7 @@ namespace Axinom.Cpix.Tests
 		private Action<CpixDocument> AddUsageRule = doc =>
 		{
 			doc.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			doc.ContentKeyPeriods.Add(new ContentKeyPeriod { Id = "keyperiod_" + Guid.NewGuid(), Index = 1 });
 			TestHelpers.AddUsageRule(doc);
 		};
 
