@@ -68,6 +68,16 @@ namespace Axinom.Cpix
 					.ToArray();
 			}
 
+			if (entity.KeyPeriodFilters?.Count > 0)
+			{
+				element.KeyPeriodFilters = entity.KeyPeriodFilters
+					.Select(f => new KeyPeriodElement()
+					{
+						PeriodId = f.PeriodId
+					})
+					.ToArray();
+			}
+
 			return XmlHelpers.AppendChildAndReuseNamespaces(element, container);
 		}
 
@@ -133,6 +143,16 @@ namespace Axinom.Cpix
 					.ToList();
 			}
 
+			if (raw.KeyPeriodFilters?.Length > 0)
+			{
+				rule.KeyPeriodFilters = raw.KeyPeriodFilters
+					.Select(f => new KeyPeriodFilter
+					{
+						PeriodId = f.PeriodId
+					})
+					.ToList();
+			}
+			
 			return rule;
 		}
 	}

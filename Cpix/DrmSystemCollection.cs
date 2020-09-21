@@ -29,6 +29,9 @@ namespace Axinom.Cpix
 			if (entity.ContentProtectionData != null)
 				drmSystemElement.ContentProtectionData = Convert.ToBase64String(Encoding.UTF8.GetBytes(entity.ContentProtectionData));
 
+			if (entity.UriExtXKey != null)
+				drmSystemElement.UriExtXKey = Convert.ToBase64String(Encoding.UTF8.GetBytes(entity.UriExtXKey));
+
 			if (entity.HdsSignalingData != null)
 				drmSystemElement.HdsSignalingData = Convert.ToBase64String(Encoding.UTF8.GetBytes(entity.HdsSignalingData));
 
@@ -69,6 +72,9 @@ namespace Axinom.Cpix
 
 			if (drmSystemElement.ContentProtectionData != null)
 				drmSystem.ContentProtectionData = Encoding.UTF8.GetString(Convert.FromBase64String(drmSystemElement.ContentProtectionData));
+
+			if (drmSystemElement.UriExtXKey != null)
+				drmSystem.UriExtXKey = Encoding.UTF8.GetString(Convert.FromBase64String(drmSystemElement.UriExtXKey));
 
 			if (drmSystemElement.HdsSignalingData != null)
 				drmSystem.HdsSignalingData = Encoding.UTF8.GetString(Convert.FromBase64String(drmSystemElement.HdsSignalingData));

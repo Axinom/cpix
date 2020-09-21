@@ -23,6 +23,8 @@ namespace Axinom.Cpix.TestVectorGenerator
 			document.ContentKeys.AddSignature(TestHelpers.Certificate4WithPrivateKey);
 			document.DrmSystems.AddSignature(TestHelpers.Certificate3WithPrivateKey);
 			document.DrmSystems.AddSignature(TestHelpers.Certificate4WithPrivateKey);
+			document.ContentKeyPeriods.AddSignature(TestHelpers.Certificate3WithPrivateKey);
+			document.ContentKeyPeriods.AddSignature(TestHelpers.Certificate4WithPrivateKey);
 			document.UsageRules.AddSignature(TestHelpers.Certificate3WithPrivateKey);
 			document.UsageRules.AddSignature(TestHelpers.Certificate4WithPrivateKey);
 
@@ -52,6 +54,18 @@ namespace Axinom.Cpix.TestVectorGenerator
 			});
 
 			DrmSignalingHelpers.AddDefaultSignalingForAllKeys(document);
+
+			document.ContentKeyPeriods.Add(new ContentKeyPeriod
+			{
+				Id = "keyperiod_1",
+				Index = 1
+			});
+			document.ContentKeyPeriods.Add(new ContentKeyPeriod
+			{
+				Id = "keyperiod_2",
+				Start = new DateTimeOffset(2020, 9, 4, 1, 1, 1, TimeSpan.Zero),
+				End = new DateTimeOffset(2020, 9, 4, 2, 1, 1, TimeSpan.Zero)
+			});
 
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate1WithPublicKey));
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate2WithPublicKey));

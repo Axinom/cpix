@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:cpix="urn:dashif:org:cpix" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:pskc="urn:ietf:params:xml:ns:keyprov:pskc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" targetNamespace="urn:dashif:org:cpix" elementFormDefault="qualified" attributeFormDefault="unqualified">
 	<xs:import namespace="http://www.w3.org/XML/1998/namespace"/>
-	<xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="xmldsig-core-schema.xsd" />
-	<xs:import namespace="urn:ietf:params:xml:ns:keyprov:pskc" schemaLocation="pskc.xsd" />
+	<xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="xmldsig-core-schema.xsd"/>
+	<xs:import namespace="urn:ietf:params:xml:ns:keyprov:pskc" schemaLocation="pskc.xsd"/>
 	<xs:complexType name="UpdateHistoryItemType">
 		<xs:attribute name="id" type="xs:ID" use="optional"/>
+		<xs:attribute name="updateVersion" type="xs:integer" use="required"/>
 		<xs:attribute name="index" type="xs:string" use="required"/>
 		<xs:attribute name="source" type="xs:string" use="required"/>
 		<xs:attribute name="date" type="xs:dateTime" use="required"/>
@@ -16,7 +17,7 @@
 		<xs:attribute name="id" type="xs:ID" use="optional"/>
 	</xs:complexType>
 	<xs:complexType name="KeyPeriodFilterType">
-		<xs:attribute name="periodId" type="xs:string" use="required"/>
+		<xs:attribute name="periodId" type="xs:IDREF" use="required"/>
 	</xs:complexType>
 	<xs:complexType name="LabelFilterType">
 		<xs:attribute name="label" type="xs:string" use="required"/>
@@ -48,6 +49,7 @@
 		</xs:sequence>
 		<xs:attribute name="id" type="xs:ID" use="optional"/>
 		<xs:attribute name="kid" type="xs:string" use="required"/>
+		<xs:attribute name="intendedTrackType" type="xs:string" use="optional"/>
 	</xs:complexType>
 	<xs:complexType name="ContentKeyUsageRuleListType">
 		<xs:sequence>
@@ -76,10 +78,10 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="PlaylistType" final="restriction" >
+	<xs:simpleType name="PlaylistType" final="restriction">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="master" />
-			<xs:enumeration value="media" />
+			<xs:enumeration value="master"/>
+			<xs:enumeration value="media"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:complexType name="DRMSystemType">
@@ -93,14 +95,15 @@
 			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 		<xs:attribute name="id" type="xs:ID" use="optional"/>
+		<xs:attribute name="updateVersion" type="xs:integer" use="optional"/>
 		<xs:attribute name="systemId" type="xs:string" use="required"/>
 		<xs:attribute name="kid" type="xs:string" use="required"/>
-		<xs:attribute name="updateVersion" type="xs:integer" use="optional"/>
+		<xs:attribute name="name" type="xs:string" use="optional"/>
 	</xs:complexType>
 	<xs:complexType name="DRMSystemListType">
 		<xs:sequence>
 			<xs:element name="DRMSystem" type="cpix:DRMSystemType" minOccurs="0" maxOccurs="unbounded">
-				<xs:unique name="uniquePlaylistForEachHlsSignalingDataElement">
+				<xs:unique name="uniquePlaylistForHLSSignalingData">
 					<xs:selector xpath="cpix:HLSSignalingData"/>
 					<xs:field xpath="@playlist"/>
 				</xs:unique>
@@ -116,7 +119,7 @@
 			<xs:element name="KeyProfileId" type="xs:string" minOccurs="0"/>
 			<xs:element name="KeyReference" type="xs:string" minOccurs="0"/>
 			<xs:element name="FriendlyName" type="xs:string" minOccurs="0"/>
-			<xs:element name="Data" type="pskc:KeyDataType"/>
+			<xs:element name="Data" type="pskc:KeyDataType" minOccurs="0"/>
 			<xs:element name="UserId" type="xs:string" minOccurs="0"/>
 			<xs:element name="Policy" type="pskc:PolicyType" minOccurs="0"/>
 			<xs:element name="Extensions" type="pskc:ExtensionsType" minOccurs="0" maxOccurs="unbounded"/>
@@ -129,6 +132,7 @@
 			<xs:extension base="cpix:KeyType">
 				<xs:attribute name="kid" type="xs:string" use="required"/>
 				<xs:attribute name="explicitIV" type="xs:base64Binary" use="optional"/>
+				<xs:attribute name="dependsOnKey" type="xs:string" use="optional"/>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
@@ -150,8 +154,8 @@
 			<xs:element name="ReceivingEntity" type="xs:string" minOccurs="0"/>
 		</xs:sequence>
 		<xs:attribute name="id" type="xs:ID" use="optional"/>
-		<xs:attribute name="name" type="xs:string" use="optional"/>
 		<xs:attribute name="updateVersion" type="xs:integer" use="optional"/>
+		<xs:attribute name="name" type="xs:string" use="optional"/>
 	</xs:complexType>
 	<xs:complexType name="DeliveryDataListType">
 		<xs:sequence>
@@ -171,6 +175,7 @@
 			<xs:element ref="ds:Signature" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 		<xs:attribute name="id" type="xs:ID" use="optional"/>
+		<xs:attribute name="contentId" type="xs:string" use="optional"/>
 		<xs:attribute name="name" type="xs:string" use="optional"/>
 	</xs:complexType>
 	<xs:element name="CPIX" type="cpix:CpixType"/>

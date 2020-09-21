@@ -271,6 +271,7 @@ namespace Axinom.Cpix.Tests
 		{
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
 			document.ContentKeys.Add(TestHelpers.GenerateContentKey());
+			document.ContentKeyPeriods.Add(new ContentKeyPeriod { Id = "keyperiod_1", Index = 1 });
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate3WithPublicKey));
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate4WithPublicKey));
 			TestHelpers.AddUsageRule(document);

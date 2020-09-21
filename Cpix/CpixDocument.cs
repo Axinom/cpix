@@ -39,6 +39,22 @@ namespace Axinom.Cpix
 	public sealed class CpixDocument
 	{
 		/// <summary>
+		/// Gets or sets the content ID, which specifies an identifier for the asset or
+		/// content that will be protected by the keys carried in this CPIX document. It is
+		/// recommended  to use an identifier that is unique within the scope in which this
+		/// document is published.
+		/// </summary>
+		public string ContentId
+		{
+			get => _contentId;
+			set
+			{
+				VerifyIsNotReadOnly();
+				_contentId = value;
+			}
+		}
+
+		/// <summary>
 		/// Gets the set of recipients that the CPIX document is meant to be securely delivered to.
 		/// 
 		/// If this collections contains entries, the content keys within the CPIX document are encrypted.
@@ -60,6 +76,11 @@ namespace Axinom.Cpix
 		/// Gets the set of DRM system signaling entries stored in the CPIX document.
 		/// </summary>
 		public EntityCollection<DrmSystem> DrmSystems { get; }
+
+		/// <summary>
+		/// Gets the set of content key period entries stored in the CPIX document.
+		/// </summary>
+		public EntityCollection<ContentKeyPeriod> ContentKeyPeriods { get; }
 
 		/// <summary>
 		/// Whether the values of content keys are readable.
@@ -180,9 +201,26 @@ namespace Axinom.Cpix
 				_xmlDocument = CreateNewXmlDocument();
 				_namespaceManager = XmlHelpers.CreateCpixNamespaceManager(_xmlDocument);
 			}
-
+			
 			foreach (var collection in EntityCollections)
 				collection.SaveChanges(_xmlDocument, _namespaceManager);
+
+			// Save root attributes.
+			var rootElement = _xmlDocument.DocumentElement;
+			var contentIdAttribute = rootElement.GetAttributeNode(DocumentRootElement.ContentIdAttributeName);
+
+			if (ContentId == null)
+			{
+				if (contentIdAttribute != null)
+					rootElement.RemoveAttributeNode(contentIdAttribute);
+			}
+			else
+			{
+				if (contentIdAttribute == null)
+					contentIdAttribute = rootElement.SetAttributeNode(DocumentRootElement.ContentIdAttributeName, null);
+
+				contentIdAttribute.Value = ContentId;
+			}
 
 			// If a loaded signature has been removed and we have a new signer, sign the document!
 			if (_documentSignature == null && _desiredSignedBy != null)
@@ -199,7 +237,7 @@ namespace Axinom.Cpix
 				{
 					// NB! Do not apply any formatting here, as digital signatures have already been generated
 					// and any formatting will invalidate the signatures!
-					Encoding = Encoding.UTF8,
+					Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier:false),
 					CloseOutput = false
 				}))
 				{
@@ -348,6 +386,10 @@ namespace Axinom.Cpix
 			// If any signatures match one of the "known" scopes (a collection or the document), remember it.
 			document.VerifyAllSignaturesAndRememberSigners();
 
+			// Load the root element attributes.
+			var documentRootElement = XmlHelpers.Deserialize<DocumentRootElement>(xmlDocument.DocumentElement);
+			document._contentId = documentRootElement.ContentId;
+
 			// Now load all the entity collections, doing the relevant logic at each step.
 			foreach (var collection in document.EntityCollections)
 				collection.Load(xmlDocument, document._namespaceManager);
@@ -367,6 +409,7 @@ namespace Axinom.Cpix
 			Recipients = new RecipientCollection(this);
 			ContentKeys = new ContentKeyCollection(this);
 			DrmSystems = new DrmSystemCollection(this);
+			ContentKeyPeriods = new ContentKeyPeriodCollection(this);
 			UsageRules = new UsageRuleCollection(this);
 		}
 
@@ -438,6 +481,7 @@ namespace Axinom.Cpix
 			Recipients,
 			ContentKeys,
 			DrmSystems,
+			ContentKeyPeriods,
 			UsageRules
 		};
 		#endregion
@@ -467,6 +511,9 @@ namespace Axinom.Cpix
 		// If _documentSignature is null, this is the desired identity whose signature will cover the document on save.
 		// If _documentSignature is not null, this is the current signer of the document.
 		private X509Certificate2 _desiredSignedBy;
+
+		// Root-level attribute values.
+		private string _contentId;
 
 		private void VerifyAllSignaturesAndRememberSigners()
 		{

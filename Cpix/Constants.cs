@@ -38,18 +38,18 @@ namespace Axinom.Cpix
 		/// <summary>
 		/// The correct order of the entity collection container elements in CPIX XML structure.
 		/// The schema specifies an ordered sequence and we need to ensure that we always generate
-		/// the elements in the correct XML document order, regardless of their oder in time.
+		/// the elements in the correct XML document order, regardless of their order in time.
 		/// 
 		/// Inside the top-level elements, things are simple and life is easy. All we care about is the top layer.
 		/// 
 		/// Values are name-namespace pairs.
 		/// </summary>
-		public static readonly Tuple<string, string>[] TopLevelXmlElementOrder = new Tuple<string, string>[]
+		public static readonly Tuple<string, string>[] TopLevelXmlElementOrder =
 		{
 			new Tuple<string, string>(RecipientCollection.ContainerXmlElementName, CpixNamespace),
 			new Tuple<string, string>(ContentKeyCollection.ContainerXmlElementName, CpixNamespace),
 			new Tuple<string, string>(DrmSystemCollection.ContainerXmlElementName, CpixNamespace),
-			new Tuple<string, string>("ContentKeyPeriodList", CpixNamespace),
+			new Tuple<string, string>(ContentKeyPeriodCollection.ContainerXmlElementName, CpixNamespace),
 			new Tuple<string, string>(UsageRuleCollection.ContainerXmlElementName, CpixNamespace),
 			new Tuple<string, string>("UpdateHistoryItemList", CpixNamespace),
 			new Tuple<string, string>("Signature", XmlDigitalSignatureNamespace),

@@ -37,6 +37,15 @@ namespace Axinom.Cpix
 		public string ContentProtectionData { get; set; }
 
 		/// <summary>
+		/// Gets or sets the EXT-X-KEY URI data. This is the full data to be added in
+		/// the URI attribute of the EXT-X-KEY tag of a HLS playlist. This must be UTF-8
+		/// text without a byte order mark. This shall only be set when the content is
+		/// in the HLS format. The use of this element is deprecated. Using
+		/// HLSSignalingData is recommended.
+		/// </summary>
+		public string UriExtXKey { get; set; }
+
+		/// <summary>
 		/// Gets or sets the HLS signaling data to be inserted in HLS master and/or
 		/// media playlists. The data includes #EXT-X-KEY or #EXT-X-SESSION-KEY
 		/// tags (depending on the playlist), along with potential proprietary tags.
@@ -64,6 +73,11 @@ namespace Axinom.Cpix
 		internal override void ValidateNewEntity(CpixDocument document)
 		{
 			ValidateEntity();
+
+			// Let's enforce this only for new entities, to avoid ambiguity (they
+			// contain overlapping data). But it's not against the spec.
+			if (UriExtXKey != null && HlsSignalingData != null)
+				throw new InvalidCpixDataException("A DRM system signaling entry may not contain both HLSSignalingData and URIExtXKey data, to avoid ambiguity.");
 		}
 
 		internal override void ValidateLoadedEntity(CpixDocument document)

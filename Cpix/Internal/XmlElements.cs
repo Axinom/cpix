@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
@@ -12,11 +13,16 @@ namespace Axinom.Cpix.Internal
 	// to/from the string-form of the data. XmlSerializer just converts between XML strings and string objects there.
 
 	/// <summary>
-	/// Just for creating a new blank document. The contents are serialized independently.
+	/// Just for creating a new blank document and handling root attributes. Other
+	/// serialization is performed independently.
 	/// </summary>
 	[XmlRoot("CPIX", Namespace = Constants.CpixNamespace)]
 	public sealed class DocumentRootElement
 	{
+		public const string ContentIdAttributeName = "contentId";
+
+		[XmlAttribute(ContentIdAttributeName)]
+		public string ContentId { get; set; }
 	}
 
 	#region Usage rules
@@ -25,6 +31,9 @@ namespace Axinom.Cpix.Internal
 	{
 		[XmlAttribute("kid")]
 		public Guid KeyId { get; set; }
+
+		[XmlElement("KeyPeriodFilter")]
+		public KeyPeriodElement[] KeyPeriodFilters { get; set; }
 
 		[XmlElement("LabelFilter")]
 		public LabelFilterElement[] LabelFilters { get; set; }
@@ -46,6 +55,12 @@ namespace Axinom.Cpix.Internal
 			// Malformed rules will not work right for resolving but who are we to say what is malformed or not.
 			// Nothing to really validate here, in essence. Go wild!
 		}
+	}
+
+	public sealed class KeyPeriodElement
+	{
+		[XmlAttribute("periodId")]
+		public string PeriodId { get; set; }
 	}
 
 	public sealed class LabelFilterElement
@@ -180,6 +195,9 @@ namespace Axinom.Cpix.Internal
 		[XmlElement]
 		public string ContentProtectionData { get; set; }
 
+		[XmlElement("URIExtXKey")]
+		public string UriExtXKey { get; set; }
+
 		[XmlElement("HLSSignalingData")]
 		public List<HlsSignalingDataElement> HlsSignalingData { get; set; } = new List<HlsSignalingDataElement>();
 
@@ -211,6 +229,49 @@ namespace Axinom.Cpix.Internal
 		[XmlText]
 		public string Value { get; set; } = string.Empty;
 	}
+	#endregion
+
+	#region Content key periods
+	[XmlRoot("ContentKeyPeriod", Namespace = Constants.CpixNamespace)]
+	public sealed class ContentKeyPeriodElement
+	{
+		[XmlAttribute("id")]
+		public string Id { get; set; }
+
+		[XmlIgnore]
+		public int? Index { get; set; }
+
+		[XmlAttribute("index")]
+		public string IndexAsXmlString
+		{
+			get => Index?.ToString();
+			set => Index = value != null ? (int?)int.Parse(value) : null;
+		}
+
+		[XmlIgnore]
+		public DateTimeOffset? Start { get; set; }
+
+		[XmlAttribute("start")]
+		public string StartAsXmlString
+		{
+			// XML date-times must be in the ISO 8601 ("O") format. Also, we'll allow
+			// missing timezones in order to throw less errors. But missing ones are
+			// considered as UTC.
+			get => Start?.ToString("O"); 
+			set => Start = value != null ? (DateTimeOffset?)DateTimeOffset.Parse(value, null, DateTimeStyles.AssumeUniversal) : null;
+		}
+
+		[XmlIgnore]
+		public DateTimeOffset? End { get; set; }
+
+		[XmlAttribute("end")]
+		public string EndAsXmlString
+		{
+			get => End?.ToString("O");
+			set => End = value != null ? (DateTimeOffset?)DateTimeOffset.Parse(value, null, DateTimeStyles.AssumeUniversal) : null;
+		}
+	}
+
 	#endregion
 
 	#region Content keys
@@ -265,7 +326,26 @@ namespace Axinom.Cpix.Internal
 			}
 			else
 			{
-				throw new InvalidCpixDataException("Must have either ContentKey/Data/Secret/EncryptedValue or ContentKey/Data/Secret/PlainValue.");
+				// Note: This library originally considered the content key element not having any
+				// key data an error and this case threw an error ("Must have either
+				// ContentKey/Data/Secret/EncryptedValue or ContentKey/Data/Secret/PlainValue.").
+				// The 'data' element was also required at the schema level. However, according to
+				// official spec and schema content key data is optional. And in practice there's a
+				// demand for using CPIX for key request purposes where content key IDs may need to
+				// be present, but data yet really cannot be.
+				//
+				// Counter-argument from at least one of the CPIX authors (the same who created this
+				// library; see https://github.com/Dash-Industry-Forum/CPIX/issues/88) is that CPIX
+				// should only be used for key transportation and not for key requests, which would
+				// make key elements without data meaningless. Since the library likely was developed
+				// with this requirement in mind, there's some danger that the removal of this
+				// requirement may "destabilize" some flows. However, running automatic and brief
+				// manual tests revealed no problems when removing just the on-load validation.
+				//
+				// Therefore, let's not require content key data on-load, but keep the requirement
+				// when adding new content keys to avoid compromising some of the existing
+				// functionality. This is also more in line with the library's philosophy: be strict
+				// when creating a new document, but more lenient when loading existing documents.
 			}
 		}
 	}
