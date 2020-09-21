@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
@@ -248,23 +249,26 @@ namespace Axinom.Cpix.Internal
 		}
 
 		[XmlIgnore]
-		public DateTime? Start { get; set; }
+		public DateTimeOffset? Start { get; set; }
 
 		[XmlAttribute("start")]
 		public string StartAsXmlString
 		{
-			get => Start?.ToString("o"); 
-			set => Start = value != null ? (DateTime?)DateTime.Parse(value) : null;
+			// XML date-times must be in the ISO 8601 ("O") format. Also, we'll allow
+			// missing timezones in order to throw less errors. But missing ones are
+			// considered as UTC.
+			get => Start?.ToString("O"); 
+			set => Start = value != null ? (DateTimeOffset?)DateTimeOffset.Parse(value, null, DateTimeStyles.AssumeUniversal) : null;
 		}
 
 		[XmlIgnore]
-		public DateTime? End { get; set; }
+		public DateTimeOffset? End { get; set; }
 
 		[XmlAttribute("end")]
 		public string EndAsXmlString
 		{
-			get => End?.ToString("o");
-			set => End = value != null ? (DateTime?)DateTime.Parse(value) : null;
+			get => End?.ToString("O");
+			set => End = value != null ? (DateTimeOffset?)DateTimeOffset.Parse(value, null, DateTimeStyles.AssumeUniversal) : null;
 		}
 	}
 

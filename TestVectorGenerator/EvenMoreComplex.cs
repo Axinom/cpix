@@ -86,8 +86,8 @@ The resulting output is still valid and all the signatures should successfully p
 			document.ContentKeyPeriods.Add(new ContentKeyPeriod
 			{
 				Id = "keyperiod_2",
-				Start = new DateTime(2020, 9, 4, 1, 1, 1),
-				End = new DateTime(2020, 9, 4, 2, 1, 1)
+				Start = new DateTimeOffset(2020, 9, 4, 1, 1, 1, TimeSpan.Zero),
+				End = new DateTimeOffset(2020, 9, 4, 2, 1, 1, TimeSpan.Zero)
 			});
 
 			document.Recipients.Add(new Recipient(TestHelpers.Certificate1WithPublicKey));

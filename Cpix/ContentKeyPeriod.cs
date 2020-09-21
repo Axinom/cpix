@@ -22,14 +22,14 @@ namespace Axinom.Cpix
 		/// for the period. Mutually inclusive with end, and mutually exclusive with
 		/// index.
 		/// </summary>
-		public DateTime? Start { get; set; }
+		public DateTimeOffset? Start { get; set; }
 
 		/// <summary>
 		/// Gets or sets the wall clock (Live) or media time (VOD) for the end time
 		/// for the period. Mutually inclusive with start, and mutually exclusive
 		/// with index.
 		/// </summary>
-		public DateTime? End { get; set; }
+		public DateTimeOffset? End { get; set; }
 
 		internal override void ValidateNewEntity(CpixDocument document)
 		{
@@ -43,11 +43,12 @@ namespace Axinom.Cpix
 
 		private void ValidateEntity()
 		{
-			if ((Index == null && (Start == null || End == null))
-				|| (Index != null && (Start != null || End != null)))
-			{
-				throw new InvalidCpixDataException("For each content key period either the index or both the start and end time must be specified.");
-			}
+			var invalidIndexStartEndCombination =
+				(Index == null && (Start == null || End == null)) ||
+				(Index != null && (Start != null || End != null));
+
+			if (invalidIndexStartEndCombination)
+				throw new InvalidCpixDataException("A content key period must specify either only the index or both the start and end time.");
 		}
 	}
 }

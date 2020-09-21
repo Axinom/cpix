@@ -130,8 +130,8 @@ namespace Axinom.Cpix.Tests
 			document.ContentKeyPeriods.Add(new ContentKeyPeriod
 			{
 				Id = "keyperiod_1",
-				Start = DateTime.Now,
-				End = DateTime.Now.AddHours(1)
+				Start = DateTimeOffset.UtcNow,
+				End = DateTimeOffset.UtcNow.AddHours(1)
 			});
 
 			AddUsageRule(document);

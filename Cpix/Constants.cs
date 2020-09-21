@@ -38,7 +38,7 @@ namespace Axinom.Cpix
 		/// <summary>
 		/// The correct order of the entity collection container elements in CPIX XML structure.
 		/// The schema specifies an ordered sequence and we need to ensure that we always generate
-		/// the elements in the correct XML document order, regardless of their oder in time.
+		/// the elements in the correct XML document order, regardless of their order in time.
 		/// 
 		/// Inside the top-level elements, things are simple and life is easy. All we care about is the top layer.
 		/// 

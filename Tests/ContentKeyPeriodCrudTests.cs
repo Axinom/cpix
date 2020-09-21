@@ -45,14 +45,14 @@ namespace Axinom.Cpix.Tests
 			})));
 			Assert.Null(Record.Exception(() => document.ContentKeyPeriods.Add(new ContentKeyPeriod
 			{
-				Start = DateTime.Now,
-				End = DateTime.Now
+				Start = DateTimeOffset.UtcNow,
+				End = DateTimeOffset.UtcNow
 			})));
 			Assert.Null(Record.Exception(() => document.ContentKeyPeriods.Add(new ContentKeyPeriod
 			{
 				Id = "test",
-				Start = DateTime.Now,
-				End = DateTime.Now
+				Start = DateTimeOffset.UtcNow,
+				End = DateTimeOffset.UtcNow
 			})));
 		}
 
@@ -66,27 +66,27 @@ namespace Axinom.Cpix.Tests
 			}));
 			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeyPeriods.Add(new ContentKeyPeriod
 			{
-				Start = DateTime.Now
+				Start = DateTimeOffset.UtcNow
 			}));
 			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeyPeriods.Add(new ContentKeyPeriod
 			{
-				End = DateTime.Now
-			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeyPeriods.Add(new ContentKeyPeriod
-			{
-				Index = 1,
-				Start = DateTime.Now
+				End = DateTimeOffset.UtcNow
 			}));
 			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeyPeriods.Add(new ContentKeyPeriod
 			{
 				Index = 1,
-				End = DateTime.Now
+				Start = DateTimeOffset.UtcNow
 			}));
 			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeyPeriods.Add(new ContentKeyPeriod
 			{
 				Index = 1,
-				Start = DateTime.Now,
-				End = DateTime.Now
+				End = DateTimeOffset.UtcNow
+			}));
+			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeyPeriods.Add(new ContentKeyPeriod
+			{
+				Index = 1,
+				Start = DateTimeOffset.UtcNow,
+				End = DateTimeOffset.UtcNow
 			}));
 		}
 
@@ -104,7 +104,7 @@ namespace Axinom.Cpix.Tests
 
 			// The corruption should still be caught.
 			var ex = Assert.Throws<InvalidCpixDataException>(() => document.Save(new MemoryStream()));
-			Assert.Contains("index or both the start and end time must be specified", ex.Message);
+			Assert.Contains("only the index or both the start and end time", ex.Message);
 		}
 
 		[Fact]
@@ -146,7 +146,7 @@ namespace Axinom.Cpix.Tests
 			var cpix = string.Format(cpixTemplate, invalidContentKeyPeriodAttributeSet);
 
 			var ex = Assert.Throws<InvalidCpixDataException>(() => CpixDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(cpix))));
-			Assert.Contains("index or both the start and end time must be specified", ex.Message);
+			Assert.Contains("only the index or both the start and end time", ex.Message);
 		}
 
 		[Fact]
@@ -187,7 +187,19 @@ namespace Axinom.Cpix.Tests
 
 			Assert.Contains("is already used as an ID", ex.Message);
 		}
-		
+
+		[Fact]
+		public void Load_WithCpixContainingContentKeyPeriodWithUnspecifiedTimezones_AssumesUtc()
+		{
+			// By default DateTimeOffsets assume local timezone, if not specified, but
+			// we want UTC. Note: this test only makes sense if local timezone is not UTC.
+			var document = CpixDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes("<?xml version=\"1.0\" encoding=\"utf-8\"?><CPIX xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:dashif:org:cpix\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" xmlns:enc=\"http://www.w3.org/2001/04/xmlenc#\" xmlns:pskc=\"urn:ietf:params:xml:ns:keyprov:pskc\"><ContentKeyPeriodList><ContentKeyPeriod start=\"2020-09-02T18:40:49\" end=\"2020-09-02T19:40:49\" /></ContentKeyPeriodList></CPIX>"))); ;
+
+			Assert.Single(document.ContentKeyPeriods);
+			Assert.Equal(TimeSpan.Zero, document.ContentKeyPeriods.First().Start?.Offset);
+			Assert.Equal(TimeSpan.Zero, document.ContentKeyPeriods.First().End?.Offset);
+		}
+
 		[Fact]
 		public void Roundtrip_WithSignedCollectionOfVariousValidContentKeyPeriods_Succeeds()
 		{
@@ -197,8 +209,8 @@ namespace Axinom.Cpix.Tests
 			var expectedPeriod2Id = "period_2";
 			var expectedPeriod2Index = 2;
 			var expectedPeriod3Id = "period_3";
-			var expectedPeriod3Start = DateTime.Now;
-			var expectedPeriod3End = DateTime.Now.AddHours(1);
+			var expectedPeriod3Start = DateTimeOffset.UtcNow;
+			var expectedPeriod3End = DateTimeOffset.UtcNow.AddHours(1);
 
 			document.ContentKeyPeriods.Add(new ContentKeyPeriod { Index = expectedPeriod1Index });
 			document.ContentKeyPeriods.Add(new ContentKeyPeriod { Id = expectedPeriod2Id, Index = expectedPeriod2Index});
