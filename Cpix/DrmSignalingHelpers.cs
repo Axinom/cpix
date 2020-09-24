@@ -61,9 +61,9 @@ namespace Axinom.Cpix
 			}
 		}
 
-		public static string GeneratePlayReadyDashSignaling(Guid keyId)
+		public static string GeneratePlayReadyDashSignaling(Guid keyId, string playReadyLaUrl = null)
 		{
-			var psshBoxContents = GeneratePlayReadyHeader(keyId);
+			var psshBoxContents = GeneratePlayReadyHeader(keyId, playReadyLaUrl);
 			var psshBox = CreatePsshBox(PlayReadySystemId, psshBoxContents);
 
 			var psshElement = new XElement(DashConstants.PsshName, Convert.ToBase64String(psshBox));
@@ -81,11 +81,11 @@ namespace Axinom.Cpix
 			return psshElement.ToString();
 		}
 
-		public static string GeneratePlayReadyMssSignaling(Guid keyId)
+		public static string GeneratePlayReadyMssSignaling(Guid keyId, string playReadyLaUrl = null)
 		{
 			// For MSS the signaling is the base64-encoded PRO.
 
-			var psshBoxContents = GeneratePlayReadyHeader(keyId);
+			var psshBoxContents = GeneratePlayReadyHeader(keyId, playReadyLaUrl);
 			return Convert.ToBase64String(psshBoxContents);
 		}
 
@@ -109,9 +109,9 @@ namespace Axinom.Cpix
 			return $"#EXT-X-KEY:{GenerateFairPlayHlsAttributes(keyId)}";
 		}
 
-		public static byte[] GeneratePlayReadyPsshBox(Guid keyId)
+		public static byte[] GeneratePlayReadyPsshBox(Guid keyId, string playReadyLaUrl = null)
 		{
-			var psshBoxContents = GeneratePlayReadyHeader(keyId);
+			var psshBoxContents = GeneratePlayReadyHeader(keyId, playReadyLaUrl);
 
 			return CreatePsshBox(PlayReadySystemId, psshBoxContents);
 		}
@@ -185,14 +185,14 @@ namespace Axinom.Cpix
 			}
 		}
 
-		private static byte[] GeneratePlayReadyHeader(Guid keyId)
+		private static byte[] GeneratePlayReadyHeader(Guid keyId, string playReadyLaUrl = null)
 		{
 			var kidString = Convert.ToBase64String(keyId.ToByteArray());
 
 			// Plain text manipulation here to keep things simple. Some common issues include:
 			// 1) The first element must be EXACTLY as written here. Including small things like order of attributes.
 			// 2) There must be no extra whitespace anywhere.
-			var xml = $"<WRMHEADER xmlns=\"http://schemas.microsoft.com/DRM/2007/03/PlayReadyHeader\" version=\"4.0.0.0\"><DATA><PROTECTINFO><KEYLEN>16</KEYLEN><ALGID>AESCTR</ALGID></PROTECTINFO><KID>{kidString}</KID></DATA></WRMHEADER>";
+			var xml = $"<WRMHEADER xmlns=\"http://schemas.microsoft.com/DRM/2007/03/PlayReadyHeader\" version=\"4.0.0.0\"><DATA><PROTECTINFO><KEYLEN>16</KEYLEN><ALGID>AESCTR</ALGID></PROTECTINFO>{(!string.IsNullOrWhiteSpace(playReadyLaUrl) ? $"<LA_URL>{playReadyLaUrl}</LA_URL>" : "")}<KID>{kidString}</KID></DATA></WRMHEADER>";
 
 			var xmlBytes = Encoding.Unicode.GetBytes(xml);
 
