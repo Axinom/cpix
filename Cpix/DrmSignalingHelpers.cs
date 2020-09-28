@@ -99,14 +99,20 @@ namespace Axinom.Cpix
 			return $"#EXT-X-KEY:{GenerateWidevineHlsAttributes(keyId)}";
 		}
 
-		public static string GenerateFairPlayHlsMasterPlaylistSignaling(Guid keyId)
+		public static string GenerateFairPlayHlsMasterPlaylistSignaling(Guid keyId, byte[] iv = null)
 		{
-			return $"#EXT-X-SESSION-KEY:{GenerateFairPlayHlsAttributes(keyId)}";
+			if (iv != null && iv.Length != 16)
+				throw new ArgumentException("IV must be exactly 16 bytes.");
+			
+			return $"#EXT-X-SESSION-KEY:{GenerateFairPlayHlsAttributes(keyId, iv)}";
 		}
 
-		public static string GenerateFairPlayHlsMediaPlaylistSignaling(Guid keyId)
+		public static string GenerateFairPlayHlsMediaPlaylistSignaling(Guid keyId, byte[] iv = null)
 		{
-			return $"#EXT-X-KEY:{GenerateFairPlayHlsAttributes(keyId)}";
+			if (iv != null && iv.Length != 16)
+				throw new ArgumentException("IV must be exactly 16 bytes.");
+
+			return $"#EXT-X-KEY:{GenerateFairPlayHlsAttributes(keyId, iv)}";
 		}
 
 		public static byte[] GeneratePlayReadyPsshBox(Guid keyId, string playReadyLaUrl = null)
@@ -233,9 +239,11 @@ namespace Axinom.Cpix
 			return widevineAttributes;
 		}
 
-		private static string GenerateFairPlayHlsAttributes(Guid keyId)
+		private static string GenerateFairPlayHlsAttributes(Guid keyId, byte[] iv = null)
 		{
-			return $"METHOD=SAMPLE-AES,URI=\"skd://{keyId}\",KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\"";
+			return $"METHOD=SAMPLE-AES,URI=\"skd://{keyId}" +
+				(iv == null ? "" : $":{ByteArrayToHexString(iv)}") +
+				"\",KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\"";
 		}
 
 		private static string ByteArrayToHexString(byte[] bytes)
