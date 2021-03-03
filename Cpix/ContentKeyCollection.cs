@@ -23,6 +23,7 @@ namespace Axinom.Cpix
 			{
 				KeyId = entity.Id,
 				ExplicitIv = entity.ExplicitIv,
+				CommonEncryptionScheme = entity.CommonEncryptionScheme,
 				Data = new DataElement
 				{
 					Secret = new SecretDataElement()
@@ -135,6 +136,7 @@ namespace Axinom.Cpix
 			{
 				Id = contentKey.KeyId,
 				ExplicitIv = contentKey.ExplicitIv,
+				CommonEncryptionScheme = contentKey.CommonEncryptionScheme,
 				Value = value,
 				IsLoadedEncryptedKey = contentKey.HasEncryptedValue
 			};

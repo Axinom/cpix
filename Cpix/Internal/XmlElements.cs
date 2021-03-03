@@ -20,9 +20,13 @@ namespace Axinom.Cpix.Internal
 	public sealed class DocumentRootElement
 	{
 		public const string ContentIdAttributeName = "contentId";
+		public const string VersionAttributeName = "version";
 
 		[XmlAttribute(ContentIdAttributeName)]
 		public string ContentId { get; set; }
+
+		[XmlAttribute(VersionAttributeName)]
+		public string Version { get; set; }
 	}
 
 	#region Usage rules
@@ -283,6 +287,9 @@ namespace Axinom.Cpix.Internal
 
 		[XmlAttribute("explicitIV")]
 		public byte[] ExplicitIv { get; set; }
+
+		[XmlAttribute("commonEncryptionScheme")]
+		public string CommonEncryptionScheme { get; set; }
 
 		[XmlElement]
 		public DataElement Data { get; set; }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Axinom.Cpix
 {
@@ -26,9 +27,19 @@ namespace Axinom.Cpix
 		public byte[] ExplicitIv { get; set; }
 
 		/// <summary>
+		/// Gets or sets the Common Encryption protection scheme that the content key
+		/// is intended to be used with. When set, the value shall be a 4-character
+		/// protection scheme name, one of "cenc", "cens", "cbc1", "cbcs". If omitted,
+		/// then content may be encrypted using any Common Encryption protection scheme.
+		/// </summary>
+		public string CommonEncryptionScheme { get; set; }
+
+		/// <summary>
 		/// Gets whether the content key is a loaded encrypted content key.
 		/// </summary>
 		internal bool IsLoadedEncryptedKey { get; set; }
+
+		private static readonly string[] ValidCommonEncryptionSchemes = { "cenc", "cens", "cbc1", "cbcs" };
 
 		internal override void ValidateLoadedEntity(CpixDocument document)
 		{
@@ -41,6 +52,13 @@ namespace Axinom.Cpix
 
 			if (ExplicitIv != null && ExplicitIv.Length != Constants.ContentKeyExplicitIvLengthInBytes)
 				throw new InvalidCpixDataException($"The explicit IVs associated with content keys must be {Constants.ContentKeyExplicitIvLengthInBytes} byte long.");
+
+			if (CommonEncryptionScheme != null && !ValidCommonEncryptionSchemes.Contains(CommonEncryptionScheme))
+			{
+				throw new InvalidCpixDataException(
+					$"The Common Encryption protection scheme associated with content keys must be one of" +
+					$"{string.Join(", ", ValidCommonEncryptionSchemes.Select(x => $"'{x}'"))}.");
+			}
 		}
 
 		internal override void ValidateNewEntity(CpixDocument document)
@@ -53,6 +71,13 @@ namespace Axinom.Cpix
 
 			if (ExplicitIv != null && ExplicitIv.Length != Constants.ContentKeyExplicitIvLengthInBytes)
 				throw new InvalidCpixDataException($"The explicit IVs associated with content keys must be {Constants.ContentKeyExplicitIvLengthInBytes} byte long.");
+
+			if (CommonEncryptionScheme != null && !ValidCommonEncryptionSchemes.Contains(CommonEncryptionScheme))
+			{
+				throw new InvalidCpixDataException(
+					$"The Common Encryption protection scheme associated with content keys must be one of" +
+					$"{string.Join(", ", ValidCommonEncryptionSchemes.Select(x => $"'{x}'"))}.");
+			}
 		}
 	}
 }
