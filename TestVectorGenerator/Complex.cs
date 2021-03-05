@@ -32,25 +32,29 @@ namespace Axinom.Cpix.TestVectorGenerator
 			{
 				Id = new Guid("b4c3188b-eddd-453d-9bc2-1cbca7566239"),
 				Value = Convert.FromBase64String("b1pkxdNYqPxljV68gohWcw=="),
-				ExplicitIv = Convert.FromBase64String("eMCi02KFz9fdUGd/6B+lgw==")
+				ExplicitIv = Convert.FromBase64String("eMCi02KFz9fdUGd/6B+lgw=="),
+				CommonEncryptionScheme = "cenc"
 			});
 			document.ContentKeys.Add(new ContentKey
 			{
 				Id = new Guid("c6294999-5f48-445f-bcce-f7e5f736d7c6"),
 				Value = Convert.FromBase64String("moOVrJvuhUUQ4LpPusAd5g=="),
-				ExplicitIv = Convert.FromBase64String("XiLNTv8ZHbMI+F2g2TkL6w==")
+				ExplicitIv = Convert.FromBase64String("XiLNTv8ZHbMI+F2g2TkL6w=="),
+				CommonEncryptionScheme = "cenc"
 			});
 			document.ContentKeys.Add(new ContentKey
 			{
 				Id = new Guid("b181a4df-2c38-41a4-993f-90b2f21343f6"),
 				Value = Convert.FromBase64String("67gabJtKDWd2crHr+JQT1A=="),
-				ExplicitIv = Convert.FromBase64String("E5XdJoK4ja+Rf/dcVvhRTA==")
+				ExplicitIv = Convert.FromBase64String("E5XdJoK4ja+Rf/dcVvhRTA=="),
+				CommonEncryptionScheme = "cenc"
 			});
 			document.ContentKeys.Add(new ContentKey
 			{
 				Id = new Guid("a466cdfd-e556-4b1d-8098-c1a4aa78997a"),
 				Value = Convert.FromBase64String("rRuRUWAibaUtai0qQnb71g=="),
-				ExplicitIv = Convert.FromBase64String("yIZGwf6xwXgRHyXBNV0jRA==")
+				ExplicitIv = Convert.FromBase64String("yIZGwf6xwXgRHyXBNV0jRA=="),
+				CommonEncryptionScheme = "cenc"
 			});
 
 			DrmSignalingHelpers.AddDefaultSignalingForAllKeys(document);

@@ -74,7 +74,7 @@
 	<xs:complexType name="HLSSignalingDataType">
 		<xs:simpleContent>
 			<xs:extension base="xs:base64Binary">
-				<xs:attribute name="playlist" type="cpix:PlaylistType" default="media" use="optional"/>
+				<xs:attribute name="playlist" type="cpix:PlaylistType" use="optional"/>
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
@@ -127,12 +127,23 @@
 		<xs:attribute name="id" type="xs:ID" use="optional"/>
 		<xs:attribute name="Algorithm" type="pskc:KeyAlgorithmType" use="optional"/>
 	</xs:complexType>
+	<xs:simpleType name="CencSchemeType" final="restriction">
+		<xs:restriction base="xs:string">
+			<xs:length value="4"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="KeyIdType">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}"/>
+		</xs:restriction>
+	</xs:simpleType>
 	<xs:complexType name="ContentKeyType">
 		<xs:complexContent>
 			<xs:extension base="cpix:KeyType">
-				<xs:attribute name="kid" type="xs:string" use="required"/>
+				<xs:attribute name="kid" type="cpix:KeyIdType" use="required"/>
 				<xs:attribute name="explicitIV" type="xs:base64Binary" use="optional"/>
 				<xs:attribute name="dependsOnKey" type="xs:string" use="optional"/>
+				<xs:attribute name="commonEncryptionScheme" type="cpix:CencSchemeType" use="optional"/>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
@@ -177,6 +188,7 @@
 		<xs:attribute name="id" type="xs:ID" use="optional"/>
 		<xs:attribute name="contentId" type="xs:string" use="optional"/>
 		<xs:attribute name="name" type="xs:string" use="optional"/>
+		<xs:attribute name="version" type="xs:string" use="optional"/>
 	</xs:complexType>
 	<xs:element name="CPIX" type="cpix:CpixType"/>
 </xs:schema>

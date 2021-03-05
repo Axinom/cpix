@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Schema;
 
@@ -51,6 +52,38 @@ namespace Axinom.Cpix
 			{
 				VerifyIsNotReadOnly();
 				_contentId = value;
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the version of this CPIX document. The value shall reference a published version of
+		/// the CPIX Guidelines and be structured as majorVersion.minorVersion (Example: '2.3'). If the CPIX
+		/// client knows that it doesn’t support all the features of a given CPIX version, it needs to behave
+		/// according to the recommendations of the API used to exchange the CPIX document.
+		/// </summary>
+		public string Version
+		{
+			get => _version;
+			set
+			{
+				VerifyIsNotReadOnly();
+
+				if (value != null)
+				{
+					const string versionFormatPattern = @"^(\d+).(\d+)$";
+					var match = Regex.Match(value, versionFormatPattern);
+
+					if (!match.Success)
+						throw new InvalidCpixDataException($"Invalid CPIX document version: '{value}'. The expected format is 'MajorVersion.MinorVersion'.");
+
+					var majorVersion = uint.Parse(match.Groups[1].Value);
+					var minorVersion = uint.Parse(match.Groups[2].Value);
+
+					if (majorVersion < 2 || minorVersion < 3)
+						throw new InvalidCpixDataException($"Invalid CPIX document version: '{value}'. The version attribute is available from CPIX 2.3.");
+				}
+
+				_version = value;
 			}
 		}
 
@@ -207,6 +240,7 @@ namespace Axinom.Cpix
 
 			// Save root attributes.
 			var rootElement = _xmlDocument.DocumentElement;
+			
 			var contentIdAttribute = rootElement.GetAttributeNode(DocumentRootElement.ContentIdAttributeName);
 
 			if (ContentId == null)
@@ -220,6 +254,21 @@ namespace Axinom.Cpix
 					contentIdAttribute = rootElement.SetAttributeNode(DocumentRootElement.ContentIdAttributeName, null);
 
 				contentIdAttribute.Value = ContentId;
+			}
+
+			var versionAttribute = rootElement.GetAttributeNode(DocumentRootElement.VersionAttributeName);
+
+			if (Version == null)
+			{
+				if (versionAttribute != null)
+					rootElement.RemoveAttributeNode(versionAttribute);
+			}
+			else
+			{
+				if (versionAttribute == null)
+					versionAttribute = rootElement.SetAttributeNode(DocumentRootElement.VersionAttributeName, null);
+
+				versionAttribute.Value = Version;
 			}
 
 			// If a loaded signature has been removed and we have a new signer, sign the document!
@@ -382,13 +431,15 @@ namespace Axinom.Cpix
 			// We will fill this instance with the loaded data.
 			var document = new CpixDocument(xmlDocument, recipientCertificates);
 
-			// Verify all signatures in the document.
-			// If any signatures match one of the "known" scopes (a collection or the document), remember it.
-			document.VerifyAllSignaturesAndRememberSigners();
-
 			// Load the root element attributes.
 			var documentRootElement = XmlHelpers.Deserialize<DocumentRootElement>(xmlDocument.DocumentElement);
 			document._contentId = documentRootElement.ContentId;
+			// Assign the version via the property instead of the field to trigger validations.
+			document.Version = documentRootElement.Version;
+
+			// Verify all signatures in the document.
+			// If any signatures match one of the "known" scopes (a collection or the document), remember it.
+			document.VerifyAllSignaturesAndRememberSigners();
 
 			// Now load all the entity collections, doing the relevant logic at each step.
 			foreach (var collection in document.EntityCollections)
@@ -514,6 +565,7 @@ namespace Axinom.Cpix
 
 		// Root-level attribute values.
 		private string _contentId;
+		private string _version;
 
 		private void VerifyAllSignaturesAndRememberSigners()
 		{

@@ -55,25 +55,29 @@ The resulting output is still valid and all the signatures should successfully p
 			{
 				Id = new Guid("152ae2e0-f455-486e-81d1-6df5fc5d7179"),
 				Value = Convert.FromBase64String("B+DoDP4r/j1NEr7b2aKXlw=="),
-				ExplicitIv = Convert.FromBase64String("7qFwxoV85KBUNVXw8rgY3w==")
+				ExplicitIv = Convert.FromBase64String("7qFwxoV85KBUNVXw8rgY3w=="),
+				CommonEncryptionScheme = "cenc"
 			});
 			document.ContentKeys.Add(new ContentKey
 			{
 				Id = new Guid("0cbe1c84-5c54-4ce8-8893-ff77f7d793e1"),
 				Value = Convert.FromBase64String("CedOXHsXc3xQ+HQuJOJZ+g=="),
-				ExplicitIv = Convert.FromBase64String("zm4oYmRJWbLPrqXnhFS00w==")
+				ExplicitIv = Convert.FromBase64String("zm4oYmRJWbLPrqXnhFS00w=="),
+				CommonEncryptionScheme = "cenc"
 			});
 			document.ContentKeys.Add(new ContentKey
 			{
 				Id = new Guid("486a8d08-29f7-42f5-9a9a-a1ab9b0685ad"),
 				Value = Convert.FromBase64String("ADq3douHS0QrY1omNB1njA=="),
-				ExplicitIv = Convert.FromBase64String("wS4WCf4LgOe45BuG/qv5LA==")
+				ExplicitIv = Convert.FromBase64String("wS4WCf4LgOe45BuG/qv5LA=="),
+				CommonEncryptionScheme = "cenc"
 			});
 			document.ContentKeys.Add(new ContentKey
 			{
 				Id = new Guid("84044421-a871-4999-8931-289aa6f4a607"),
 				Value = Convert.FromBase64String("JlZWL6tfkh6e8k9U1IOC8A=="),
-				ExplicitIv = Convert.FromBase64String("9tlEFBcaX2S8/tfgQw9vAQ==")
+				ExplicitIv = Convert.FromBase64String("9tlEFBcaX2S8/tfgQw9vAQ=="),
+				CommonEncryptionScheme = "cenc"
 			});
 
 			DrmSignalingHelpers.AddDefaultSignalingForAllKeys(document);

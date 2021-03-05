@@ -1,7 +1,7 @@
 Axinom CPIX library
 ===================
 
-A .NET Standard library for working with CPIX (Content Protection Information Exchange) documents, as defined by [DASH Industry Forum](http://dashif.org/guidelines/). This library implements CPIX version 2.2.
+A .NET Standard library for working with CPIX (Content Protection Information Exchange) documents, as defined by [DASH Industry Forum](http://dashif.org/guidelines/). This library implements CPIX version 2.3.
 
 Installation
 ============

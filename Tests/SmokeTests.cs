@@ -18,6 +18,7 @@ namespace Axinom.Cpix.Tests
 			Assert.Empty(document.ContentKeys);
 			Assert.Empty(document.UsageRules);
 			Assert.Null(document.ContentId);
+			Assert.Null(document.Version);
 		}
 
 		[Fact]
@@ -34,6 +35,7 @@ namespace Axinom.Cpix.Tests
 			Assert.Empty(document.ContentKeys);
 			Assert.Empty(document.UsageRules);
 			Assert.Null(document.ContentId);
+			Assert.Null(document.Version);
 		}
 
 		[Fact]

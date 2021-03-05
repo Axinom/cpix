@@ -54,5 +54,10 @@ namespace Axinom.Cpix
 			new Tuple<string, string>("UpdateHistoryItemList", CpixNamespace),
 			new Tuple<string, string>("Signature", XmlDigitalSignatureNamespace),
 		};
+
+		/// <summary>
+		/// Valid Common Encryption protection scheme identifiers.
+		/// </summary>
+		public static readonly string[] ValidCommonEncryptionSchemes = { "cenc", "cens", "cbc1", "cbcs" };
 	}
 }
