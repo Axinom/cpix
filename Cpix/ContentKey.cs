@@ -39,44 +39,40 @@ namespace Axinom.Cpix
 		/// </summary>
 		internal bool IsLoadedEncryptedKey { get; set; }
 
-		private static readonly string[] ValidCommonEncryptionSchemes = { "cenc", "cens", "cbc1", "cbcs" };
-
 		internal override void ValidateLoadedEntity(CpixDocument document)
 		{
-			if (Id == Guid.Empty)
-				throw new InvalidCpixDataException("A unique key ID must be provided for each content key.");
+			ValidateEntity(document);
 
 			// We skip length check if we do not have a value for an encrypted key (it will be read-only).
 			if (IsLoadedEncryptedKey && Value != null && Value.Length != Constants.ContentKeyLengthInBytes)
 				throw new InvalidCpixDataException($"A {Constants.ContentKeyLengthInBytes}-byte value must be provided for each new content key.");
-
-			if (ExplicitIv != null && ExplicitIv.Length != Constants.ContentKeyExplicitIvLengthInBytes)
-				throw new InvalidCpixDataException($"The explicit IVs associated with content keys must be {Constants.ContentKeyExplicitIvLengthInBytes} byte long.");
-
-			if (CommonEncryptionScheme != null && !ValidCommonEncryptionSchemes.Contains(CommonEncryptionScheme))
-			{
-				throw new InvalidCpixDataException(
-					$"The Common Encryption protection scheme associated with content keys must be one of" +
-					$"{string.Join(", ", ValidCommonEncryptionSchemes.Select(x => $"'{x}'"))}.");
-			}
 		}
 
 		internal override void ValidateNewEntity(CpixDocument document)
 		{
-			if (Id == Guid.Empty)
-				throw new InvalidCpixDataException("A unique key ID must be provided for each content key.");
+			ValidateEntity(document);
 
 			if (Value == null || Value.Length != Constants.ContentKeyLengthInBytes)
 				throw new InvalidCpixDataException($"A {Constants.ContentKeyLengthInBytes}-byte value must be provided for each new content key.");
+		}
+
+		private void ValidateEntity(CpixDocument document)
+		{
+			// Contains validation code common for both loaded and new entities.
+			// This private method shall be called from the ValidateLoadedEntity()
+			// and ValidateNewEntity() methods.
+
+			if (Id == Guid.Empty)
+				throw new InvalidCpixDataException("A unique key ID must be provided for each content key.");
 
 			if (ExplicitIv != null && ExplicitIv.Length != Constants.ContentKeyExplicitIvLengthInBytes)
 				throw new InvalidCpixDataException($"The explicit IVs associated with content keys must be {Constants.ContentKeyExplicitIvLengthInBytes} byte long.");
 
-			if (CommonEncryptionScheme != null && !ValidCommonEncryptionSchemes.Contains(CommonEncryptionScheme))
+			if (CommonEncryptionScheme != null && !Constants.ValidCommonEncryptionSchemes.Contains(CommonEncryptionScheme))
 			{
 				throw new InvalidCpixDataException(
 					$"The Common Encryption protection scheme associated with content keys must be one of" +
-					$"{string.Join(", ", ValidCommonEncryptionSchemes.Select(x => $"'{x}'"))}.");
+					$"{string.Join(", ", Constants.ValidCommonEncryptionSchemes.Select(x => $"'{x}'"))}.");
 			}
 		}
 	}

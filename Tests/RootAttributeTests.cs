@@ -103,7 +103,7 @@ namespace Axinom.Cpix.Tests
 			document.SignedBy = TestHelpers.Certificate1WithPrivateKey;
 			document = TestHelpers.Reload(document);
 
-			Assert.Throws<InvalidOperationException>(() => document.Version = "fail");
+			Assert.Throws<InvalidOperationException>(() => document.Version = "2.3");
 		}
 
 		[Theory]
@@ -114,7 +114,7 @@ namespace Axinom.Cpix.Tests
 		{
 			var document = new CpixDocument();
 
-			Assert.Throws<InvalidCpixDataException>(() => document.Save(document.Version = invalidVersion));
+			Assert.Throws<InvalidCpixDataException>(() => document.Version = invalidVersion);
 		}
 	}
 }

@@ -63,21 +63,11 @@ namespace Axinom.Cpix
 		/// </summary>
 		public string Version
 		{
-			get => VersionInternal;
-
+			get => _version;
 			set
 			{
 				VerifyIsNotReadOnly();
 
-				VersionInternal = value;
-			}
-		}
-
-		private string VersionInternal
-		{
-			get => _version;
-			set
-			{
 				if (value != null)
 				{
 					const string versionFormatPattern = @"^(\d+).(\d+)$";
@@ -441,14 +431,15 @@ namespace Axinom.Cpix
 			// We will fill this instance with the loaded data.
 			var document = new CpixDocument(xmlDocument, recipientCertificates);
 
-			// Verify all signatures in the document.
-			// If any signatures match one of the "known" scopes (a collection or the document), remember it.
-			document.VerifyAllSignaturesAndRememberSigners();
-
 			// Load the root element attributes.
 			var documentRootElement = XmlHelpers.Deserialize<DocumentRootElement>(xmlDocument.DocumentElement);
 			document._contentId = documentRootElement.ContentId;
-			document.VersionInternal = documentRootElement.Version;
+			// Assign the version via the property instead of the field to trigger validations.
+			document.Version = documentRootElement.Version;
+
+			// Verify all signatures in the document.
+			// If any signatures match one of the "known" scopes (a collection or the document), remember it.
+			document.VerifyAllSignaturesAndRememberSigners();
 
 			// Now load all the entity collections, doing the relevant logic at each step.
 			foreach (var collection in document.EntityCollections)
