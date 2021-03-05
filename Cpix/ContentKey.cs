@@ -58,10 +58,6 @@ namespace Axinom.Cpix
 
 		private void ValidateEntity(CpixDocument document)
 		{
-			// Contains validation code common for both loaded and new entities.
-			// This private method shall be called from the ValidateLoadedEntity()
-			// and ValidateNewEntity() methods.
-
 			if (Id == Guid.Empty)
 				throw new InvalidCpixDataException("A unique key ID must be provided for each content key.");
 

@@ -54,16 +54,30 @@ namespace Axinom.Cpix.Tests
 				Value = new byte[Constants.ContentKeyLengthInBytes],
 				ExplicitIv = null
 			})));
-
-			foreach (var validScheme in Constants.ValidCommonEncryptionSchemes)
+			Assert.Null(Record.Exception(() => document.ContentKeys.Add(new ContentKey
 			{
-				Assert.Null(Record.Exception(() => document.ContentKeys.Add(new ContentKey
-				{
-					Id = Guid.NewGuid(),
-					Value = new byte[Constants.ContentKeyLengthInBytes],
-					CommonEncryptionScheme = validScheme
-				})));
-			}
+				Id = Guid.NewGuid(),
+				Value = new byte[Constants.ContentKeyLengthInBytes],
+				CommonEncryptionScheme = "cenc"
+			})));
+			Assert.Null(Record.Exception(() => document.ContentKeys.Add(new ContentKey
+			{
+				Id = Guid.NewGuid(),
+				Value = new byte[Constants.ContentKeyLengthInBytes],
+				CommonEncryptionScheme = "cens"
+			})));
+			Assert.Null(Record.Exception(() => document.ContentKeys.Add(new ContentKey
+			{
+				Id = Guid.NewGuid(),
+				Value = new byte[Constants.ContentKeyLengthInBytes],
+				CommonEncryptionScheme = "cbc1"
+			})));
+			Assert.Null(Record.Exception(() => document.ContentKeys.Add(new ContentKey
+			{
+				Id = Guid.NewGuid(),
+				Value = new byte[Constants.ContentKeyLengthInBytes],
+				CommonEncryptionScheme = "cbcs"
+			})));
 		}
 
 		[Fact]
