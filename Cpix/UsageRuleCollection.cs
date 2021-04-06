@@ -18,7 +18,8 @@ namespace Axinom.Cpix
 		{
 			var element = new UsageRuleElement
 			{
-				KeyId = entity.KeyId
+				KeyId = entity.KeyId,
+				IntendedTrackType = entity.IntendedTrackType
 			};
 
 			if (entity.VideoFilters?.Count > 0)
@@ -88,7 +89,8 @@ namespace Axinom.Cpix
 
 			var rule = new UsageRule
 			{
-				KeyId = raw.KeyId
+				KeyId = raw.KeyId,
+				IntendedTrackType = raw.IntendedTrackType
 			};
 
 			// This disables all usage rule processing, basically, and treats this particular rule as read-only.

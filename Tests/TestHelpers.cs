@@ -46,6 +46,7 @@ namespace Axinom.Cpix.Tests
 			var rule = new UsageRule
 			{
 				KeyId = contentKey.Id,
+				IntendedTrackType = "TestTrackType",
 
 				// Some arbitrary filters here, just to generate interesting test data.
 				AudioFilters = new[]
@@ -139,8 +140,10 @@ namespace Axinom.Cpix.Tests
 
 			// Sanity check.
 			foreach (var collection in document.EntityCollections)
+			{
 				if (collection.Count == 0)
 					throw new Exception("TestHelpers need update - not all collections got populated!");
+			}
 		}
 
 		public static readonly RandomNumberGenerator Random = RandomNumberGenerator.Create();

@@ -77,6 +77,7 @@ namespace Axinom.Cpix.TestVectorGenerator
 			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = document.ContentKeys.First().Id,
+				IntendedTrackType = "TrackType1",
 
 				AudioFilters = new[]
 				{
@@ -115,6 +116,7 @@ namespace Axinom.Cpix.TestVectorGenerator
 			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = document.ContentKeys.Last().Id,
+				IntendedTrackType = "TrackType2",
 
 				BitrateFilters = new[]
 				{

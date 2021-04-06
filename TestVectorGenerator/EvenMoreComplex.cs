@@ -100,6 +100,7 @@ The resulting output is still valid and all the signatures should successfully p
 			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = document.ContentKeys.First().Id,
+				IntendedTrackType = "髬 髬髬",
 
 				AudioFilters = new[]
 				{
@@ -138,6 +139,7 @@ The resulting output is still valid and all the signatures should successfully p
 			document.UsageRules.Add(new UsageRule
 			{
 				KeyId = document.ContentKeys.Last().Id,
+				IntendedTrackType = "滆 柦",
 
 				BitrateFilters = new[]
 				{
