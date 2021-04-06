@@ -12,6 +12,13 @@ namespace Axinom.Cpix
 		public Guid KeyId { get; set; }
 
 		/// <summary>
+		/// Specifies the type of media track which corresponds to the streams which
+		/// match the rules defined in this usage rule. Example values: LowRes, UHD,
+		/// UHD+HFR, etc.
+		/// </summary>
+		public string IntendedTrackType { get; set; }
+
+		/// <summary>
 		/// If true for a loaded usage rule, there were filters present in the CPIX document that are not supported
 		/// by the current implementation. Presence of such filters disables usage rule resolving for the entire document.
 		/// </summary>

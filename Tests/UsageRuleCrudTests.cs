@@ -10,7 +10,38 @@ namespace Axinom.Cpix.Tests
 	public sealed class UsageRuleCrudTests
 	{
 		[Fact]
-		public void AddUsageRule_WithNewDocument_AddsUsageRule()
+		public void AddUsageRule_WithMinimalData_AddsExpectedUsageRule()
+		{
+			var contentKey = TestHelpers.GenerateContentKey();
+
+			var expectedRule = new UsageRule
+			{
+				KeyId = contentKey.Id
+			};
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(contentKey);
+			document.UsageRules.Add(expectedRule);
+
+			document = TestHelpers.Reload(document);
+
+			Assert.Single(document.UsageRules);
+
+			var actualRule = document.UsageRules.First();
+
+			Assert.False(actualRule.ContainsUnsupportedFilters);
+
+			Assert.Equal(expectedRule.KeyId, actualRule.KeyId);
+			Assert.Null(actualRule.IntendedTrackType);
+			Assert.Empty(actualRule.AudioFilters);
+			Assert.Empty(actualRule.BitrateFilters);
+			Assert.Empty(actualRule.KeyPeriodFilters);
+			Assert.Empty(actualRule.LabelFilters);
+			Assert.Empty(actualRule.VideoFilters);
+		}
+
+		[Fact]
+		public void AddUsageRule_WithVariousData_AddsExpectedUsageRule()
 		{
 			var contentKey = TestHelpers.GenerateContentKey();
 
@@ -18,12 +49,23 @@ namespace Axinom.Cpix.Tests
 			document.ContentKeys.Add(contentKey);
 			document.ContentKeyPeriods.Add(new ContentKeyPeriod { Id = "period1", Index = 1 });
 
-			TestHelpers.AddUsageRule(document);
+			var expectedRule = TestHelpers.AddUsageRule(document);
 
 			document = TestHelpers.Reload(document);
 
 			Assert.Single(document.UsageRules);
-			Assert.Equal(contentKey.Id, document.UsageRules.Single().KeyId);
+
+			var actualRule = document.UsageRules.First();
+
+			Assert.False(actualRule.ContainsUnsupportedFilters);
+
+			Assert.Equal(expectedRule.KeyId, actualRule.KeyId);
+			Assert.Equal(expectedRule.IntendedTrackType, actualRule.IntendedTrackType);
+			Assert.Equal(expectedRule.AudioFilters.Count, actualRule.AudioFilters.Count);
+			Assert.Equal(expectedRule.BitrateFilters.Count, actualRule.BitrateFilters.Count);
+			Assert.Equal(expectedRule.KeyPeriodFilters.Count, actualRule.KeyPeriodFilters.Count);
+			Assert.Equal(expectedRule.LabelFilters.Count, actualRule.LabelFilters.Count);
+			Assert.Equal(expectedRule.VideoFilters.Count, actualRule.VideoFilters.Count);
 		}
 
 		[Fact]
@@ -273,6 +315,7 @@ namespace Axinom.Cpix.Tests
 			var rule = new UsageRule
 			{
 				KeyId = contentKey.Id,
+				IntendedTrackType = "XUHD",
 				KeyPeriodFilters = new [] { new KeyPeriodFilter { PeriodId = contentKeyPeriod.Id} }
 			};
 
@@ -285,6 +328,8 @@ namespace Axinom.Cpix.Tests
 			document = TestHelpers.Reload(document);
 
 			Assert.Single(document.UsageRules);
+			Assert.Equal(rule.IntendedTrackType, document.UsageRules.First().IntendedTrackType);
+
 			Assert.Single(document.UsageRules.First().KeyPeriodFilters);
 			Assert.Equal(rule.KeyPeriodFilters.First().PeriodId, document.UsageRules.First().KeyPeriodFilters.First().PeriodId);
 		}

@@ -36,6 +36,9 @@ namespace Axinom.Cpix.Internal
 		[XmlAttribute("kid")]
 		public Guid KeyId { get; set; }
 
+		[XmlAttribute("intendedTrackType")]
+		public string IntendedTrackType { get; set; }
+
 		[XmlElement("KeyPeriodFilter")]
 		public KeyPeriodElement[] KeyPeriodFilters { get; set; }
 
