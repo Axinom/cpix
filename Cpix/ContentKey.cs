@@ -44,16 +44,16 @@ namespace Axinom.Cpix
 			ValidateEntity(document);
 
 			// We skip length check if we do not have a value for an encrypted key (it will be read-only).
-			if (IsLoadedEncryptedKey && Value != null && Value.Length != Constants.ContentKeyLengthInBytes)
-				throw new InvalidCpixDataException($"A {Constants.ContentKeyLengthInBytes}-byte value must be provided for each new content key.");
+			if (IsLoadedEncryptedKey && Value != null && !Constants.ValidContentKeyLengthsInBytes.Contains(Value.Length))
+				throw new InvalidCpixDataException($"Loaded content key must have a key value key with size from the set: {Constants.ValidContentKeyLengthsHumanReadable}.");
 		}
 
 		internal override void ValidateNewEntity(CpixDocument document)
 		{
 			ValidateEntity(document);
 
-			if (Value == null || Value.Length != Constants.ContentKeyLengthInBytes)
-				throw new InvalidCpixDataException($"A {Constants.ContentKeyLengthInBytes}-byte value must be provided for each new content key.");
+			if (Value == null || !Constants.ValidContentKeyLengthsInBytes.Contains(Value.Length))
+				throw new InvalidCpixDataException($"Created content key must have a key value key with size from the set: {Constants.ValidContentKeyLengthsHumanReadable}.");
 		}
 
 		private void ValidateEntity(CpixDocument document)

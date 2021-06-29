@@ -18,6 +18,7 @@ Features
 The following features are implemented:
 
 * Content key save/load
+	* Supports 128-bit and 256-bit keys
 * Usage rule save/load
 * Resolving content keys based on usage rules
 * Encryption of content keys (optional)
@@ -35,7 +36,7 @@ The following features are implemented:
 
 The following features are partially implemented:
 
-* Key periods and key period filters 
+* Key periods and key period filters
 	* Read/write and basic validation. Content key resolution not implemented.
 
 The following features are NOT implemented:

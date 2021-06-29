@@ -22,7 +22,9 @@ namespace Axinom.Cpix
 
 		public const string Sha512Algorithm = "http://www.w3.org/2001/04/xmlenc#sha512";
 
-		public const int ContentKeyLengthInBytes = 16;
+		public static readonly int[] ValidContentKeyLengthsInBytes = new[] { 16, 32 };
+		public static string ValidContentKeyLengthsHumanReadable => string.Join(", ", ValidContentKeyLengthsInBytes);
+
 		public const int ContentKeyExplicitIvLengthInBytes = 16;
 
 		/// <summary>
