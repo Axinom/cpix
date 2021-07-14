@@ -44,16 +44,15 @@ namespace Axinom.Cpix
 			ValidateEntity(document);
 
 			// We skip length check if we do not have a value for an encrypted key (it will be read-only).
-			if (IsLoadedEncryptedKey && Value != null && !Constants.ValidContentKeyLengthsInBytes.Contains(Value.Length))
-				throw new InvalidCpixDataException($"Loaded content key must have a key value key with size from the set: {Constants.ValidContentKeyLengthsHumanReadable}.");
+			if (IsLoadedEncryptedKey && Value != null)
+				ValidateContentKeyValueAndSize(document);
 		}
 
 		internal override void ValidateNewEntity(CpixDocument document)
 		{
 			ValidateEntity(document);
 
-			if (Value == null || !Constants.ValidContentKeyLengthsInBytes.Contains(Value.Length))
-				throw new InvalidCpixDataException($"Created content key must have a key value key with size from the set: {Constants.ValidContentKeyLengthsHumanReadable}.");
+			ValidateContentKeyValueAndSize(document);
 		}
 
 		private void ValidateEntity(CpixDocument document)
@@ -70,6 +69,12 @@ namespace Axinom.Cpix
 					$"The Common Encryption protection scheme associated with content keys must be one of" +
 					$"{string.Join(", ", Constants.ValidCommonEncryptionSchemes.Select(x => $"'{x}'"))}.");
 			}
+		}
+
+		private void ValidateContentKeyValueAndSize(CpixDocument document)
+		{
+			if (Value == null || !Constants.ValidContentKeyLengthsInBytes.Contains(Value.Length))
+				throw new InvalidCpixDataException($"A content key must have a key value with a byte-size from the set: {Constants.ValidContentKeyLengthsHumanReadable}.");
 		}
 	}
 }
