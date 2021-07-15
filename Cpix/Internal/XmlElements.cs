@@ -317,22 +317,23 @@ namespace Axinom.Cpix.Internal
 				if (Data.Secret.EncryptedValue.CipherData?.CipherValue == null || Data.Secret.EncryptedValue.CipherData?.CipherValue.Length == 0)
 					throw new InvalidCpixDataException("ContentKey/Data/Secret/EncryptedValue/CipherData/CipherValue element is missing.");
 
-				// 128-bit IV + 128-bit encrypted content key + 128-bit PKCS#7 padding block.
-				var expectedLength = (128 + 128 + 128) / 8;
+				// 128-bit IV + N-bit encrypted content key + 128-bit PKCS#7 padding block.
+				var validLengths = Constants.ValidContentKeyLengthsInBytes
+					.Select(contentKeyLength => contentKeyLength + (128 + 128) / 8)
+					.ToList();
 
-				if (Data.Secret.EncryptedValue.CipherData?.CipherValue.Length != expectedLength)
-					throw new InvalidCpixDataException("ContentKey/Data/Secret/EncryptedValue/CipherData/CipherValue element does not contain the expected number of bytes (" + expectedLength + ")");
+				if (!validLengths.Contains(Data.Secret.EncryptedValue.CipherData?.CipherValue.Length ?? 0))
+					throw new InvalidCpixDataException("ContentKey/Data/Secret/EncryptedValue/CipherData/CipherValue element does not contain the expected number of bytes (any of " + string.Join(", ", validLengths) + ")");
 
 				if (Data?.Secret?.ValueMAC == null)
 					throw new NotSupportedException("Expected ContentKey/Data/Secret/ValueMAC element does not exist.");
 			}
 			else if (HasPlainValue)
 			{
-				// 128-bit content key.
-				var expectedLength = 128 / 8;
+				var validLengths = Constants.ValidContentKeyLengthsInBytes;
 
-				if (Data.Secret.PlainValue.Length != expectedLength)
-					throw new InvalidCpixDataException("ContentKey/Data/Secret/PlainValue element does not contain the expected number of bytes (" + expectedLength + ")");
+				if (!validLengths.Contains(Data.Secret.PlainValue.Length))
+					throw new InvalidCpixDataException("ContentKey/Data/Secret/PlainValue element does not contain the expected number of bytes (any of " + Constants.ValidContentKeyLengthsHumanReadable + ")");
 			}
 			else
 			{
