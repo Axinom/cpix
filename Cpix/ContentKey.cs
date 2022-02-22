@@ -73,7 +73,7 @@ namespace Axinom.Cpix
 
 		private void ValidateContentKeyValueAndSize(CpixDocument document)
 		{
-			if (Value == null || !Constants.ValidContentKeyLengthsInBytes.Contains(Value.Length))
+			if (Value != null && !Constants.ValidContentKeyLengthsInBytes.Contains(Value.Length))
 				throw new InvalidCpixDataException($"A content key must have a key value with a byte-size from the set: {Constants.ValidContentKeyLengthsHumanReadable}.");
 		}
 	}
