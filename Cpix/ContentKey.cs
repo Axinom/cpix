@@ -73,6 +73,9 @@ namespace Axinom.Cpix
 
 		private void ValidateContentKeyValueAndSize(CpixDocument document)
 		{
+			// We support content keys without a value because many packagers
+			// create such documents for requesting keys from key services,
+			// which then fill in the value.
 			if (Value != null && !Constants.ValidContentKeyLengthsInBytes.Contains(Value.Length))
 				throw new InvalidCpixDataException($"A content key must have a key value with a byte-size from the set: {Constants.ValidContentKeyLengthsHumanReadable}.");
 		}

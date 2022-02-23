@@ -167,7 +167,7 @@ namespace Axinom.Cpix.Tests
 		}
 
 		[Fact]
-		public void Save_WithInvalidContentKey_Fails()
+		public void Save_WithSneakilyCorruptedContentKey_Fails()
 		{
 			var contentKey = TestHelpers.GenerateContentKey();
 
@@ -175,10 +175,10 @@ namespace Axinom.Cpix.Tests
 			// It will be validated here.
 			document.ContentKeys.Add(contentKey);
 
-			// Invalidate it after validation!
-			contentKey.Id = Guid.Empty;
+			// Corrupt it after validation!
+			contentKey.Value = new byte[5];
 
-			// The invalidation should still be caught.
+			// The corruption should still be caught.
 			Assert.Throws<InvalidCpixDataException>(() => document.Save(new MemoryStream()));
 		}
 

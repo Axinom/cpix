@@ -26,6 +26,9 @@ namespace Axinom.Cpix
 				CommonEncryptionScheme = entity.CommonEncryptionScheme,
 			};
 
+			// We support content keys without a value because many packagers
+			// create such documents for requesting keys from key services,
+			// which then fill in the value.
 			if (entity.Value != null)
 			{
 				element.Data = new DataElement
@@ -56,7 +59,6 @@ namespace Axinom.Cpix
 					};
 
 					var mac = new HMACSHA512(Document.MacKey);
-
 
 					using (var encryptor = aes.CreateEncryptor())
 					{
