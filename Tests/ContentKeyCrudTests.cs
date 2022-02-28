@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using Xunit;
 
 namespace Axinom.Cpix.Tests
@@ -83,6 +84,11 @@ namespace Axinom.Cpix.Tests
 				Value = new byte[Constants.ValidContentKeyLengthsInBytes.First()],
 				CommonEncryptionScheme = "cbcs"
 			})));
+			Assert.Null(Record.Exception(() => document.ContentKeys.Add(new ContentKey
+			{
+				Id = Guid.NewGuid(),
+				Value = null
+			})));
 		}
 
 		[Fact]
@@ -113,11 +119,6 @@ namespace Axinom.Cpix.Tests
 			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeys.Add(new ContentKey
 			{
 				Id = Guid.NewGuid(),
-				Value = null
-			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.ContentKeys.Add(new ContentKey
-			{
-				Id = Guid.NewGuid(),
 				Value = new byte[Constants.ValidContentKeyLengthsInBytes.First()],
 				ExplicitIv = new byte[Constants.ContentKeyExplicitIvLengthInBytes + 1]
 			}));
@@ -142,6 +143,30 @@ namespace Axinom.Cpix.Tests
 		}
 
 		[Fact]
+		public void Save_WithNullContentKeyValue_Succeeds()
+		{
+			var contentKey = TestHelpers.GenerateContentKey();
+			
+			// Make the content key value null.
+			contentKey.Value = null;
+
+			var document = new CpixDocument();
+			document.ContentKeys.Add(contentKey);
+
+			// CPIX document serialization should allow null content key values.
+			Assert.Null(Record.Exception(() => document.Save(new MemoryStream())));
+
+			var buffer = new MemoryStream();
+			document.Save(buffer);
+			buffer.Position = 0;
+
+			var actualDocument = CpixDocument.Load(buffer);
+
+			Assert.Single(actualDocument.ContentKeys);
+			Assert.Null(actualDocument.ContentKeys.First().Value);
+		}
+
+		[Fact]
 		public void Save_WithSneakilyCorruptedContentKey_Fails()
 		{
 			var contentKey = TestHelpers.GenerateContentKey();
@@ -151,7 +176,7 @@ namespace Axinom.Cpix.Tests
 			document.ContentKeys.Add(contentKey);
 
 			// Corrupt it after validation!
-			contentKey.Value = null;
+			contentKey.Value = new byte[5];
 
 			// The corruption should still be caught.
 			Assert.Throws<InvalidCpixDataException>(() => document.Save(new MemoryStream()));

@@ -24,63 +24,70 @@ namespace Axinom.Cpix
 				KeyId = entity.Id,
 				ExplicitIv = entity.ExplicitIv,
 				CommonEncryptionScheme = entity.CommonEncryptionScheme,
-				Data = new DataElement
-				{
-					Secret = new SecretDataElement()
-				}
 			};
 
-			if (Document.Recipients.Any())
+			// We support content keys without a value because many packagers
+			// create such documents for requesting keys from key services,
+			// which then fill in the value.
+			if (entity.Value != null)
 			{
-				// We have to encrypt the key. Okay. Ensure we have the crypto values available.
-				if (Document.DocumentKey == null)
-					Document.GenerateKeys();
-
-				// Unique IV is generated for every content key.
-				var iv = new byte[128 / 8];
-
-				using (var random = RandomNumberGenerator.Create())
-					random.GetBytes(iv);
-
-				var aes = new AesManaged
+				element.Data = new DataElement
 				{
-					BlockSize = 128,
-					KeySize = 256,
-					Key = Document.DocumentKey,
-					Mode = CipherMode.CBC,
-					Padding = PaddingMode.PKCS7,
-					IV = iv
+					Secret = new SecretDataElement()
 				};
 
-				var mac = new HMACSHA512(Document.MacKey);
-
-				using (var encryptor = aes.CreateEncryptor())
+				if (Document.Recipients.Any())
 				{
-					var encryptedValue = encryptor.TransformFinalBlock(entity.Value, 0, entity.Value.Length);
+					// We have to encrypt the key. Okay. Ensure we have the crypto values available.
+					if (Document.DocumentKey == null)
+						Document.GenerateKeys();
 
-					// NB! We prepend the IV to the value when saving an encrypted value to the document field.
-					var fieldValue = iv.Concat(encryptedValue).ToArray();
+					// Unique IV is generated for every content key.
+					var iv = new byte[128 / 8];
 
-					element.Data.Secret.EncryptedValue = new EncryptedXmlValue
+					using (var random = RandomNumberGenerator.Create())
+						random.GetBytes(iv);
+
+					var aes = new AesManaged
 					{
-						CipherData = new CipherDataContainer
-						{
-							CipherValue = fieldValue
-						},
-						EncryptionMethod = new EncryptionMethodDeclaration
-						{
-							Algorithm = Constants.Aes256CbcAlgorithm
-						}
+						BlockSize = 128,
+						KeySize = 256,
+						Key = Document.DocumentKey,
+						Mode = CipherMode.CBC,
+						Padding = PaddingMode.PKCS7,
+						IV = iv
 					};
 
-					// Never not MAC.
-					element.Data.Secret.ValueMAC = mac.ComputeHash(fieldValue);
+					var mac = new HMACSHA512(Document.MacKey);
+
+					using (var encryptor = aes.CreateEncryptor())
+					{
+						var encryptedValue = encryptor.TransformFinalBlock(entity.Value, 0, entity.Value.Length);
+
+						// NB! We prepend the IV to the value when saving an encrypted value to the document field.
+						var fieldValue = iv.Concat(encryptedValue).ToArray();
+
+						element.Data.Secret.EncryptedValue = new EncryptedXmlValue
+						{
+							CipherData = new CipherDataContainer
+							{
+								CipherValue = fieldValue
+							},
+							EncryptionMethod = new EncryptionMethodDeclaration
+							{
+								Algorithm = Constants.Aes256CbcAlgorithm
+							}
+						};
+
+						// Never not MAC.
+						element.Data.Secret.ValueMAC = mac.ComputeHash(fieldValue);
+					}
 				}
-			}
-			else
-			{
-				// We are saving the key in the clear.
-				element.Data.Secret.PlainValue = entity.Value;
+				else
+				{
+					// We are saving the key in the clear.
+					element.Data.Secret.PlainValue = entity.Value;
+				}
 			}
 
 			return XmlHelpers.AppendChildAndReuseNamespaces(element, container);
