@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <PackageReference Include="protobuf-net" Version="2.4.0" />
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="4.5.0" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="4.7.1" />
   </ItemGroup>
 
 </Project>
