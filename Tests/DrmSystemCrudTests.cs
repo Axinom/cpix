@@ -77,6 +77,24 @@ namespace Axinom.Cpix.Tests
 				HdsSignalingData = "<aa:drmAdditionalHeader xmlns:aa=\"urn:test\">data</aa:drmAdditionalHeader>"
 			})));
 		}
+		
+		[Fact]
+		public void AddDrmSystem_WithBothHlsSignalingDataAndUriExtXKey_Succeeds()
+		{
+			var document = new CpixDocument();
+
+			Assert.Null(Record.Exception(() => document.DrmSystems.Add(new DrmSystem
+			{
+				SystemId = Guid.NewGuid(),
+				KeyId = Guid.NewGuid(),
+				UriExtXKey = "anything is valid",
+				HlsSignalingData = new HlsSignalingData()
+				{
+					MasterPlaylistData = "master",
+					MediaPlaylistData = "media"
+				}
+			})));
+		}
 
 		[Fact]
 		public void AddDrmSystem_WithVariousInvalidData_Fails()
@@ -104,13 +122,6 @@ namespace Axinom.Cpix.Tests
 				SystemId = Guid.NewGuid(),
 				KeyId = Guid.NewGuid(),
 				ContentProtectionData = "<undeclaredprefix:test></undeclaredprefix:test>"
-			}));
-			Assert.Throws<InvalidCpixDataException>(() => document.DrmSystems.Add(new DrmSystem
-			{
-				SystemId = Guid.NewGuid(),
-				KeyId = Guid.NewGuid(),
-				UriExtXKey = "mutually exclusive with HLSSignalingData when adding new data",
-				HlsSignalingData = new HlsSignalingData()
 			}));
 			Assert.Throws<InvalidCpixDataException>(() => document.DrmSystems.Add(new DrmSystem
 			{

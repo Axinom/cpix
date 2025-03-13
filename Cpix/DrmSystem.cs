@@ -73,11 +73,6 @@ namespace Axinom.Cpix
 		internal override void ValidateNewEntity(CpixDocument document)
 		{
 			ValidateEntity();
-
-			// Let's enforce this only for new entities, to avoid ambiguity (they
-			// contain overlapping data). But it's not against the spec.
-			if (UriExtXKey != null && HlsSignalingData != null)
-				throw new InvalidCpixDataException("A DRM system signaling entry may not contain both HLSSignalingData and URIExtXKey data, to avoid ambiguity.");
 		}
 
 		internal override void ValidateLoadedEntity(CpixDocument document)
